@@ -23,20 +23,18 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-// Create a jar which contains all the applications
-task PyBoofJar(type: Jar) {
+// Create a jar which contains all the application and all dependencies
+task allJar(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'PyBoof',
                     'Implementation-Version': version,
                     'Main-Class': 'pyboof.PyBoofEntryPoint'
     }
-    archiveName = 'PyBoof.jar'
+    archiveName = 'PyBoof-all.jar'
+    destinationDir = file("${projectDir}/python/pyboof")
+
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
-
-    doLast {
-        archivePath.renameTo(file(archiveName))
-    }
 }
 
 test {
