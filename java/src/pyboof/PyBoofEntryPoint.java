@@ -18,12 +18,13 @@
 
 package pyboof;
 
-import boofcv.struct.Configuration;
-
-import py4j.GatewayServer;
 
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
+import boofcv.struct.Configuration;
 import boofcv.struct.feature.TupleDesc;
+import boofcv.factory.filter.binary.ConfigThreshold;
+import boofcv.factory.filter.binary.ThresholdType;
+import py4j.GatewayServer;
 
 import georegression.struct.point.Point2D_F64;
 
@@ -47,6 +48,13 @@ public class PyBoofEntryPoint {
 		GatewayServer gatewayServer = new GatewayServer(new PyBoofEntryPoint());
 		gatewayServer.start();
 		System.out.println("Gateway Server Started");
+	}
+
+	/**
+	 * Hack around 'global' being a keyword in Python
+	 */
+	public static ConfigThreshold createGlobalThreshold( ThresholdType type ) {
+		return ConfigThreshold.global(type);
 	}
 
 	public static List<TupleDesc> extractFeatures( DetectDescribePoint alg ) {
@@ -82,6 +90,17 @@ public class PyBoofEntryPoint {
 		} catch (ClassNotFoundException e) {
 			System.err.println("Can't find class "+classPath);
 			System.exit(1);
+		}
+
+		return list;
+	}
+
+	public static List<String> getPublicFields( Class typeClass ) {
+		List<String> list = new ArrayList<String>();
+
+		Field[] fields = typeClass.getFields();
+		for( Field f : fields ) {
+			list.add(f.getName());
 		}
 
 		return list;

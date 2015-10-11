@@ -5,7 +5,6 @@ from pyboof import dtype_to_Class_SingleBand
 from pyboof.common import is_java_class
 import struct
 import sys
-from py4j import java_gateway
 
 
 class ConfigSurfFast(JavaConfig):

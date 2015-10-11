@@ -191,7 +191,7 @@ def create_single_band( width , height , dtype):
     elif dtype == np.float64:
         return gateway.jvm.boofcv.struct.image.ImageFloat64(width,height)
     else:
-        raise Exception("Only uint8 supported")
+        raise Exception("Unsupported type")
 
 def create_multi_spectral( width , height , num_bands , dtype):
     """

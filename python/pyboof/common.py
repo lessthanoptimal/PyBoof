@@ -39,29 +39,40 @@ class JavaConfig:
     attributes
     """
     def __init__(self, java_class_path ):
-        self.java_class_path = java_class_path
+        if isinstance(java_class_path, basestring):
+            self.java_class_path = java_class_path
 
-        words = java_class_path.replace('$',".").split(".")
+            words = java_class_path.replace('$',".").split(".")
 
-        a = gateway.jvm.__getattr__(words[0])
-        for i in range(1,len(words)):
-            a = a.__getattr__(words[i])
+            a = gateway.jvm.__getattr__(words[0])
+            for i in range(1,len(words)):
+                a = a.__getattr__(words[i])
 
-        self.java_obj = a.__call__()
-        self.java_fields = [ x for x in gateway.jvm.pyboof.PyBoofEntryPoint.getPublicFields(java_class_path)]
+            self.java_obj = a.__call__()
+            self.java_fields = [ x for x in gateway.jvm.pyboof.PyBoofEntryPoint.getPublicFields(java_class_path)]
+        else:
+            self.java_obj = java_class_path
+            self.java_fields = [ x for x in gateway.jvm.pyboof.PyBoofEntryPoint.getPublicFields(java_class_path.getClass())]
 
     def get_java_object(self):
         return self.java_obj
 
     def __getattr__(self, item):
         if "java_fields" in self.__dict__ and item in self.__dict__["java_fields"]:
-            return java_gateway.get_field(self.java_obj,item)
+            a = java_gateway.get_field(self.java_obj,item)
+            if gateway.jvm.pyboof.PyBoofEntryPoint.isConfigClass(a):
+                return JavaConfig(a)
+            else:
+                return a
         else:
             return object.__getattribute__(self, item)
 
     def __setattr__(self, key, value):
         if "java_fields" in self.__dict__ and key in self.__dict__["java_fields"]:
-            java_gateway.set_field(self.java_obj,key, value)
+            if isinstance(value, JavaConfig):
+                java_gateway.set_field(self.java_obj,key, value.java_obj)
+            else:
+                java_gateway.set_field(self.java_obj,key, value)
         else:
             self.__dict__[key] = value
 

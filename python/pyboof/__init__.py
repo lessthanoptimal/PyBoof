@@ -2,16 +2,9 @@ from py4j.java_gateway import JavaGateway
 from py4j.protocol import Py4JNetworkError
 import subprocess
 import time
+import os
 
 gateway = JavaGateway()
-
-from pyboof.calib import *
-from pyboof.common import *
-from pyboof.geo import *
-from pyboof.image import *
-from pyboof.ip import *
-from pyboof.recognition import *
-import pyboof.swing
 
 try_again = False
 
@@ -31,3 +24,11 @@ if try_again:
     except Py4JNetworkError:
         print "Doesn't look like the java process started."
         exit(1)
+
+from pyboof.calib import *
+from pyboof.common import *
+from pyboof.geo import *
+from pyboof.image import *
+from pyboof.ip import *
+from pyboof.recognition import *
+import pyboof.swing
