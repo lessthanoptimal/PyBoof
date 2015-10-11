@@ -1,6 +1,7 @@
 from pyboof.image import *
 import pyboof.ip as ip
 
+
 class GradientFlow:
     def __init__(self, derivX, derivY):
         self.derivX = derivX
@@ -9,6 +10,7 @@ class GradientFlow:
     def visualize(self):
         buffered_image = gateway.jvm.boofcv.gui.image.VisualizeImageData.colorizeGradient(self.derivX,self.derivY,-1)
         gateway.jvm.boofcv.gui.image.ShowImages.showWindow(buffered_image,"Gradient")
+
 
 class BoofFlow:
     def __init__(self, image):

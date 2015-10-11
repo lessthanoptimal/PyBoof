@@ -18,7 +18,21 @@
 
 package pyboof;
 
+
+import boofcv.abst.feature.detdesc.DetectDescribePoint;
+import boofcv.struct.Configuration;
+import boofcv.struct.feature.TupleDesc;
+import boofcv.factory.filter.binary.ConfigThreshold;
+import boofcv.factory.filter.binary.ThresholdType;
 import py4j.GatewayServer;
+
+import georegression.struct.point.Point2D_F64;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+
 
 /**
  * Must launch this application to use PyBoof
@@ -34,5 +48,76 @@ public class PyBoofEntryPoint {
 		GatewayServer gatewayServer = new GatewayServer(new PyBoofEntryPoint());
 		gatewayServer.start();
 		System.out.println("Gateway Server Started");
+	}
+
+	/**
+	 * Hack around 'global' being a keyword in Python
+	 */
+	public static ConfigThreshold createGlobalThreshold( ThresholdType type ) {
+		return ConfigThreshold.global(type);
+	}
+
+	public static List<TupleDesc> extractFeatures( DetectDescribePoint alg ) {
+		int N = alg.getNumberOfFeatures();
+
+		List<TupleDesc> array = new ArrayList<TupleDesc>();
+		for (int i = 0; i < N; i++) {
+			array.add(alg.getDescription(i).copy());
+		}
+
+		return array;
+	}
+
+	public static List<Point2D_F64> extractPoints( DetectDescribePoint alg ) {
+		int N = alg.getNumberOfFeatures();
+
+		List<Point2D_F64> array = new ArrayList<Point2D_F64>();
+		for (int i = 0; i < N; i++) {
+			array.add(alg.getLocation(i).copy());
+		}
+
+		return array;
+	}
+
+	public static List<String> getPublicFields( String classPath ) {
+		List<String> list = new ArrayList<String>();
+
+		try {
+			Field[] fields = Class.forName(classPath).getFields();
+			for( Field f : fields ) {
+				list.add(f.getName());
+			}
+		} catch (ClassNotFoundException e) {
+			System.err.println("Can't find class "+classPath);
+			System.exit(1);
+		}
+
+		return list;
+	}
+
+	public static List<String> getPublicFields( Class typeClass ) {
+		List<String> list = new ArrayList<String>();
+
+		Field[] fields = typeClass.getFields();
+		for( Field f : fields ) {
+			list.add(f.getName());
+		}
+
+		return list;
+	}
+
+	public static boolean isConfigClass( Object o ) {
+		return o instanceof Configuration;
+	}
+
+	public static boolean isClass( Class c , String path ) {
+
+		try {
+			//System.out.println("Class = "+c+"  forname = "+Class.forName(path));
+			Class found = Class.forName(path);
+			return c.isAssignableFrom(found) || found.isAssignableFrom(c);
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
 	}
 }

@@ -1,53 +1,37 @@
 from pyboof.common import *
 from pyboof.image import *
 from pyboof.geo import *
-from py4j import java_gateway
+from pyboof import JavaConfig
+from pyboof import Config
 
 
-class Config(JavaWrapper):
-    def __init__(self, java_ConfigPolygonDetector):
-        self.set_java_object(java_ConfigPolygonDetector)
+class ConfigPolygonDetector(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self,"boofcv.struct.Configuration.ConfigPolygonDetector")
 
-    def get_property(self, name):
-        return java_gateway.get_field(self.java_obj,name)
 
-    def set_property(self, name, value):
-        return java_gateway.set_field(self.java_obj,name, value)
-
-class ConfigPolygonDetector(Config):
-    def __init__(self, java_ConfigPolygonDetector):
-        Config.__init__(self,java_ConfigPolygonDetector)
-
-class ConfigFiducialImage(Config):
-    def __init__(self, obj=None):
-        if obj is None:
-            config = gateway.jvm.boofcv.factory.fiducial.ConfigFiducialImage()
-        else:
-            config = obj
-        Config.__init__(self,config)
-
-    def get_polygon_detector(self):
-        return ConfigPolygonDetector(self.java_obj.getSquareDetector())
+class ConfigFiducialImage(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self,"boofcv.factory.fiducial.ConfigFiducialImage")
 
 
 class FactoryFiducial:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
 
-    def squareRobust(self, config, binary_radius ):
-        if isinstance(config,ConfigFiducialImage):
-            java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial.squareImageRobust(config.java_obj,binary_radius,self.boof_image_type)
-            return FiducialImageDetector(java_detector)
-        else:
-            raise RuntimeError("Need to add square binary")
+    def squareImage(self, configFid, configThresh ):
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial.\
+            squareImage(configFid.java_obj,configThresh.java_obj,self.boof_image_type)
+        return FiducialImageDetector(java_detector)
 
-    def squareFast(self, config, threshold ):
-        if isinstance(config,ConfigFiducialImage):
-            java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial.squareImageFast(config.java_obj,threshold,self.boof_image_type)
-            return FiducialImageDetector(java_detector)
-        else:
-            raise RuntimeError("Need to add square binary")
+    def squareBinary(self, configFid, configThresh ):
+        pass
 
+    def chessboard(self):
+        pass
+
+    def squareGrid(self):
+        pass
 
 class FiducialDetector(JavaWrapper):
     """
@@ -73,19 +57,21 @@ class FiducialDetector(JavaWrapper):
         self.java_obj.getFiducialToCamera(which,fid_to_cam.get_java_object())
         return fid_to_cam
 
-    def getId(self, which):
-        self.java_obj.getId(which)
+    def get_id(self, which):
+        return self.java_obj.getId(which)
 
-    def getWidth(self, which ):
-        self.java_obj.getWidth(which)
+    def get_width(self, which ):
+        return self.java_obj.getWidth(which)
 
     def getInputType(self):
         return ImageType(self.java_obj.getInputType())
+
 
 class FiducialImageDetector(FiducialDetector):
 
     def addPattern(self, image, side_length, threshold=100.0):
         self.java_obj.addPatternImage(image,threshold,side_length)
+
 
 class ConfigCirculant(Config):
     def __init__(self, obj=None):
@@ -94,6 +80,7 @@ class ConfigCirculant(Config):
         else:
             config = obj
         Config.__init__(self,config)
+
 
 class ConfigTld(Config):
     def __init__(self, obj=None):
@@ -111,6 +98,7 @@ class ConfigTld(Config):
             config = obj
         Config.__init__(self,config)
 
+
 class FactoryTrackerObjectQuad:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
@@ -127,13 +115,14 @@ class FactoryTrackerObjectQuad:
         java_tracker = gateway.jvm.boofcv.factory.tracker.FactoryTrackerObjectQuad.tld(java_conf,self.boof_image_type)
         return TrackerObjectQuad(java_tracker)
 
+
 class TrackerObjectQuad(JavaWrapper):
     """
     High level object tracker.  Takes in a quadrilateral for the initial location of the target then proceeds to
     update it for each new image in the sequence
     """
     def __init__(self, java_TrackerObjectQuad):
-        self.set_java_object(java_TrackerObjectQuad)
+        JavaWrapper.__init__(self,java_TrackerObjectQuad)
 
     def initialize(self, image , location ):
         """
