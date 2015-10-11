@@ -2,21 +2,13 @@ from pyboof.common import *
 from pyboof.image import *
 from pyboof.geo import *
 from py4j import java_gateway
+from pyboof import Config
 
-
-class Config(JavaWrapper):
-    def __init__(self, java_ConfigPolygonDetector):
-        self.set_java_object(java_ConfigPolygonDetector)
-
-    def get_property(self, name):
-        return java_gateway.get_field(self.java_obj,name)
-
-    def set_property(self, name, value):
-        return java_gateway.set_field(self.java_obj,name, value)
 
 class ConfigPolygonDetector(Config):
     def __init__(self, java_ConfigPolygonDetector):
         Config.__init__(self,java_ConfigPolygonDetector)
+
 
 class ConfigFiducialImage(Config):
     def __init__(self, obj=None):
@@ -82,10 +74,12 @@ class FiducialDetector(JavaWrapper):
     def getInputType(self):
         return ImageType(self.java_obj.getInputType())
 
+
 class FiducialImageDetector(FiducialDetector):
 
     def addPattern(self, image, side_length, threshold=100.0):
         self.java_obj.addPatternImage(image,threshold,side_length)
+
 
 class ConfigCirculant(Config):
     def __init__(self, obj=None):
@@ -94,6 +88,7 @@ class ConfigCirculant(Config):
         else:
             config = obj
         Config.__init__(self,config)
+
 
 class ConfigTld(Config):
     def __init__(self, obj=None):
@@ -111,6 +106,7 @@ class ConfigTld(Config):
             config = obj
         Config.__init__(self,config)
 
+
 class FactoryTrackerObjectQuad:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
@@ -126,6 +122,7 @@ class FactoryTrackerObjectQuad:
             java_conf = config.java_obj
         java_tracker = gateway.jvm.boofcv.factory.tracker.FactoryTrackerObjectQuad.tld(java_conf,self.boof_image_type)
         return TrackerObjectQuad(java_tracker)
+
 
 class TrackerObjectQuad(JavaWrapper):
     """
