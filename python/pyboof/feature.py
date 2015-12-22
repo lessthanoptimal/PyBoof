@@ -1,10 +1,12 @@
-from pyboof import JavaConfig
-from pyboof import JavaWrapper
-from pyboof import gateway
-from pyboof import dtype_to_Class_SingleBand
-from pyboof.common import is_java_class
 import struct
 import sys
+from pyboof import JavaConfig
+from pyboof import JavaWrapper
+from pyboof import dtype_to_Class_SingleBand
+from pyboof import gateway
+from pyboof.common import JavaList
+from pyboof.common import JavaList_to_fastqueue
+from pyboof.common import is_java_class
 
 
 class ConfigSurfFast(JavaConfig):
@@ -35,12 +37,6 @@ class ConfigDenseSampling(JavaConfig):
         self.periodY = periodY
 
 
-class ConfigAssociation:
-    def __init__(self,score_type=AssocScoreType.DEFAULT, max_error=sys.float_info.max,backwards_validation=True):
-        self.score_type = score_type
-        self.max_error = max_error
-        self.backwards_validation = backwards_validation
-
 class AssocScoreType:
     """
     Enum different types of association scoring techniques
@@ -48,18 +44,42 @@ class AssocScoreType:
     DEFAULT = 0,
     SAD = 1
     EUCLIDEAN = 2
-    NCC = 2
+    EUCLIDEAN_SQ = 3
+    NCC = 4
 
-class JavaList(JavaWrapper):
-    def __init__(self, java_list, java_type):
-        JavaWrapper.__init__(self,java_list)
-        self.java_type = java_type
 
-    def size(self):
-        return self.java_obj.size()
+class ConfigAssociation:
+    def __init__(self,score_type=AssocScoreType.DEFAULT, max_error=sys.float_info.max,backwards_validation=True):
+        self.score_type = score_type
+        self.max_error = max_error
+        self.backwards_validation = backwards_validation
 
-    def save_to_disk(self, file_name ):
-        gateway.jvm.pyboof.FileIO.saveList(self.java_obj,self.java_type,file_name)
+
+class AssociateDescription(JavaWrapper):
+    def __init__(self, java_object ):
+        JavaWrapper.__init__(self, java_object)
+
+    def set_source(self, feature_list ):
+        fast_queue = JavaList_to_fastqueue(feature_list.java_obj,feature_list.java_type,queue_declare=False)
+        self.java_obj.setSource(fast_queue)
+
+    def set_destination(self, feature_list ):
+        fast_queue = JavaList_to_fastqueue(feature_list.java_obj,feature_list.java_type,queue_declare=False)
+        self.java_obj.setDestination(fast_queue)
+
+    def associate(self):
+        output = []
+
+        self.java_obj.associate()
+        matches = self.java_obj.getMatches()
+        for i in xrange(matches.getSize()):
+            association = matches.get(i)
+            output.append( (association.src,association.dst,association.score) )
+
+        return output
+
+    def get_java_matches(self):
+        return self.java_obj.getMatches()
 
 def read_list_tuple_desc_f64( f , list_length ):
     output = []
@@ -113,7 +133,7 @@ class DetectDescribePointFeatures(JavaWrapper):
 
     def detect(self, image ):
         self.java_obj.detect(image)
-        N = self.java_obj.getNumberOfFeatures()
+
         java_locations = gateway.jvm.pyboof.PyBoofEntryPoint.extractPoints(self.java_obj)
         java_descriptions = gateway.jvm.pyboof.PyBoofEntryPoint.extractFeatures(self.java_obj)
 
@@ -122,17 +142,28 @@ class DetectDescribePointFeatures(JavaWrapper):
 
         return locations, descriptions
 
-    def get_scale(self, idx ):
-        return self.java_obj.getScale(idx)
+    def get_scales(self):
+        N = self.java_obj.getNumberOfFeatures()
+        output = [0]*N
+        for i in xrange(N):
+            output.append(self.java_obj.getScale(i))
+        return output
 
-    def get_orientation(self, idx ):
-        return self.java_obj.getOrientation(idx)
+    def get_orientations(self ):
+        N = self.java_obj.getNumberOfFeatures()
+        output = [0]*N
+        for i in xrange(N):
+            output.append(self.java_obj.getOrientation(i))
+        return output
 
     def has_scale(self):
         return self.java_obj.hasScale()
 
     def has_orientation(self):
         return self.java_obj.hasOrientation()
+
+    def get_descriptor_type(self):
+        return self.java_obj.getDescriptionType()
 
 
 class DenseDescribePointFeatures(JavaWrapper):
@@ -197,17 +228,33 @@ class FactoryDenseDescribe:
 
 
 class FactoryAssociate:
-    def __init__(self, descriptor_type=None ):
-        self.descriptor_type =  descriptor_type
+    def __init__(self):
+        self.score = None
 
-    def greedy(self, config):
-        pass
+    def set_score(self, score_type , descriptor_type ):
+        if score_type == AssocScoreType.DEFAULT:
+            self.score = gateway.jvm.boofcv.factory.feature.associate.\
+                FactoryAssociation.defaultScore(descriptor_type)
+        elif score_type == AssocScoreType.EUCLIDEAN:
+            self.score = gateway.jvm.boofcv.factory.feature.associate.\
+                FactoryAssociation.scoreEuclidean(descriptor_type,False)
+        elif score_type == AssocScoreType.EUCLIDEAN_SQ:
+            self.score = gateway.jvm.boofcv.factory.feature.associate.\
+                FactoryAssociation.scoreEuclidean(descriptor_type,True)
+        elif score_type == AssocScoreType.NCC:
+            self.score = gateway.jvm.boofcv.factory.feature.associate.\
+                FactoryAssociation.scoreNcc()
+        elif score_type == AssocScoreType.SAD:
+            self.score = gateway.jvm.boofcv.factory.feature.associate.\
+                FactoryAssociation.scoreSad(descriptor_type)
+
+    def greedy(self, max_error=sys.float_info.max,backwards_validation=True):
+        java_obj = gateway.jvm.boofcv.factory.feature.associate.\
+                FactoryAssociation.greedy(self.score,max_error,backwards_validation)
+        return AssociateDescription(java_obj)
 
     def kdtree(self):
         pass
 
     def kdRandomForest(self):
-        pass
-
-    def greedy(self):
         pass

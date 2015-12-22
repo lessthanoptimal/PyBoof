@@ -3,6 +3,9 @@ import numpy as np
 import pyboof.common as common
 from pyboof import gateway
 import py4j.java_gateway as jg
+import pyboof
+import mmap
+import struct
 
 class Family:
     """
@@ -94,37 +97,54 @@ def ndarray_to_boof( npimg ):
     if npimg is None:
         raise Exception("Input image is None")
 
-    if len(npimg.shape) == 2:
-        if npimg.dtype == np.uint8:
-            b = gateway.jvm.boofcv.struct.image.ImageUInt8()
-            b.setData( bytearray(npimg.data) )
-        elif npimg.dtype == np.float32:
-            b = gateway.jvm.boofcv.struct.image.ImageFloat32()
-            b.setData( npimg.data )
-        else:
-            raise Exception("Image type not supported yet")
-    else:
-        num_bands = npimg.shape[2]
-
-        bands = []
-        for i in range(num_bands):
-            bands.append(npimg[:,:,i])
-
-        class_type = dtype_to_Class_SingleBand(npimg.dtype)
-
-        b = gateway.jvm.boofcv.struct.image.MultiSpectral(class_type,num_bands)
-
-        for i in range(num_bands):
+    if pyboof.mmap_fid:
+        if len(npimg.shape) == 2:
             if npimg.dtype == np.uint8:
-                band = gateway.jvm.boofcv.struct.image.ImageUInt8()
-                band.setData( bytearray(bands[i]) )
+                return mmap_numpy_to_boof_SU8(npimg)
             elif npimg.dtype == np.float32:
-                band = gateway.jvm.boofcv.struct.image.ImageFloat32()
-                band.setData( bands[i] )
-            band.setWidth(npimg.shape[1])
-            band.setHeight(npimg.shape[0])
-            band.setStride(npimg.shape[1])
-            b.setBand(i,band)
+                raise Exception("Need to add support for float images")
+            else:
+                raise Exception("Image type not supported yet")
+        else:
+            if npimg.dtype == np.uint8:
+                return mmap_numpy_to_boof_IU8(npimg)
+            elif npimg.dtype == np.float32:
+                raise Exception("Need to add support for float images")
+            else:
+                raise Exception("Image type not supported yet")
+    else:
+        if len(npimg.shape) == 2:
+            if npimg.dtype == np.uint8:
+                b = gateway.jvm.boofcv.struct.image.ImageUInt8()
+                b.setData( bytearray(npimg.data) )
+            elif npimg.dtype == np.float32:
+                b = gateway.jvm.boofcv.struct.image.ImageFloat32()
+                b.setData( npimg.data )
+            else:
+                raise Exception("Image type not supported yet")
+        else:
+            # TODO change this to interleaved images since that's the closest equivalent
+            num_bands = npimg.shape[2]
+
+            bands = []
+            for i in range(num_bands):
+                bands.append(npimg[:,:,i])
+
+            class_type = dtype_to_Class_SingleBand(npimg.dtype)
+
+            b = gateway.jvm.boofcv.struct.image.MultiSpectral(class_type,num_bands)
+
+            for i in range(num_bands):
+                if npimg.dtype == np.uint8:
+                    band = gateway.jvm.boofcv.struct.image.ImageUInt8()
+                    band.setData( bytearray(bands[i]) )
+                elif npimg.dtype == np.float32:
+                    band = gateway.jvm.boofcv.struct.image.ImageFloat32()
+                    band.setData( bands[i] )
+                band.setWidth(npimg.shape[1])
+                band.setHeight(npimg.shape[0])
+                band.setStride(npimg.shape[1])
+                b.setBand(i,band)
 
     b.setWidth(npimg.shape[1])
     b.setHeight(npimg.shape[0])
@@ -334,3 +354,37 @@ def dtype_to_ImageType( dtype ):
     java_class = dtype_to_Class_SingleBand(dtype)
     return gateway.jvm.boofcv.struct.image.ImageType.single(java_class)
 
+
+# ================================================================
+#        Functions for converting images using mmap files
+
+
+def mmap_numpy_to_boof_SU8( numpy_image ):
+    width = numpy_image.shape[1]
+    height = numpy_image.shape[0]
+    num_bands = 1
+
+    mm = mmap.mmap(pyboof.mmap_fid.fileno(), 0)
+    mm.seek(0)
+    mm.write(struct.pack('>HIII',0,width,height,num_bands))
+    mm.write(numpy_image.data)
+    mm.close()
+    bimg = gateway.jvm.boofcv.struct.image.ImageUInt8(1,1)
+    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_SU8(bimg)
+    return bimg
+
+
+def mmap_numpy_to_boof_IU8( numpy_image ):
+    width = numpy_image.shape[1]
+    height = numpy_image.shape[0]
+    num_bands = numpy_image.shape[2]
+
+    mm = mmap.mmap(pyboof.mmap_fid.fileno(), 0)
+    mm.seek(0)
+    mm.write(struct.pack('>HIII',0,width,height,num_bands))
+    mm.write(numpy_image.data)
+    mm.close()
+
+    bimg = gateway.jvm.boofcv.struct.image.InterleavedU8(1,1,1)
+    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_IU8(bimg)
+    return bimg

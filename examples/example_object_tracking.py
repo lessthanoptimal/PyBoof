@@ -3,6 +3,9 @@ import pyboof as pb
 import numpy as np
 import time
 
+# Enable use of memory mapped files for MUCH faster conversion of images between java and python
+pb.init_memmap(5)
+
 cap = cv2.VideoCapture(0)
 
 refPt=[(0,0),(0,0)]
@@ -56,7 +59,8 @@ while True:
     pb.convert_boof_image(boof_color,image_input)
     time2 = int(round(time.time() * 1000))
 
-    print("time py to boof: "+str(time1-time0)+" boof to boof "+str(time2-time1))
+    print "time py to boof: {:4d} boof to boof: {:4d}".format(time1-time0,time2-time1)
+    # print "    enter {:d}   exit {:d}".format(time0,time1)
 
     if state == 1:
         cv2.rectangle(frame, refPt[0], refPt[1], (0, 255, 0), 2)

@@ -12,12 +12,15 @@ repositories {
 
     maven {
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+
+    maven {
         url = "http://xuggle.googlecode.com/svn/trunk/repo/share/java/"
     }
 }
 
 dependencies {
-    compile group: 'org.boofcv', name: 'all', version: '0.20-SNAPSHOT'
+    compile group: 'org.boofcv', name: 'all', version: '0.20'
     compile 'net.sf.py4j:py4j:0.9'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
