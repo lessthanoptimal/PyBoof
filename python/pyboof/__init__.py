@@ -31,7 +31,10 @@ if try_again:
 
 def init_memmap( size_MB=2):
     """
-    Call to enable use of memory mapped files for quick communication between Python of Java
+    Call to enable use of memory mapped files for quick communication between Python and Java.  This
+    faster communication method requires specialized code so is only used when large amounts of memory
+    is being transferred.
+
     :param size_MB: Size of the memory mapped file in megabytes
     :type size_MB: int
     """

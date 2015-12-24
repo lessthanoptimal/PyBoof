@@ -20,7 +20,7 @@ class JavaWrapper:
         return self.java_obj
 
     def __str__(self):
-        return self.java_obj.toString()
+        return "Wrapped Java: "+self.java_obj.toString()
 
 
 class Config(JavaWrapper):

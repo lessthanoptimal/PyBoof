@@ -38,7 +38,20 @@ class ImageType(common.JavaWrapper):
     def get_dtype(self):
         return JImageDataType_to_dtype(self.java_obj)
 
-def create_ImageType( family, dtype, num_bands = 1 ):
+
+def create_ImageType(family, dtype, num_bands=1):
+    """
+    Returns an ImageType from the specified parameters
+
+    :param family: Image data structure
+    :type family: Family
+    :param dtype: primitive data type of pixel
+    :type dtype: int
+    :param num_bands: Number of bands in the image.
+    :type num_bands: int
+    :return: Returns the ImageType
+    :rtype: ImageType
+    """
     if family == Family.SINGLE_BAND and num_bands != 1:
         raise Exception("SingleBand images must have only one band")
 
@@ -50,7 +63,7 @@ def create_ImageType( family, dtype, num_bands = 1 ):
     elif family == Family.INTERLEAVED:
         jImageType = gateway.jvm.boofcv.struct.image.ImageType.interleaved(num_bands,jImageClass)
     else:
-        raise Exception("Unknown family")
+        raise Exception("Unknown family = "+str(family))
 
     return ImageType(jImageType)
 
