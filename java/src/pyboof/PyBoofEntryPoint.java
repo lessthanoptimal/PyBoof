@@ -20,19 +20,21 @@ package pyboof;
 
 
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
-import boofcv.struct.Configuration;
-import boofcv.struct.feature.TupleDesc;
 import boofcv.factory.filter.binary.ConfigThreshold;
 import boofcv.factory.filter.binary.ThresholdType;
-import py4j.GatewayServer;
-
+import boofcv.struct.Configuration;
+import boofcv.struct.feature.TupleDesc;
 import georegression.struct.point.Point2D_F64;
+import org.ddogleg.struct.FastQueue;
+import py4j.GatewayServer;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 
+// TODO visualize features.  location, scale, orienation
+// TODO visualize matches. image, image, location, location, index pairs
 
 /**
  * Must launch this application to use PyBoof
@@ -42,6 +44,8 @@ import java.util.List;
  */
 public class PyBoofEntryPoint {
 
+	public static BoofMemoryMapped mmap;
+
 	public static void nothing(){}
 
 	public static void main(String[] args) {
@@ -50,11 +54,25 @@ public class PyBoofEntryPoint {
 		System.out.println("Gateway Server Started");
 	}
 
+	public static void initializeMmap( String filePath , int sizeMB ) {
+		mmap = new BoofMemoryMapped(filePath,sizeMB);
+	}
+
 	/**
 	 * Hack around 'global' being a keyword in Python
 	 */
 	public static ConfigThreshold createGlobalThreshold( ThresholdType type ) {
 		return ConfigThreshold.global(type);
+	}
+
+	public static FastQueue listToFastQueue( List list , Class type , boolean declare ) {
+		FastQueue ret = new FastQueue(list.size(),type,declare);
+
+		for (int i = 0; i < list.size(); i++) {
+			ret.add(list.get(i));
+		}
+
+		return ret;
 	}
 
 	public static List<TupleDesc> extractFeatures( DetectDescribePoint alg ) {

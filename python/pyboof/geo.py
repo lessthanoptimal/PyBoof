@@ -1,7 +1,8 @@
+import math
 import numpy as np
+import py4j.java_gateway as jg
 from pyboof import gateway
 from pyboof.common import *
-import py4j.java_gateway as jg
 
 
 def real_ejml_to_nparray( ejml ):
@@ -64,6 +65,12 @@ class Point2D:
             self.y = o.getY()
         else:
             raise Exception("Unknown object type")
+
+    def distance(self, point):
+        dx = point.x-self.x
+        dy = point.y-self.y
+        return math.sqrt(dx*dx + dy*dy)
+
 
     def get_tuple(self):
         """

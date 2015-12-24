@@ -2,6 +2,9 @@ import cv2
 import pyboof as pb
 import numpy as np
 
+# Enable use of memory mapped files for MUCH faster conversion of images between java and python
+pb.init_memmap(5)
+
 image_path = '../data/example/outdoors01.jpg'
 
 # Can load an image using OpenCV then convert it into BoofCV
@@ -14,6 +17,9 @@ boof_gray = pb.load_single_band(image_path,np.uint8)
 boof_color = pb.load_multi_spectral(image_path,np.uint8)
 
 # Let's display all 3 of them in Java
-pb.swing.show(boof_cv,"OpenCV")
-pb.swing.show(boof_gray,"Gray Scale")
-pb.swing.show(boof_color,"Color")
+# display the results in a single window as a list
+image_list = [(boof_cv,"OpenCV"),
+              (boof_gray,"Gray Scale"),
+              (boof_color,"Color")]
+
+pb.swing.show_list(image_list,title="Images")

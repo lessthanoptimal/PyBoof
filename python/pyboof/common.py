@@ -5,6 +5,9 @@ from pyboof import gateway
 def is_java_class( java_class , string_path ):
     return gateway.jvm.pyboof.PyBoofEntryPoint.isClass(java_class,string_path)
 
+def is_java_list( object ):
+    object.getClass()
+    return True
 
 class JavaWrapper:
     def __init__(self, java_object=None):
@@ -17,7 +20,7 @@ class JavaWrapper:
         return self.java_obj
 
     def __str__(self):
-        return self.java_obj.toString()
+        return "Wrapped Java: "+self.java_obj.toString()
 
 
 class Config(JavaWrapper):
@@ -80,4 +83,17 @@ class JavaConfig:
         return sorted(set(
                 self.__dict__.keys() + self.java_fields))
 
+class JavaList(JavaWrapper):
+    def __init__(self, java_list, java_type):
+        JavaWrapper.__init__(self,java_list)
+        self.java_type = java_type
 
+    def size(self):
+        return self.java_obj.size()
+
+    def save_to_disk(self, file_name ):
+        gateway.jvm.pyboof.FileIO.saveList(self.java_obj,self.java_type,file_name)
+
+
+def JavaList_to_fastqueue( list , java_class_type , queue_declare=False):
+    return gateway.jvm.pyboof.PyBoofEntryPoint.listToFastQueue(list,java_class_type,queue_declare)

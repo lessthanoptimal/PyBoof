@@ -1,8 +1,8 @@
-from pyboof.common import *
-from pyboof.image import *
-from pyboof.geo import *
-from pyboof import JavaConfig
 from pyboof import Config
+from pyboof import JavaConfig
+from pyboof.common import *
+from pyboof.geo import *
+from pyboof.image import *
 
 
 class ConfigPolygonDetector(JavaConfig):
@@ -98,21 +98,66 @@ class ConfigTld(Config):
             config = obj
         Config.__init__(self,config)
 
+class ConfigMeanShiftComaniciu(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self,"boofcv.abst.tracker.ConfigComaniciu2003")
 
 class FactoryTrackerObjectQuad:
-    def __init__(self, dtype ):
-        self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
+    def __init__(self, image_type ):
+        """
+        Creates a factory for a specific image type.
+        :param image_type: Specifies the type of image it processes.  Can be a dtype or ImageType
+        :type image_type: int | ImageType
+        """
+        if isinstance(image_type, ImageType):
+            self.image_type = image_type
+        else:
+            self.image_type = ImageType(dtype_to_ImageType(image_type))
 
     def circulant(self, config=None ):
-        java_tracker = gateway.jvm.boofcv.factory.tracker.FactoryTrackerObjectQuad.circulant(config,self.boof_image_type)
+        """
+        Creates a Circulant tracker
+        :param config: Configuration for tracker or None to use default
+        :type config: None | ConfigCirculant
+        :return: Tracker
+        :rtype: TrackerObjectQuad
+        """
+        boof_image_class = self.image_type.java_obj.getImageClass()
+        java_tracker = gateway.jvm.boofcv.factory.tracker.\
+            FactoryTrackerObjectQuad.circulant(config, boof_image_class)
         return TrackerObjectQuad(java_tracker)
 
     def tld(self, config=None ):
+        """
+        Creates a TLD tracker
+        :param config: Configuration for tracker or None to use default
+        :type config: None | ConfigTld
+        :return: Tracker
+        :rtype: TrackerObjectQuad
+        """
+        boof_image_class = self.image_type.java_obj.getImageClass()
         if config is None:
             java_conf = None
         else:
             java_conf = config.java_obj
-        java_tracker = gateway.jvm.boofcv.factory.tracker.FactoryTrackerObjectQuad.tld(java_conf,self.boof_image_type)
+        java_tracker = gateway.jvm.boofcv.factory.tracker.\
+            FactoryTrackerObjectQuad.tld(java_conf, boof_image_class)
+        return TrackerObjectQuad(java_tracker)
+
+    def mean_shift_comaniciu(self, config=None ):
+        """
+        Creates a Comaniciu (histogram based) style Mean-Shift tracker
+        :param config: Configuration for tracker or None to use default
+        :type config: None | ConfigMeanShiftComaniciu
+        :return: Tracker
+        :rtype: TrackerObjectQuad
+        """
+        if config is None:
+            java_conf = None
+        else:
+            java_conf = config.java_obj
+        java_tracker = gateway.jvm.boofcv.factory.tracker.FactoryTrackerObjectQuad.\
+            meanShiftComaniciu2003(java_conf, self.image_type.java_obj)
         return TrackerObjectQuad(java_tracker)
 
 
