@@ -14,6 +14,6 @@ undistorted = original.createSameShape()
 
 # Remove distortion and show the results
 pb.remove_distortion(original,undistorted,intrinsic)
-pb.swing.show(original,"Original")
-pb.swing.show(undistorted,"Undistorted")
+image_list = [(original,"Original"),(undistorted,"Undistorted")]
+pb.swing.show_list(image_list,title="Lens Distortion")
 

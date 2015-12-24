@@ -1,5 +1,19 @@
 PyBoof is a wrapper around BoofCV for Python.  It uses Py4j to call BoofCV Java functions.
 
+# Getting Example Data
+
+Data is stored in a git submodule.  The first time you check out the code you need to initialize it
+
+```
+git submodule init
+```
+
+Then to download the latest update it
+
+```
+git submodule update
+```
+
 # Installation
 
 1. ./setup.py build

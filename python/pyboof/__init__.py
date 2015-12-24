@@ -51,3 +51,4 @@ from pyboof.image import *
 from pyboof.ip import *
 from pyboof.recognition import *
 from pyboof.feature import *
+import pyboof.swing

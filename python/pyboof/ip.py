@@ -110,41 +110,120 @@ class InputToBinary(JavaWrapper):
     def process(self, input , output):
         self.java_obj.process(input,output)
 
-class FactoryThresholdBinary(JavaWrapper):
+class FactoryThresholdBinary:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
 
-    def localGaussian(self, radius, bias=0, down=True):
+    def localGaussian(self, radius, scale=0.95, down=True):
+        """
+        Create an instance of local gaussian threshold
+
+        :param radius: Radius of local region
+        :type radius: int
+        :param scale: Threshold scale adjustment
+        :type scale: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            localGaussian(int(radius),float(bias),down,self.boof_image_type)
+            localGaussian(int(radius),float(scale),down,self.boof_image_type)
         return InputToBinary(java_object)
 
     def localSauvola(self, radius, k=0.3, down=True):
+        """
+        Create an instance of local gaussian threshold
+
+        :param radius: Radius of local region
+        :type radius: int
+        :param k: User specified threshold adjustment factor.  Must be positive. Try 0.3
+        :type k: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             localSauvola(int(radius),float(k),down,self.boof_image_type)
         return InputToBinary(java_object)
 
-    def localSquare(self, radius, bias=0, down=True):
+    def localSquare(self, radius, scale=0.95, down=True):
+        """
+        Create an instance of local square threshold
+
+        :param radius: Radius of local region
+        :type radius: int
+        :param scale: Threshold scale adjustment
+        :type scale: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            localSquare(int(radius),float(bias),down,self.boof_image_type)
+            localSquare(int(radius),float(scale),down,self.boof_image_type)
         return InputToBinary(java_object)
 
     def globalEntropy(self, min_value=0, max_value=255, down=True):
+        """
+        Applies a global entropy based threshold to the entire image.
+
+        :param min_value: Minimum pixel value.
+        :type min_value: int
+        :param max_value: Maximum pixel value
+        :type min_value: int
+        :param down: True for thresholding down and false for up
+        :type down: bool:
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             globalEntropy(int(min_value),int(max_value),down,self.boof_image_type)
         return InputToBinary(java_object)
 
     def globalFixed(self, threshold, down=True):
+        """
+        Applies a fixed threshold to the entire image.
+
+        :param min_value: Minimum pixel value.
+        :type min_value: int
+        :param max_value: Maximum pixel value
+        :type min_value: int
+        :param down: True for thresholding down and false for up
+        :type down: bool:
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             globalFixed(float(threshold),down,self.boof_image_type)
         return InputToBinary(java_object)
 
     def globalOtsu(self, min_value=0, max_value=255, down=True):
+        """
+        Computes the Otsu threshold and applies it to the entire image.
+
+        :param min_value: Minimum pixel value.
+        :type min_value: int
+        :param max_value: Maximum pixel value
+        :type min_value: int
+        :param down: True for thresholding down and false for up
+        :type down: bool:
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             globalOtsu(int(min_value),int(max_value),down,self.boof_image_type)
         return InputToBinary(java_object)
     
     def threshold(self, config ):
+        """
+        Creates an instance of InputToBinary from a configuration class for a specific method
+        :param config: Config class for a
+        :type config: ConfigThreshold
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             threshold(config.java_obj,self.boof_image_type)
         return InputToBinary(java_object)
