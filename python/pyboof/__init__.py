@@ -1,3 +1,4 @@
+import mmap
 import os
 import subprocess
 import time
@@ -9,7 +10,7 @@ gateway = JavaGateway()
 try_again = False
 
 mmap_size = 0
-mmap_fid = None
+mmap_file = None
 
 try:
     gateway.jvm.pyboof.PyBoofEntryPoint.nothing()
@@ -29,6 +30,12 @@ if try_again:
         exit(1)
 
 
+# Type bit for different data structures
+class MmapType:
+    IMAGE_U8 = 0
+    LIST_POINT_F64 = 1
+    LIST_TUPLE_F64 = 2
+
 def init_memmap( size_MB=2):
     """
     Call to enable use of memory mapped files for quick communication between Python and Java.  This
@@ -38,11 +45,14 @@ def init_memmap( size_MB=2):
     :param size_MB: Size of the memory mapped file in megabytes
     :type size_MB: int
     """
-    global mmap_fid, mmap_size
+    global mmap_size, mmap_file
     mmap_name = "mmap_python_java.mmap"
     mmap_size = size_MB*1024*1024
-    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_name, size_MB);
+    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_name, size_MB)
+    # Open file in read,write,binary mode
     mmap_fid = open(mmap_name, "r+b")
+    mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
+                          prot=mmap.PROT_READ | mmap.PROT_WRITE)
 
 from pyboof.calib import *
 from pyboof.common import *
@@ -51,4 +61,3 @@ from pyboof.image import *
 from pyboof.ip import *
 from pyboof.recognition import *
 from pyboof.feature import *
-import pyboof.swing

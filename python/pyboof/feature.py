@@ -1,5 +1,6 @@
 import struct
 import sys
+import pyboof
 from pyboof import JavaConfig
 from pyboof import JavaWrapper
 from pyboof import dtype_to_Class_SingleBand
@@ -8,6 +9,36 @@ from pyboof.common import JavaList
 from pyboof.common import JavaList_to_fastqueue
 from pyboof.common import is_java_class
 
+
+def p2b_list_desc64( pylist ):
+    """
+    Converts a python list of feature descriptors stored in 64bit floats into a BoofCV compatible format
+    :param pylist: Python list of feature descriptors
+    :type pylist: list[list[float]]
+    :return: List of descriptors in BoofCV format
+    """
+    java_list = gateway.jvm.java.util.ArrayList()
+
+    if pyboof.mmap_file:
+        mmap_list_python_to_Tuple64(pylist,java_list)
+    else:
+        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+    return java_list
+
+def b2p_list_desc64( boof_list ):
+    """
+    Converts a BoofCV list of feature descriptors stored in 64bit floats into a Python compatible format
+    :param boof_list: Descriptor list in BoofCV format
+    :return: List of descriptors in Python format
+    :rtype: list[list[float]]
+    """
+    pylist = []
+
+    if pyboof.mmap_file:
+        mmap_list_Tuple64_to_python(boof_list,pylist)
+    else:
+        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+    return pylist
 
 class ConfigSurfFast(JavaConfig):
     def __init__(self):
@@ -59,12 +90,20 @@ class AssociateDescription(JavaWrapper):
     def __init__(self, java_object ):
         JavaWrapper.__init__(self, java_object)
 
-    def set_source(self, feature_list ):
-        fast_queue = JavaList_to_fastqueue(feature_list.java_obj,feature_list.java_type,queue_declare=False)
+    def set_source(self, feature_list):
+        # automatically convert from python to boof type
+        if feature_list is list:
+            feature_list = p2b_list_desc64(feature_list)
+
+        fast_queue = JavaList_to_fastqueue(feature_list.java_obj, feature_list.java_type, queue_declare=False)
         self.java_obj.setSource(fast_queue)
 
-    def set_destination(self, feature_list ):
-        fast_queue = JavaList_to_fastqueue(feature_list.java_obj,feature_list.java_type,queue_declare=False)
+    def set_destination(self, feature_list):
+        # automatically convert from python to boof type
+        if feature_list is list:
+            feature_list = p2b_list_desc64(feature_list)
+
+        fast_queue = JavaList_to_fastqueue(feature_list.java_obj, feature_list.java_type, queue_declare=False)
         self.java_obj.setDestination(fast_queue)
 
     def associate(self):
@@ -258,3 +297,60 @@ class FactoryAssociate:
 
     def kdRandomForest(self):
         pass
+
+
+def mmap_list_python_to_Tuple64(pylist, java_list):
+    """
+    Converts a python list of float arrays into a list of TupleDesk64F in java using memmap file
+    :param pylist: (Input) Python list of float arrays.  All arrays need to have the same length
+    :type pylist: list[list[float]]
+    :param java_list: (Output) Java list to store TupleDesc64F
+    """
+    num_elements = len(pylist)
+    if num_elements == 0:
+        dof = 0
+    else:
+        dof = len(pylist[0])
+    mm = pyboof.mmap_file
+
+    # max number of list elements it can write at once
+    max_elements = (pyboof.mmap_size-100)/(dof*8)
+
+    curr = 0
+    while curr < num_elements:
+        # Write as much of the list as it can to the mmap file
+        num_write = min(max_elements,num_elements-curr)
+        mm.seek(0)
+        mm.write(struct.pack('>HII', pyboof.MmapType.LIST_TUPLE_F64, num_elements, dof))
+        for i in range(curr, curr+num_write):
+            mm.write(struct.pack('>%sd' % dof, *pylist[i]))
+
+        # Now tell the java end to read what it just wrote
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Tuple64(java_list)
+
+        # move on to the next block
+        curr = curr + num_write
+
+def mmap_list_Tuple64_to_python( java_list , pylist ):
+    """
+    Converts a java list of TupleDesc64F into a python list of float arrays using memmap file
+    :param java_list: Input: java list
+    :param pylist: output: python list
+    :type pylist: list[list[float]]
+    """
+    num_elements = java_list.size()
+    mm = pyboof.mmap_file
+
+    num_read = 0
+    while num_read < num_elements:
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Tuple64(java_list, num_read)
+        mm.seek(0)
+        data_type, num_found, dof = struct.unpack(">HII", mm.read(2+4+4))
+        if data_type != pyboof.MmapType.LIST_TUPLE_F64:
+            raise Exception("Unexpected data type in mmap file. {%d}" % data_type)
+        if num_found > num_elements-num_read:
+            raise Exception("Too many elements returned. "+str(num_found))
+        for i in xrange(num_found):
+            desc = struct.unpack(">%sd" % dof, mm.read(8*dof))
+            pylist.append(desc)
+        num_read += num_found

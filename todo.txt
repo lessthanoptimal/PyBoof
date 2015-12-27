@@ -1,0 +1,7 @@
+- Create a build date
+  * load into JVM and python
+  * if different kill JVM and restart it
+
+- mmap
+  * list tuple64
+  * list point2D

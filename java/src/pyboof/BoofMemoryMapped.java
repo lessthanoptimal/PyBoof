@@ -1,12 +1,15 @@
 package pyboof;
 
+import boofcv.struct.feature.TupleDesc_F64;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.InterleavedU8;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.List;
 
 /**
  * @author Peter Abeles
@@ -16,11 +19,57 @@ public class BoofMemoryMapped {
 
 	public BoofMemoryMapped( String filePath , int sizeMB ) {
 		try {
+			int size = sizeMB*1024*1024;
 			mmf = new RandomAccessFile(filePath, "rw")
-					.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, sizeMB*1024*1024 );
+					.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size );
 //			System.out.println("Created mmap file "+filePath+" size "+sizeMB+" MB");
+//			System.out.println("limit.  Requested "+size+"  found "+mmf.limit());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Reads elements from the memory map file and appends them to the current list
+	 * @param list List in which the elements are appended into
+	 */
+	public void read_List_Tuple64(List<TupleDesc_F64> list ) {
+		mmf.position(0);
+		if( mmf.getShort() != Type.LIST_TUPLE_F64.ordinal() ) {
+			throw new RuntimeException("Not a list of tuples!");
+		}
+		int numElements = mmf.getInt();
+		int dof = mmf.getInt();
+
+		byte data[] = new byte[8*dof];
+		ByteBuffer bb = ByteBuffer.wrap(data);
+		for (int i = 0; i < numElements; i++) {
+			mmf.get(data,0,data.length);
+			TupleDesc_F64 desc = new TupleDesc_F64(dof);
+			for (int j = 0; j < dof; j++) {
+				desc.value[j] = bb.getDouble(j*8);
+			}
+			list.add( desc );
+		}
+	}
+
+	public void write_List_Tuple64(List<TupleDesc_F64> list , int startIndex ) {
+		int DOF = list.size()>0?list.get(0).size() : 0;
+
+		int maxElements = (mmf.limit()-100)/(8*DOF);
+		int numElements = Math.min(list.size(),maxElements);
+
+		mmf.position(0);
+		mmf.putShort((short)Type.LIST_TUPLE_F64.ordinal());
+		mmf.putInt(numElements);
+		mmf.putInt(DOF);
+
+		for (int i = 0; i < numElements; i++) {
+			TupleDesc_F64 desc = list.get(startIndex+i);
+
+			for (int j = 0; j < DOF; j++) {
+				mmf.putDouble(desc.value[j]);
+			}
 		}
 	}
 
@@ -67,6 +116,7 @@ public class BoofMemoryMapped {
 	public enum Type
 	{
 		IMAGE_U8,
-		POINTS_F64,
+		LIST_POINT_F64,
+		LIST_TUPLE_F64
 	}
 }

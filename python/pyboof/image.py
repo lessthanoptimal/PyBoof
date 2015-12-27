@@ -4,7 +4,6 @@ import pyboof.common as common
 from pyboof import gateway
 import py4j.java_gateway as jg
 import pyboof
-import mmap
 import struct
 
 class Family:
@@ -110,7 +109,7 @@ def ndarray_to_boof( npimg ):
     if npimg is None:
         raise Exception("Input image is None")
 
-    if pyboof.mmap_fid:
+    if pyboof.mmap_file:
         if len(npimg.shape) == 2:
             if npimg.dtype == np.uint8:
                 return mmap_numpy_to_boof_SU8(npimg)
@@ -377,11 +376,10 @@ def mmap_numpy_to_boof_SU8( numpy_image ):
     height = numpy_image.shape[0]
     num_bands = 1
 
-    mm = mmap.mmap(pyboof.mmap_fid.fileno(), 0)
+    mm = pyboof.mmap_file
     mm.seek(0)
     mm.write(struct.pack('>HIII',0,width,height,num_bands))
     mm.write(numpy_image.data)
-    mm.close()
     bimg = gateway.jvm.boofcv.struct.image.ImageUInt8(1,1)
     gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_SU8(bimg)
     return bimg
@@ -392,12 +390,18 @@ def mmap_numpy_to_boof_IU8( numpy_image ):
     height = numpy_image.shape[0]
     num_bands = numpy_image.shape[2]
 
-    mm = mmap.mmap(pyboof.mmap_fid.fileno(), 0)
+    # The image write takes less than a millisecond
+    mm = pyboof.mmap_file
     mm.seek(0)
-    mm.write(struct.pack('>HIII',0,width,height,num_bands))
+    mm.write(struct.pack('>HIII', pyboof.MmapType.IMAGE_U8, width, height, num_bands))
     mm.write(numpy_image.data)
-    mm.close()
 
-    bimg = gateway.jvm.boofcv.struct.image.InterleavedU8(1,1,1)
+    # TODO This command alone takes 2 to 3 MS to perform and has random pauses 15ms to 100ms
+    #      The entire performance hit mentioned above is caused by invoking the Java function
+    #      Actually running the function has already been subtracted
+    #
+    bimg = gateway.jvm.boofcv.struct.image.InterleavedU8(width,height,num_bands)
+    # TODO again just invoking the java function appears to take 2 to 3 ms even if the function does nothing
+    #      Hard to tell how load the actual read takes in the MMAP file.  Probably around 1ms
     gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_IU8(bimg)
     return bimg
