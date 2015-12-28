@@ -33,7 +33,7 @@ if try_again:
 # Type bit for different data structures
 class MmapType:
     IMAGE_U8 = 0
-    LIST_POINT_F64 = 1
+    LIST_POINT2D_F64 = 1
     LIST_TUPLE_F64 = 2
 
 def init_memmap( size_MB=2):

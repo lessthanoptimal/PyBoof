@@ -75,23 +75,29 @@ public class PyBoofEntryPoint {
 		return ret;
 	}
 
-	public static List<TupleDesc> extractFeatures( DetectDescribePoint alg ) {
+	public static List<TupleDesc> extractFeatures( DetectDescribePoint alg , boolean copy ) {
 		int N = alg.getNumberOfFeatures();
 
 		List<TupleDesc> array = new ArrayList<TupleDesc>();
 		for (int i = 0; i < N; i++) {
-			array.add(alg.getDescription(i).copy());
+			if( copy)
+				array.add(alg.getDescription(i).copy());
+			else
+				array.add(alg.getDescription(i));
 		}
 
 		return array;
 	}
 
-	public static List<Point2D_F64> extractPoints( DetectDescribePoint alg ) {
+	public static List<Point2D_F64> extractPoints( DetectDescribePoint alg , boolean copy ) {
 		int N = alg.getNumberOfFeatures();
 
 		List<Point2D_F64> array = new ArrayList<Point2D_F64>();
 		for (int i = 0; i < N; i++) {
-			array.add(alg.getLocation(i).copy());
+			if( copy )
+				array.add(alg.getLocation(i).copy());
+			else
+				array.add(alg.getLocation(i));
 		}
 
 		return array;

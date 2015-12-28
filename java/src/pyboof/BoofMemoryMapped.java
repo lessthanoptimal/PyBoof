@@ -3,6 +3,7 @@ package pyboof;
 import boofcv.struct.feature.TupleDesc_F64;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.InterleavedU8;
+import georegression.struct.point.Point2D_F64;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -33,7 +34,7 @@ public class BoofMemoryMapped {
 	 * Reads elements from the memory map file and appends them to the current list
 	 * @param list List in which the elements are appended into
 	 */
-	public void read_List_Tuple64(List<TupleDesc_F64> list ) {
+	public void read_List_TupleF64(List<TupleDesc_F64> list ) {
 		mmf.position(0);
 		if( mmf.getShort() != Type.LIST_TUPLE_F64.ordinal() ) {
 			throw new RuntimeException("Not a list of tuples!");
@@ -53,7 +54,7 @@ public class BoofMemoryMapped {
 		}
 	}
 
-	public void write_List_Tuple64(List<TupleDesc_F64> list , int startIndex ) {
+	public void write_List_TupleF64(List<TupleDesc_F64> list , int startIndex ) {
 		int DOF = list.size()>0?list.get(0).size() : 0;
 
 		int maxElements = (mmf.limit()-100)/(8*DOF);
@@ -70,6 +71,45 @@ public class BoofMemoryMapped {
 			for (int j = 0; j < DOF; j++) {
 				mmf.putDouble(desc.value[j]);
 			}
+		}
+	}
+
+	/**
+	 * Reads elements from the memory map file and appends them to the current list
+	 * @param list List in which the elements are appended into
+	 */
+	public void read_List_Point2DF64(List<Point2D_F64> list ) {
+		mmf.position(0);
+		if( mmf.getShort() != Type.LIST_POINT2D_F64.ordinal() ) {
+			throw new RuntimeException("Not a list of Point2D_F64!");
+		}
+		int numElements = mmf.getInt();
+
+		byte data[] = new byte[8*2];
+		ByteBuffer bb = ByteBuffer.wrap(data);
+		for (int i = 0; i < numElements; i++) {
+			mmf.get(data,0,data.length);
+			Point2D_F64 p = new Point2D_F64();
+			p.x = bb.getDouble(0);
+			p.y = bb.getDouble(8);
+			list.add( p );
+		}
+	}
+
+	public void write_List_Point2DF64(List<Point2D_F64> list , int startIndex ) {
+
+		int maxElements = (mmf.limit()-100)/(8*2);
+		int numElements = Math.min(list.size(),maxElements);
+
+		mmf.position(0);
+		mmf.putShort((short)Type.LIST_POINT2D_F64.ordinal());
+		mmf.putInt(numElements);
+
+		for (int i = 0; i < numElements; i++) {
+			Point2D_F64 p = list.get(startIndex+i);
+
+			mmf.putDouble(p.x);
+			mmf.putDouble(p.y);
 		}
 	}
 
@@ -116,7 +156,7 @@ public class BoofMemoryMapped {
 	public enum Type
 	{
 		IMAGE_U8,
-		LIST_POINT_F64,
+		LIST_POINT2D_F64,
 		LIST_TUPLE_F64
 	}
 }
