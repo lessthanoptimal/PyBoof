@@ -5,9 +5,9 @@ from pyboof import JavaConfig
 from pyboof import JavaWrapper
 from pyboof import dtype_to_Class_SingleBand
 from pyboof import gateway
-from pyboof.common import JavaList
-from pyboof.common import JavaList_to_fastqueue
-from pyboof.common import is_java_class
+from common import JavaList
+from common import JavaList_to_fastqueue
+from common import is_java_class
 
 
 def p2b_list_descF64(pylist):

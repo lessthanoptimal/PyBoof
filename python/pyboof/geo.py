@@ -1,8 +1,7 @@
 import math
 import numpy as np
 import py4j.java_gateway as jg
-from pyboof import gateway
-from pyboof.common import *
+from common import *
 
 
 def real_ejml_to_nparray( ejml ):

@@ -1,8 +1,5 @@
-from pyboof import Config
-from pyboof import JavaConfig
-from pyboof.common import *
-from pyboof.geo import *
-from pyboof.image import *
+from geo import *
+from image import *
 
 
 class ConfigPolygonDetector(JavaConfig):

@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import pyboof.common as common
+import common
 from pyboof import gateway
 import py4j.java_gateway as jg
 import pyboof

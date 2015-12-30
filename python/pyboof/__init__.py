@@ -30,11 +30,14 @@ if try_again:
         exit(1)
 
 
-# Type bit for different data structures
 class MmapType:
+    """
+    Type byte for different data structures
+    """
     IMAGE_U8 = 0
     LIST_POINT2D_F64 = 1
     LIST_TUPLE_F64 = 2
+
 
 def init_memmap( size_MB=2):
     """
@@ -54,10 +57,11 @@ def init_memmap( size_MB=2):
     mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
                           prot=mmap.PROT_READ | mmap.PROT_WRITE)
 
-from pyboof.calib import *
-from pyboof.common import *
-from pyboof.geo import *
-from pyboof.image import *
-from pyboof.ip import *
-from pyboof.recognition import *
-from pyboof.feature import *
+from calib import *
+from common import *
+from geo import *
+from image import *
+from ip import *
+from recognition import *
+from feature import *
+import swing

@@ -1,27 +1,29 @@
-from pyboof.ip import *
-from pyboof.image import *
+from ip import *
+from image import *
 
 # TODO add intrinsic parameters
 # TODO add remove lens distortion
 
-"""
-BoofCV Intrinsic Camera parameters
-"""
+
 class Intrinsic:
-    # Intrinsic calibration matrix
-    fx=0
-    fy=0
-    skew=0
-    cx = 0
-    cy = 0
-    # image shape
-    width = 0
-    height = 0
-    # radial distortion
-    radial = None
-    # tangential terms
-    t1 = 0
-    t2 = 0
+    """
+    BoofCV Intrinsic Camera parameters
+    """
+    def __init__(self):
+        # Intrinsic calibration matrix
+        self.fx=0
+        self.fy=0
+        self.skew=0
+        self.cx = 0
+        self.cy = 0
+        # image shape
+        self.width = 0
+        self.height = 0
+        # radial distortion
+        self.radial = None
+        # tangential terms
+        self.t1 = 0
+        self.t2 = 0
 
     def load_xml(self, file_name):
         file_path = os.path.abspath(file_name)

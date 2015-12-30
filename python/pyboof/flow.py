@@ -1,6 +1,5 @@
-from pyboof.image import *
-import pyboof.ip as ip
-
+from image import *
+import ip
 
 class GradientFlow:
     def __init__(self, derivX, derivY):
