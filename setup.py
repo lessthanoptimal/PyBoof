@@ -22,7 +22,7 @@ class MyBuild(build_py):
 
 setup(name='PyBoof',
       cmdclass={'build_py': MyBuild},
-      version='0.20',
+      version='0.21',
       description='Py4J Python wrapper for BoofCV',
       url='https://github.com/lessthanoptimal/PyBoof',
       author="Peter Abeles",
