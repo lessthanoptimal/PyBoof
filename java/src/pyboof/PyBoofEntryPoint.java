@@ -55,6 +55,7 @@ public class PyBoofEntryPoint {
 	}
 
 	public static void initializeMmap( String filePath , int sizeMB ) {
+		// no need to do special cleanup if mmap already exists.  It will be cleaned up by GC
 		mmap = new BoofMemoryMapped(filePath,sizeMB);
 	}
 

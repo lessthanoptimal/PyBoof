@@ -51,7 +51,8 @@ def init_memmap( size_MB=2):
     global mmap_size, mmap_file
     mmap_name = "mmap_python_java.mmap"
     mmap_size = size_MB*1024*1024
-    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_name, size_MB)
+    mmap_name_path = os.path.join(os.getcwd(),mmap_name)
+    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_name_path, size_MB)
     # Open file in read,write,binary mode
     mmap_fid = open(mmap_name, "r+b")
     mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
