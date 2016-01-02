@@ -45,7 +45,11 @@ import java.util.List;
 public class PyBoofEntryPoint {
 
 	public static BoofMemoryMapped mmap;
+	public static String buildDate;
 
+	/**
+	 * Called in python to see if the JVM is set up correctly
+	 */
 	public static void nothing(){}
 
 	public static void main(String[] args) {
@@ -54,7 +58,15 @@ public class PyBoofEntryPoint {
 		System.out.println("Gateway Server Started");
 	}
 
-	public static void initializeMmap( String filePath , int sizeMB ) {
+	public static String getBuildDate() {
+		return buildDate;
+	}
+
+	public static void setBuildDate(String buildDate) {
+		PyBoofEntryPoint.buildDate = buildDate;
+	}
+
+	public static void initializeMmap(String filePath , int sizeMB ) {
 		// no need to do special cleanup if mmap already exists.  It will be cleaned up by GC
 		mmap = new BoofMemoryMapped(filePath,sizeMB);
 	}

@@ -4,11 +4,15 @@ from distutils.core import setup
 from setuptools.command.build_py import build_py
 from subprocess import call
 import os.path
+import time
 
 class MyBuild(build_py):
    def run(self):
        try:
            call(["gradle","allJar"])
+           f = open('python/pyboof/build_date.txt', 'w')
+           f.write(str(int(round(time.time() * 1000))))
+           f.close()
        except:
            if not os.path.isfile('python/pyboof/PyBoof-all.jar'):
                print "Gradle build failed AND there is no PyBoof-all.jar"
@@ -29,5 +33,5 @@ setup(name='PyBoof',
       author_email="peter.abeles@gmail.com",
       packages=['pyboof'],
       package_dir={'': 'python'},
-      package_data={'pyboof': ['PyBoof-all.jar']},
+      package_data={'pyboof': ['PyBoof-all.jar','build_date.txt']},
       )
