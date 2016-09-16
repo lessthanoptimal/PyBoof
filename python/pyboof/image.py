@@ -1,10 +1,12 @@
-import os
 import numpy as np
-import common
-from pyboof import gateway
+import os
 import py4j.java_gateway as jg
-import pyboof
 import struct
+from pyboof import gateway
+
+import common
+import pyboof
+
 
 class Family:
     """
@@ -83,12 +85,12 @@ def load_single_band( path , dtype ):
         raise Exception("Can't find image or image format can't be read")
     return found
 
-def load_multi_spectral( path , dtype ):
+def load_planar( path , dtype ):
     file_path = os.path.abspath(path)
 
     buffered_image =  gateway.jvm.boofcv.io.image.UtilImageIO.loadImage(file_path)
     num_bands = buffered_image.getRaster().getNumBands()
-    multi_spectral = create_multi_spectral(buffered_image.getWidth(),buffered_image.getHeight(),num_bands,dtype)
+    multi_spectral = create_planar(buffered_image.getWidth(),buffered_image.getHeight(),num_bands,dtype)
     gateway.jvm.boofcv.io.image.ConvertBufferedImage.convertFrom(buffered_image,multi_spectral,True)
 
     return multi_spectral
@@ -127,10 +129,10 @@ def ndarray_to_boof( npimg ):
     else:
         if len(npimg.shape) == 2:
             if npimg.dtype == np.uint8:
-                b = gateway.jvm.boofcv.struct.image.ImageUInt8()
+                b = gateway.jvm.boofcv.struct.image.GrayU8()
                 b.setData( bytearray(npimg.data) )
             elif npimg.dtype == np.float32:
-                b = gateway.jvm.boofcv.struct.image.ImageFloat32()
+                b = gateway.jvm.boofcv.struct.image.GrayF32()
                 b.setData( npimg.data )
             else:
                 raise Exception("Image type not supported yet")
@@ -144,14 +146,14 @@ def ndarray_to_boof( npimg ):
 
             class_type = dtype_to_Class_SingleBand(npimg.dtype)
 
-            b = gateway.jvm.boofcv.struct.image.MultiSpectral(class_type,num_bands)
+            b = gateway.jvm.boofcv.struct.image.Planar(class_type,num_bands)
 
             for i in range(num_bands):
                 if npimg.dtype == np.uint8:
-                    band = gateway.jvm.boofcv.struct.image.ImageUInt8()
+                    band = gateway.jvm.boofcv.struct.image.GrayU8()
                     band.setData( bytearray(bands[i]) )
                 elif npimg.dtype == np.float32:
-                    band = gateway.jvm.boofcv.struct.image.ImageFloat32()
+                    band = gateway.jvm.boofcv.struct.image.GrayF32()
                     band.setData( bands[i] )
                 band.setWidth(npimg.shape[1])
                 band.setHeight(npimg.shape[0])
@@ -207,38 +209,38 @@ def create_single_band( width , height , dtype):
     :return: New instance of a BoofCV single band image
     """
     if dtype == np.uint8:
-        return gateway.jvm.boofcv.struct.image.ImageUInt8(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayU8(width,height)
     elif dtype == np.int8:
-        return gateway.jvm.boofcv.struct.image.ImageSInt8(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayS8(width,height)
     elif dtype == np.uint16:
-        return gateway.jvm.boofcv.struct.image.ImageUInt16(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayU16(width,height)
     elif dtype == np.int16:
-        return gateway.jvm.boofcv.struct.image.ImageSInt16(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayS16(width,height)
     elif dtype == np.int32:
-        return gateway.jvm.boofcv.struct.image.ImageSInt32(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayS32(width,height)
     elif dtype == np.int64:
-        return gateway.jvm.boofcv.struct.image.ImageSInt64(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayS64(width,height)
     elif dtype == np.float32:
-        return gateway.jvm.boofcv.struct.image.ImageFloat32(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayF32(width,height)
     elif dtype == np.float64:
-        return gateway.jvm.boofcv.struct.image.ImageFloat64(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayF64(width,height)
     else:
         raise Exception("Unsupported type")
 
-def create_multi_spectral( width , height , num_bands , dtype):
+def create_planar( width , height , num_bands , dtype):
     """
-    Creates a MultiSpectral BoofCV image.
+    Creates a Planar BoofCV image.
 
     :param width: Image width
     :param height: Image height
     :param num_bands: Number of bands in the image
     :param dtype: data type
-    :return: New instance of a BoofCV single band image
+    :return: New instance of a BoofCV planar multi-bandimage
     """
 
     jImageClass = dtype_to_Class_SingleBand(dtype)
 
-    return gateway.jvm.boofcv.struct.image.MultiSpectral(jImageClass,width,height,num_bands)
+    return gateway.jvm.boofcv.struct.image.Planar(jImageClass,width,height,num_bands)
 
 def get_dtype( boof_image ):
     """
@@ -318,21 +320,21 @@ def family_to_Java_Family( family ):
 
 def dtype_to_Class_SingleBand( dtype ):
     if dtype == np.uint8:
-        class_path = "boofcv.struct.image.ImageUInt8"
+        class_path = "boofcv.struct.image.GrayU8"
     elif dtype == np.int8:
-        class_path = "boofcv.struct.image.ImageSInt8"
+        class_path = "boofcv.struct.image.GrayS8"
     elif dtype == np.uint16:
-        class_path = "boofcv.struct.image.ImageUInt16"
+        class_path = "boofcv.struct.image.GrayU16"
     elif dtype == np.int16:
-        class_path = "boofcv.struct.image.ImageSInt16"
+        class_path = "boofcv.struct.image.GrayS16"
     elif dtype == np.int32:
-        class_path = "boofcv.struct.image.ImageSInt32"
+        class_path = "boofcv.struct.image.GrayS32"
     elif dtype == np.int64:
-        class_path = "boofcv.struct.image.ImageSInt64"
+        class_path = "boofcv.struct.image.GrayS64"
     elif dtype == np.float32:
-        class_path = "boofcv.struct.image.ImageFloat32"
+        class_path = "boofcv.struct.image.GrayF32"
     elif dtype == np.float64:
-        class_path = "boofcv.struct.image.ImageFloat64"
+        class_path = "boofcv.struct.image.GrayF64"
     else:
         raise Exception("No BoofCV equivalent. "+str(dtype))
 
@@ -380,7 +382,7 @@ def mmap_numpy_to_boof_SU8( numpy_image ):
     mm.seek(0)
     mm.write(struct.pack('>HIII',0,width,height,num_bands))
     mm.write(numpy_image.data)
-    bimg = gateway.jvm.boofcv.struct.image.ImageUInt8(1,1)
+    bimg = gateway.jvm.boofcv.struct.image.GrayU8(1,1)
     gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_SU8(bimg)
     return bimg
 

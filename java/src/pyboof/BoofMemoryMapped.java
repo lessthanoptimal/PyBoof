@@ -1,7 +1,7 @@
 package pyboof;
 
 import boofcv.struct.feature.TupleDesc_F64;
-import boofcv.struct.image.ImageUInt8;
+import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.InterleavedU8;
 import georegression.struct.point.Point2D_F64;
 
@@ -113,7 +113,7 @@ public class BoofMemoryMapped {
 		}
 	}
 
-	public void writeImage_SU8(ImageUInt8 image ) {
+	public void writeImage_SU8(GrayU8 image ) {
 		mmf.position(0);
 		mmf.putShort((short)Type.IMAGE_U8.ordinal());
 		mmf.putInt(image.getWidth());
@@ -125,7 +125,7 @@ public class BoofMemoryMapped {
 		}
 	}
 
-	public void readImage_SU8(ImageUInt8 image ) {
+	public void readImage_SU8(GrayU8 image ) {
 		mmf.position(0);
 		if( mmf.getShort() != Type.IMAGE_U8.ordinal() ) {
 			throw new RuntimeException("Not an image!");

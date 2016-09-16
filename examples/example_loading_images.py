@@ -1,6 +1,7 @@
 import cv2
-import pyboof as pb
 import numpy as np
+
+import pyboof as pb
 
 # Enable use of memory mapped files for MUCH faster conversion of images between java and python
 pb.init_memmap(5)
@@ -14,7 +15,7 @@ boof_cv = pb.ndarray_to_boof(ndarray_img)
 
 # Can also use BoofCV to load the image directly
 boof_gray = pb.load_single_band(image_path,np.uint8)
-boof_color = pb.load_multi_spectral(image_path,np.uint8)
+boof_color = pb.load_planar(image_path,np.uint8)
 
 # Let's display all 3 of them in Java
 # display the results in a single window as a list
