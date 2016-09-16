@@ -1,7 +1,9 @@
+from pyboof import gateway
+
 from common import JavaConfig
 from common import JavaWrapper
 from image import dtype_to_Class_SingleBand
-from pyboof import gateway
+
 
 class Border:
     SKIP=0,
@@ -9,7 +11,7 @@ class Border:
     NORMALIZED=2
     REFLECT=3
     WRAP=4
-    VALUE=5
+    ZERO=5
 
 
 class GradientType:
@@ -58,8 +60,8 @@ def border_to_java( border ):
         return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("REFLECT")
     elif border == Border.WRAP:
         return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("WRAP")
-    elif border == Border.VALUE:
-        return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("VALUE")
+    elif border == Border.ZERO:
+        return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("ZERO")
 
 
 def blur_gaussian(input,output,sigma=-1.0,radius=1):

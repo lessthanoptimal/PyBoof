@@ -1,6 +1,6 @@
-import pyboof as pb
-
 import numpy as np
+
+import pyboof as pb
 
 original = pb.load_single_band('../data/example/outdoors01.jpg',np.uint8)
 
@@ -35,3 +35,5 @@ image_list = [(original,"original"),
               (buffered_two0,"two0"),
               (buffered_two1,"two1")]
 pb.swing.show_list(image_list,title="Gradients")
+
+raw_input("Press any key to exit")

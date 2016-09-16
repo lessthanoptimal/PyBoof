@@ -1,5 +1,6 @@
-from ip import *
 from image import *
+from ip import *
+
 
 # TODO add intrinsic parameters
 # TODO add remove lens distortion
@@ -117,7 +118,7 @@ def adjustment_to_java( value ):
     else:
         raise RuntimeError("Unknown type")
 
-def remove_distortion( input, output, intrinsic, adjustment=AdjustmentType.FULL_VIEW, border=Border.VALUE):
+def remove_distortion( input, output, intrinsic, adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO):
     image_type = ImageType(input.getImageType())
     distorter, java_intrinsic_out = create_remove_lens_distortion(intrinsic,image_type,adjustment,border)
     distorter.apply(input,output)
@@ -125,7 +126,7 @@ def remove_distortion( input, output, intrinsic, adjustment=AdjustmentType.FULL_
     intrinsic_out.set_boof(java_intrinsic_out)
     return intrinsic_out
 
-def create_remove_lens_distortion( intrinsic, image_type, adjustment=AdjustmentType.FULL_VIEW, border=Border.VALUE ):
+def create_remove_lens_distortion( intrinsic, image_type, adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO ):
     java_image_type = image_type.get_java_object()
     java_adjustment = adjustment_to_java(adjustment)
     java_border = border_to_java(border)

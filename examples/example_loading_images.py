@@ -1,6 +1,6 @@
-import cv2
 import numpy as np
 
+import cv2
 import pyboof as pb
 
 # Enable use of memory mapped files for MUCH faster conversion of images between java and python
@@ -24,3 +24,5 @@ image_list = [(boof_cv,"OpenCV"),
               (boof_color,"Color")]
 
 pb.swing.show_list(image_list,title="Images")
+
+raw_input("Press any key to exit")

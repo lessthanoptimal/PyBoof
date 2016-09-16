@@ -1,6 +1,6 @@
-import pyboof as pb
 import numpy as np
 
+import pyboof as pb
 from pyboof.swing import visualize_matches
 
 # Enable use of memory mapped files for MUCH faster conversion between some python and boofcv data types
@@ -40,3 +40,5 @@ print "Associated {} features".format(len(matches))
 visualize_matches(image0, image1, locs0, locs1, associator.get_java_matches())
 
 # TODO add support for python to java formatted matches
+
+raw_input("Press any key to exit")

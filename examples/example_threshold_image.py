@@ -1,5 +1,6 @@
-import pyboof as pb
 import numpy as np
+
+import pyboof as pb
 
 original = pb.load_single_band('../data/example/fiducial/image/examples/image00.jpg',np.uint8)
 
@@ -16,11 +17,13 @@ algorithms.append(("globalEntropy",factory.globalEntropy()))
 algorithms.append(("globalOtsu"   ,factory.globalOtsu()))
 algorithms.append(("globalFixed"  ,factory.globalFixed(threshold=100)))
 
-image_list = [(original,"Original")]
+image_list = [(original, "Original")]
 
 for a in algorithms:
-    a[1].process(original,binary)
+    a[1].process(original, binary)
     buffered_binary = pb.swing.render_binary(binary)
     image_list.append((buffered_binary,a[0]))
 
-pb.swing.show_list(image_list,title="Binary Thresholding")
+pb.swing.show_list(image_list, title="Binary Thresholding")
+
+raw_input("Press any key to exit")
