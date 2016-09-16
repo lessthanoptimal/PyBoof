@@ -1,10 +1,13 @@
+import atexit
 import mmap
 import os
+import signal
 import subprocess
 import time
+
 from py4j.java_gateway import JavaGateway
-from py4j.protocol import Py4JNetworkError
 from py4j.protocol import Py4JError
+from py4j.protocol import Py4JNetworkError
 
 gateway = JavaGateway()
 
@@ -13,14 +16,15 @@ mmap_file = None
 
 build_date = None
 
+java_pid = None
+
 # Read the date everything was build
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"build_date.txt"), 'r') as f:
     build_date = f.readline()
 
 if build_date is None:
-    print "Can't find build_data.txt!"
+    print "Can't find build_data.txt at "+os.path.dirname(os.path.realpath(__file__))
     exit(1)
-
 
 def check_jvm( set_date ):
     global gateway
@@ -46,16 +50,46 @@ def check_jvm( set_date ):
         exit(1)
     return True
 
+
+def shutdown_jvm():
+    global java_pid, gateway
+    if java_pid is None:
+        pass
+    else:
+        # shutdown the gateway so that it doesn't spew out a billion error messages when it can't connect
+        # to the JVM
+        gateway.shutdown()
+        gateway = None
+        os.kill(java_pid, signal.SIGTERM)
+        java_pid = None
+
+# Catch control-c and kill the java process "gracefully" first.
+def signal_handler(signal, frame):
+    shutdown_jvm()
+    sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+
+# kill java on a regular exit too
+atexit.register(shutdown_jvm)
+
 if not check_jvm(False):
     print "Launching Java process"
     jar_path = os.path.realpath(__file__)
     jar_path = os.path.join(os.path.dirname(jar_path),"PyBoof-all.jar")
-    subprocess.Popen(["java","-jar",jar_path])
-    time.sleep(1)
-    if not check_jvm(True):
-        print "Failed to start p4j to jvm connection"
-        exit(1)
+    proc = subprocess.Popen(["java","-jar",jar_path])
+    java_pid = proc.pid
+    time.sleep(0.1)
+    # closed loop initialization.  If it fails for 5 seconds give up
+    start_time = time.time()
+    success = False
+    while time.time() - start_time < 5.0:
+        if check_jvm(True):
+            success = True
+            break
 
+    if not success:
+        print "Failed to successfully launch the JVM after 5 seconds.  Aborting"
+        pass
 
 class MmapType:
     """
