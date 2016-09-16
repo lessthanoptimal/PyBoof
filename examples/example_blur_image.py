@@ -1,5 +1,4 @@
 import numpy as np
-
 import pyboof as pb
 
 original = pb.load_single_band('../data/example/outdoors01.jpg', np.uint8)
