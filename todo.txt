@@ -4,3 +4,5 @@
 
 - unit tests
   * images
+
+- upload jar to gradle central so that it doesn't need to be compiled

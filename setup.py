@@ -59,4 +59,5 @@ setup(name='PyBoof',
       eager_resources=['java'],
       packages=['pyboof'],
       package_data={'pyboof': ['PyBoof-all.jar','build_date.txt']},
+      install_requires=['py4j==0.10.3','numpy'],
       )

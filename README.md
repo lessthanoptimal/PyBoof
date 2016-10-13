@@ -1,22 +1,29 @@
-PyBoof is a wrapper around BoofCV for Python.  It uses Py4j to call BoofCV Java functions.  To obtain the latest code use the following command.
+PyBoof is [Python](http://www.python.org) wrapper for the computer vision library [BoofCV](http://boofcv.org). Since this is a Java library you will need to have java and javac installed.  The former is the Java compiler.  In the future the requirement for javac will be removed since a pre-compiled version of the Java code will be made available and automatically downloaded.  Installing the Java JDK is platform specific, so a quick search online should tell you how to do it.
 
+To start using the library simply install the latest stable version using pip
+```bash
+sudo pip install pyboof
 ```
+
+# Installing From Source
+One advantage to checkout the source code and installing from source is that you also get all the example code and the example datasets.
+```bash
 git clone --recursive https://github.com/lessthanoptimal/PyBoof.git
 ```
-This will check the main repository and the data repository at the same time.  If you forgot --recursive then you can
-checkout the data directory with the following command.
-```
+
+If you forgot --recursive then you can checkout the data directory with the following command.
+
+```bash
 git submodule update --init --recursive
 ```
 
 After you have the source code on your local machine you can install it and its dependencies with the following commands:
 
-1. ./setup.py build
-2. sudo ./setup.py install
-3. sudo pip install py4j==0.10.3
+1. cd PyBoof
+2. ./setup.py build
+3. sudo ./setup.py install
 
 Yes you do need to do the build first.  This will automatically build the Java jar and put it into the correct place.
-The end result is that you don't need to personally launch the JVM it will do it for you!
 
 # Supported Platforms
 
@@ -24,9 +31,13 @@ The code has been developed and tested on Ubuntu Linux 16.04.  Should work on an
 
 # Examples
 
-Lots of usage examples are included and can be found in the 'examples' directory.  To run any of the examples simply invoke python on the script
+Examples are included with the source code.  You can obtain them by either checkout the source code, as described above, or browsing 
+[github here](https://github.com/lessthanoptimal/PyBoof/tree/master/examples).  If you don't check out the source code you won't have example data and not
+all of the examples will work.
 
-1. cd examples
+To run any of the examples simply invoke python on the script
+
+1. cd PyBoof/examples
 2. python example_blur_image.py
 
 Code for applying a Gaussian and mean spatial filter to an image and displays the results.
@@ -50,3 +61,10 @@ pb.swing.show_list(image_list, title="Outputs")
 raw_input("Press any key to exit")
 
 ```
+
+# Dependencies
+
+PyBoof depends on the following python packages.  They should be automatically installed
+
+* py4j
+* numpy
