@@ -6,6 +6,10 @@ group = 'org.boofcv'
 group = 'org.boofcv'
 version = '0.20-SNAPSHOT'
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.13'
+}
+
 repositories {
     mavenCentral()
     mavenLocal()
@@ -20,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.boofcv', name: 'all', version: '0.24.1'
+    compile group: 'org.boofcv', name: 'core', version: '0.24.1'
     compile 'net.sf.py4j:py4j:0.10.3'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -34,7 +38,7 @@ task allJar(type: Jar) {
                     'Main-Class': 'pyboof.PyBoofEntryPoint'
     }
     archiveName = 'PyBoof-all.jar'
-    destinationDir = file("${projectDir}/python/pyboof")
+    destinationDir = file("${projectDir}/pyboof")
 
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar

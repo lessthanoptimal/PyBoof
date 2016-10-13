@@ -1,0 +1,4 @@
+include README.md build.gradle gradlew gradlew.bat
+recursive-include java *.java
+recursive-include gradle/wrapper *
+

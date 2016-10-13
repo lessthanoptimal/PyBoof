@@ -1,7 +1,6 @@
-- Create a build date
-  * load into JVM and python
-  * if different kill JVM and restart it
+- camera calibration
+- visual odometry
+- polygon detector
 
-- mmap
-  * list tuple64
-  * list point2D
+- unit tests
+  * images
