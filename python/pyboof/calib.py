@@ -33,7 +33,7 @@ class Intrinsic:
         if boof_intrinsic is None:
             raise RuntimeError("Can't load intrinsic parameters")
 
-        self.set_boof( boof_intrinsic )
+        self.set_from_boof(boof_intrinsic)
 
     def set_matrix(self, fx, fy, skew, cx, cy):
         self.fx = fx
@@ -63,7 +63,7 @@ class Intrinsic:
         self.t1 = orig.t1
         self.t2 = orig.t2
 
-    def set_boof(self, boof_intrinsic):
+    def set_from_boof(self, boof_intrinsic):
         self.fx = boof_intrinsic.getFx()
         self.fy = boof_intrinsic.getFy()
         self.cx = boof_intrinsic.getCx()
@@ -75,7 +75,7 @@ class Intrinsic:
         self.t1 = boof_intrinsic.getT1()
         self.t2 = boof_intrinsic.getT2()
 
-    def convert_boof(self):
+    def convert_to_boof(self):
         boof_intrinsic = gateway.jvm.boofcv.struct.calib.IntrinsicParameters()
         boof_intrinsic.setFx(self.fx)
         boof_intrinsic.setFy(self.fy)
@@ -123,14 +123,14 @@ def remove_distortion( input, output, intrinsic, adjustment=AdjustmentType.FULL_
     distorter, java_intrinsic_out = create_remove_lens_distortion(intrinsic,image_type,adjustment,border)
     distorter.apply(input,output)
     intrinsic_out = Intrinsic()
-    intrinsic_out.set_boof(java_intrinsic_out)
+    intrinsic_out.set_from_boof(java_intrinsic_out)
     return intrinsic_out
 
 def create_remove_lens_distortion( intrinsic, image_type, adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO ):
     java_image_type = image_type.get_java_object()
     java_adjustment = adjustment_to_java(adjustment)
     java_border = border_to_java(border)
-    java_intrinsic = intrinsic.convert_boof()
+    java_intrinsic = intrinsic.convert_to_boof()
     java_intrinsic_out = gateway.jvm.boofcv.struct.calib.IntrinsicParameters()
     id =  gateway.jvm.boofcv.alg.distort.LensDistortionOps.imageRemoveDistortion(java_adjustment,java_border,java_intrinsic,java_intrinsic_out,java_image_type)
     return [ImageDistort(id),java_intrinsic_out]

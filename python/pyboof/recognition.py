@@ -43,7 +43,7 @@ class FiducialDetector(JavaWrapper):
         self.java_obj.detect(image)
 
     def setIntrinsic(self, intrinsic ):
-        java_intrinsic = intrinsic.convert_boof()
+        java_intrinsic = intrinsic.convert_to_boof()
         self.java_obj.setIntrinsic(java_intrinsic)
 
     def totalFound(self):

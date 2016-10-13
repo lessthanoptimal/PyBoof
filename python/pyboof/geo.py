@@ -27,9 +27,12 @@ def real_nparray_to_ejml( array ):
 class Se3_F64(JavaWrapper):
     def __init__(self, java_Se3F64=None):
         if java_Se3F64 is None:
-            self.set_java_object(gateway.jvm.georegression.struct.se.Se3_F64())
+            JavaWrapper.__init__(self, gateway.jvm.georegression.struct.se.Se3_F64())
         else:
-            self.set_java_object(java_Se3F64)
+            JavaWrapper.__init__(self, java_Se3F64)
+
+    def invert(self):
+        return Se3_F64(self.java_obj.invert(None))
 
     def get_rotation(self):
         return real_ejml_to_nparray(self.java_obj.getR())

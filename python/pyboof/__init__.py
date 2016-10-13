@@ -126,4 +126,5 @@ from image import *
 from ip import *
 from recognition import *
 from feature import *
+from stereo import *
 import swing
