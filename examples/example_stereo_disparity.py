@@ -16,7 +16,7 @@ stereo_param.load("../data/example/calibration/stereo/Bumblebee2_Chess/stereo.xm
 
 # Rectify and undistort the images
 model_rectifier = pb.StereoRectification(stereo_param.left, stereo_param.right, stereo_param.right_to_left)
-model_rectifier.full_view_left()
+model_rectifier.all_inside_left()
 
 distort_left = model_rectifier.create_distortion(pb.ImageType(image0.getImageType()), True)
 distort_right = model_rectifier.create_distortion(pb.ImageType(image0.getImageType()), False)
@@ -42,7 +42,7 @@ disparity_image = pb.boof_to_ndarray(disparityAlg.get_disparity_image())
 # disparity images is in a weird format.  disparity - min disparity and a value more than max-min if invalid
 # legacy from 8bit disparity images
 disparity_image[:] += 10
-disparity_image[disparity_image>70] = float('nan')
+disparity_image[disparity_image > 70] = float('nan')
 
 plt.imshow(disparity_image)
 plt.show()

@@ -445,36 +445,31 @@ def mmap_boof_to_numpy_U8(boof_image):
 
     mm = pyboof.mmap_file
     mm.seek(0)
-    type = struct.unpack('>h', mm.read(2))[0]
-    if type is not pyboof.MmapType.IMAGE_U8:
+    header_bytes = mm.read(14) # speed it up significantly by minimizing disk access
+    data_type, width, height, num_bands = struct.unpack('>hiii', header_bytes)
+
+    if data_type is not pyboof.MmapType.IMAGE_U8:
         raise RuntimeError("Expected IMAGE_U8 in mmap file")
-
-    width = struct.unpack('>i', mm.read(4))[0]
-    height = struct.unpack('>i', mm.read(4))[0]
-    num_bands = struct.unpack('>i', mm.read(4))[0]
-
     if num_bands is not 1:
-        raise RuntimeError("Expected single band image found {}".format(num_bands))
+        raise RuntimeError("Expected single band image. Found {}".format(num_bands))
 
     data = mm.read(width*height)
     return np.ndarray(shape=(height, width), dtype=np.uint8, buffer=np.array(data))
 
 
 def mmap_boof_to_numpy_F32(boof_image):
+    # PERFORMANCE NOTE: Surprisingly this executes very fast.  The python code below is by far the slowest part
     gateway.jvm.pyboof.PyBoofEntryPoint.mmap.writeImage_F32(boof_image)
 
     mm = pyboof.mmap_file
     mm.seek(0)
-    data_type = struct.unpack('>h', mm.read(2))[0]
+    header_bytes = mm.read(14) # speed it up significantly by minimizing disk access
+    data_type, width, height, num_bands = struct.unpack('>hiii', header_bytes)
+
     if data_type is not pyboof.MmapType.IMAGE_F32:
         raise RuntimeError("Expected IMAGE_F32 in mmap file")
-
-    width = struct.unpack('>i', mm.read(4))[0]
-    height = struct.unpack('>i', mm.read(4))[0]
-    num_bands = struct.unpack('>i', mm.read(4))[0]
-
     if num_bands is not 1:
-        raise RuntimeError("Expected single band image found {}".format(num_bands))
+        raise RuntimeError("Expected single band image. Found {}".format(num_bands))
 
     raw_data = mm.read(width * height * 4)
     data = struct.unpack('>{}f'.format(width*height), raw_data)
@@ -482,5 +477,4 @@ def mmap_boof_to_numpy_F32(boof_image):
     if len(data) != width*height:
         print "Unexpected data length. {}".format(len(data))
 
-    foo = np.ndarray(shape=(height, width), dtype=np.float, order='C', buffer=np.array(data))
-    return foo
+    return np.ndarray(shape=(height, width), dtype=np.float, order='C', buffer=np.array(data))

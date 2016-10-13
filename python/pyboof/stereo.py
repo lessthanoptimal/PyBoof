@@ -8,6 +8,9 @@ from pyboof import gateway
 
 
 class StereoParameters:
+    """
+    Calibration parameters for a stereo camera system.
+    """
     def __init__(self, java_object = None ):
         self.left = pyboof.Intrinsic()
         self.right = pyboof.Intrinsic()
@@ -68,14 +71,18 @@ class ConfigStereoDisparity:
 
 
 class StereoRectification:
+    """
+    Used to compute distortion for rectified stereo images
+    """
     def __init__(self, intrinsic_left , intrinsic_right , right_to_left ):
         """
+        Configures rectification
 
-        :param intrinsic_left:
+        :param intrinsic_left:  Intrinsic parameters for left camera
         :type intrinsic_left: pyboof.Intrinsic
-        :param intrinsic_right:
+        :param intrinsic_right: Intrinsic parameters for right camera
         :type intrinsic_right: pyboof.Intrinsic
-        :param right_to_left:
+        :param right_to_left: Extrinsic parameters for right to left camera
         :type right_to_left: pyboof.Se3_F64
         """
 
@@ -102,6 +109,9 @@ class StereoRectification:
         self.rectK = self.orig_rectK.copy()
 
     def all_inside_left(self):
+        """
+        Adjusts the rectification to ensure that there are no dead regions with no pixels.
+        """
         self.rect1.set(self.orig_rect1)
         self.rect2.set(self.orig_rect2)
         self.rectK.set(self.orig_rectK)
@@ -110,6 +120,9 @@ class StereoRectification:
         gateway.jvm.boofcv.alg.geo.RectifyImageOps.allInsideLeft(boof_left, self.rect1, self.rect2, self.rectK)
 
     def full_view_left(self):
+        """
+        Adjusts the rectification to ensure that the full view (every single pixel) is inside the left camera view
+        """
         self.rect1.set(self.orig_rect1)
         self.rect2.set(self.orig_rect2)
         self.rectK.set(self.orig_rectK)
@@ -124,7 +137,7 @@ class StereoRectification:
         :param image_type: Type of image the distortion will process
         :type image_type: pyboof.ImageType
         :param is_left_image: If true the distortion is for the left image if false then the right image
-        :type left_image: bool
+        :type is_left_image: bool
         :return: ImageDistort class
         :rtype: pyboof.ImageDistort
         """
@@ -140,15 +153,31 @@ class StereoRectification:
         return pyboof.ImageDistort(boof_distorter)
 
 
-
 class StereoDisparity(JavaWrapper):
+    """
+    Class which computes the disparity between two stereo images.  Input images are assumed to be already
+    rectified.
+    """
     def __init__(self, java_object ):
         JavaWrapper.__init__(self, java_object)
 
     def process(self, image_left, image_right):
+        """
+        Computes disparity from two images in BoofCV format.  To get results call
+        :param image_left: BoofCV image rectified from left camera
+        :param image_right: BoofCV image rectified from right camera
+        """
         self.java_obj.process(image_left, image_right)
 
     def get_disparity_image(self):
+        """
+        Returns the disparity image.
+
+        For pixel level precision a GrayU8 image is returned.  For sub-pixel a GrayF32 is returned.  Disparity
+        values have a range of 0 to max-min-1 disparity.  Invalid values are any value above max-min.
+
+        :return: BoofCV GrayU8 or GrayF32
+        """
         return self.java_obj.getDisparity()
 
     def getBorderX(self):
@@ -164,13 +193,18 @@ class StereoDisparity(JavaWrapper):
         return ClassSingleBand_to_dtype(self.java_obj.getDisparityType())
 
 
-
-
 class FactoryStereoDisparity:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
 
     def region_wta(self, config):
+        """
+        Creates a rectangular region based winner takes all (wta) stereo disparity algorithm.
+        :param config: Configuration for disparity computation
+        :type config: pyboof.ConfigStereoDisparity
+        :return: StereoDisparity
+        :rtype: pyboof.StereoDisparity
+        """
         if config is None:
             config = ConfigStereoDisparity()
 
