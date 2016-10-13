@@ -7,8 +7,8 @@ import pyboof as pb
 pb.init_memmap(5)
 
 # Load two images
-image0 = pb.load_single_band("../data/example/stereo/sundial01_left.jpg", np.uint8)
-image1 = pb.load_single_band("../data/example/stereo/sundial01_right.jpg", np.uint8)
+image0 = pb.load_single_band("../data/example/stereo/chair01_left.jpg", np.uint8)
+image1 = pb.load_single_band("../data/example/stereo/chair01_right.jpg", np.uint8)
 
 # Load stereo rectification
 stereo_param = pb.StereoParameters()
@@ -29,8 +29,8 @@ distort_right.apply(image1, rect1)
 
 # Configure and compute disparity
 config = pb.ConfigStereoDisparity()
-config.minDisparity = 0
-config.maxDisparity = 40
+config.minDisparity = 10
+config.maxDisparity = 60
 
 factory = pb.FactoryStereoDisparity(np.uint8)
 
@@ -39,6 +39,10 @@ disparityAlg = factory.region_wta(config)
 disparityAlg.process(rect0, rect1)
 
 disparity_image = pb.boof_to_ndarray(disparityAlg.get_disparity_image())
+# disparity images is in a weird format.  disparity - min disparity and a value more than max-min if invalid
+# legacy from 8bit disparity images
+disparity_image[:] += 10
+disparity_image[disparity_image>70] = float('nan')
 
 plt.imshow(disparity_image)
 plt.show()

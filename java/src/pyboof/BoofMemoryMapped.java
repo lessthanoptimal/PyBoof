@@ -141,7 +141,7 @@ public class BoofMemoryMapped {
 			for (int x = 0; x < image.width; x++ ) {
 				buffer.putFloat(image.data[start+x]);
 			}
-			mmf.put(buffer.array(),0,image.width);
+			mmf.put(buffer.array(),0,image.width*4);
 		}
 	}
 

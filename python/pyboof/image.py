@@ -465,15 +465,13 @@ def mmap_boof_to_numpy_F32(boof_image):
 
     mm = pyboof.mmap_file
     mm.seek(0)
-    type = struct.unpack('>h', mm.read(2))[0]
-    if type is not pyboof.MmapType.IMAGE_F32:
+    data_type = struct.unpack('>h', mm.read(2))[0]
+    if data_type is not pyboof.MmapType.IMAGE_F32:
         raise RuntimeError("Expected IMAGE_F32 in mmap file")
 
     width = struct.unpack('>i', mm.read(4))[0]
     height = struct.unpack('>i', mm.read(4))[0]
     num_bands = struct.unpack('>i', mm.read(4))[0]
-
-    print ("width {} height {} num_bands {}".format(width,height,num_bands))
 
     if num_bands is not 1:
         raise RuntimeError("Expected single band image found {}".format(num_bands))
@@ -481,4 +479,8 @@ def mmap_boof_to_numpy_F32(boof_image):
     raw_data = mm.read(width * height * 4)
     data = struct.unpack('>{}f'.format(width*height), raw_data)
 
-    return np.ndarray(shape=(height, width), dtype=np.uint8, buffer=np.array(data))
+    if len(data) != width*height:
+        print "Unexpected data length. {}".format(len(data))
+
+    foo = np.ndarray(shape=(height, width), dtype=np.float, order='C', buffer=np.array(data))
+    return foo

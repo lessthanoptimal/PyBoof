@@ -54,15 +54,15 @@ class ConfigStereoDisparity:
         # Maximum disparity that it will calculate. Must be > 0
         self.maxDisparity = 40
         # Radius of the rectangular region along x-axis.
-        self.regionRadiusX = 2
+        self.regionRadiusX = 5
         # Radius of the rectangular region along y-axis.
-        self.regionRadiusY = 2
+        self.regionRadiusY = 5
         # Maximum allowed error in a region per pixel.  Set to <= 0 to disable.
-        self.maxPerPixelError = 10
+        self.maxPerPixelError = 25
         # Tolerance for how difference the left to right associated values can be.
-        self.validateRtoL = 6
+        self.validateRtoL = 1
         # Tolerance for how similar optimal region is to other region.  Closer to zero is more tolerant.
-        self.texture = 0.1
+        self.texture = 0.2
         # Should a sub-pixel algorthm be used?
         self.subPixel = True
 
