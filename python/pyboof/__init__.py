@@ -96,8 +96,9 @@ class MmapType:
     Type byte for different data structures
     """
     IMAGE_U8 = 0
-    LIST_POINT2D_F64 = 1
-    LIST_TUPLE_F64 = 2
+    IMAGE_F32 = 1
+    LIST_POINT2D_F64 = 2
+    LIST_TUPLE_F64 = 3
 
 
 def init_memmap( size_MB=2):

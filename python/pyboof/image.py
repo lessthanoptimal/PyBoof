@@ -1,11 +1,12 @@
 import numpy as np
 import os
-import py4j.java_gateway as jg
 import struct
+
+import py4j.java_gateway as jg
+import pyboof
 from pyboof import gateway
 
 import common
-import pyboof
 
 
 class Family:
@@ -17,6 +18,7 @@ class Family:
     SINGLE_BAND = 0,
     MULTI_SPECTRAL = 1
     INTERLEAVED = 2
+
 
 class ImageType(common.JavaWrapper):
     """
@@ -114,9 +116,9 @@ def ndarray_to_boof( npimg ):
     if pyboof.mmap_file:
         if len(npimg.shape) == 2:
             if npimg.dtype == np.uint8:
-                return mmap_numpy_to_boof_SU8(npimg)
+                return mmap_numpy_to_boof_U8(npimg)
             elif npimg.dtype == np.float32:
-                raise Exception("Need to add support for float images")
+                return mmap_numpy_to_boof_F32(npimg)
             else:
                 raise Exception("Image type not supported yet")
         else:
@@ -169,11 +171,26 @@ def ndarray_to_boof( npimg ):
 def boof_to_ndarray( boof ):
     width = boof.getWidth()
     height = boof.getHeight()
-    if jg.is_instance_of(gateway, boof, gateway.jvm.boofcv.struct.image.ImageSingleBand ):
-        data = boof.getData()
-        nptype = JImageDataType_to_dtype(boof)
+    if jg.is_instance_of(gateway, boof, gateway.jvm.boofcv.struct.image.ImageGray):
+        nptype = JImageDataType_to_dtype(boof.getImageType().getDataType())
+        boof_data = boof.getData()
 
-        return np.ndarray(shape=(height,width), dtype=nptype, buffer=data)
+        if pyboof.mmap_file:
+            if nptype == np.uint8:
+                return mmap_boof_to_numpy_U8(boof)
+            elif nptype == np.float32:
+                return mmap_boof_to_numpy_F32(boof)
+            else:
+                raise RuntimeError("Unsupported image type")
+        else:
+            # create copy the very slow way
+            N = len(boof_data)
+            print "Before painful copy {}".format(N)
+            data = [0]*N
+            for i in xrange(N):
+                data[i] = boof_data[i]
+            print "After painful copy"
+            return np.ndarray(shape=(height,width), dtype=nptype, buffer=np.array(data))
     else:
         raise Exception("Only single band supported so far")
 
@@ -373,17 +390,31 @@ def dtype_to_ImageType( dtype ):
 #        Functions for converting images using mmap files
 
 
-def mmap_numpy_to_boof_SU8( numpy_image ):
+def mmap_numpy_to_boof_U8(numpy_image):
     width = numpy_image.shape[1]
     height = numpy_image.shape[0]
     num_bands = 1
 
     mm = pyboof.mmap_file
     mm.seek(0)
-    mm.write(struct.pack('>HIII',0,width,height,num_bands))
+    mm.write(struct.pack('>HIII',pyboof.MmapType.IMAGE_U8,width,height,num_bands))
     mm.write(numpy_image.data)
     bimg = gateway.jvm.boofcv.struct.image.GrayU8(1,1)
     gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_SU8(bimg)
+    return bimg
+
+
+def mmap_numpy_to_boof_F32(numpy_image):
+    width = numpy_image.shape[1]
+    height = numpy_image.shape[0]
+    num_bands = 1
+
+    mm = pyboof.mmap_file
+    mm.seek(0)
+    mm.write(struct.pack('>HIII', pyboof.MmapType.IMAGE_F32, width, height, num_bands))
+    mm.write(numpy_image.data)
+    bimg = gateway.jvm.boofcv.struct.image.GrayF32(1, 1)
+    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_F32(bimg)
     return bimg
 
 
@@ -407,3 +438,47 @@ def mmap_numpy_to_boof_IU8( numpy_image ):
     #      Hard to tell how load the actual read takes in the MMAP file.  Probably around 1ms
     gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_IU8(bimg)
     return bimg
+
+
+def mmap_boof_to_numpy_U8(boof_image):
+    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.writeImage_U8(boof_image)
+
+    mm = pyboof.mmap_file
+    mm.seek(0)
+    type = struct.unpack('>h', mm.read(2))[0]
+    if type is not pyboof.MmapType.IMAGE_U8:
+        raise RuntimeError("Expected IMAGE_U8 in mmap file")
+
+    width = struct.unpack('>i', mm.read(4))[0]
+    height = struct.unpack('>i', mm.read(4))[0]
+    num_bands = struct.unpack('>i', mm.read(4))[0]
+
+    if num_bands is not 1:
+        raise RuntimeError("Expected single band image found {}".format(num_bands))
+
+    data = mm.read(width*height)
+    return np.ndarray(shape=(height, width), dtype=np.uint8, buffer=np.array(data))
+
+
+def mmap_boof_to_numpy_F32(boof_image):
+    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.writeImage_F32(boof_image)
+
+    mm = pyboof.mmap_file
+    mm.seek(0)
+    type = struct.unpack('>h', mm.read(2))[0]
+    if type is not pyboof.MmapType.IMAGE_F32:
+        raise RuntimeError("Expected IMAGE_F32 in mmap file")
+
+    width = struct.unpack('>i', mm.read(4))[0]
+    height = struct.unpack('>i', mm.read(4))[0]
+    num_bands = struct.unpack('>i', mm.read(4))[0]
+
+    print ("width {} height {} num_bands {}".format(width,height,num_bands))
+
+    if num_bands is not 1:
+        raise RuntimeError("Expected single band image found {}".format(num_bands))
+
+    raw_data = mm.read(width * height * 4)
+    data = struct.unpack('>{}f'.format(width*height), raw_data)
+
+    return np.ndarray(shape=(height, width), dtype=np.uint8, buffer=np.array(data))

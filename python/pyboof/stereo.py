@@ -1,15 +1,10 @@
-import struct
-import sys
+import os
+
 import pyboof
-from pyboof import JavaConfig
+from pyboof import ClassSingleBand_to_dtype
 from pyboof import JavaWrapper
 from pyboof import dtype_to_Class_SingleBand
-from pyboof import ClassSingleBand_to_dtype
 from pyboof import gateway
-from common import JavaList
-from common import JavaList_to_fastqueue
-from common import is_java_class
-import os
 
 
 class StereoParameters:
@@ -33,13 +28,13 @@ class StereoParameters:
     def set_from_boof(self, boof_stereo_param ):
         self.left.set_from_boof(boof_stereo_param.getLeft())
         self.right.set_from_boof(boof_stereo_param.getRight())
-        self.right_to_left = pyboof.Se3_F64(boof_stereo_param.getRightToleft())
+        self.right_to_left = pyboof.Se3_F64(boof_stereo_param.getRightToLeft())
 
     def convert_to_boof(self):
         boof = gateway.jvm.boofcv.struct.calib.StereoParameters()
-        boof.getLeft().set( self.left.convert_to_boof())
+        boof.getLeft().set(self.left.convert_to_boof())
         boof.getRight().set(self.right.convert_to_boof())
-        boof.getRightToLeft().set( self.right_to_left.java_obj )
+        boof.getRightToLeft().set(self.right_to_left.java_obj)
 
 class DisparityAlgorithms:
     """
@@ -93,10 +88,10 @@ class StereoRectification:
 
         rectify_alg = gateway.jvm.boofcv.alg.geo.RectifyImageOps.createCalibrated()
 
-        rectify_alg.process(K1, pyboof.Se3_F64().java_obj, K2, left_to_right)
+        rectify_alg.process(K1, pyboof.Se3_F64().java_obj, K2, left_to_right.get_java_object())
 
         self.intrinsic_left = intrinsic_left
-        self.intrinsic_lright = intrinsic_right
+        self.intrinsic_right = intrinsic_right
 
         self.orig_rect1 = rectify_alg.getRect1()
         self.orig_rect2 = rectify_alg.getRect2()
@@ -106,7 +101,7 @@ class StereoRectification:
         self.rect2 = self.orig_rect2.copy()
         self.rectK = self.orig_rectK.copy()
 
-    def allInsideLeft(self):
+    def all_inside_left(self):
         self.rect1.set(self.orig_rect1)
         self.rect2.set(self.orig_rect2)
         self.rectK.set(self.orig_rectK)
@@ -114,7 +109,7 @@ class StereoRectification:
         boof_left = self.intrinsic_left.convert_to_boof()
         gateway.jvm.boofcv.alg.geo.RectifyImageOps.allInsideLeft(boof_left, self.rect1, self.rect2, self.rectK)
 
-    def fullViewLeft(self):
+    def full_view_left(self):
         self.rect1.set(self.orig_rect1)
         self.rect2.set(self.orig_rect2)
         self.rectK.set(self.orig_rectK)
@@ -122,7 +117,7 @@ class StereoRectification:
         boof_left = self.intrinsic_left.convert_to_boof()
         gateway.jvm.boofcv.alg.geo.RectifyImageOps.fullViewLeft(boof_left, self.rect1, self.rect2, self.rectK)
 
-    def createDistortion(self, image_type, is_left_image):
+    def create_distortion(self, image_type, is_left_image):
         """
         Creates and returns a class for distorting the left image and rectifying it
 
@@ -137,11 +132,11 @@ class StereoRectification:
         boof_border = pyboof.border_to_java( pyboof.Border.SKIP)
 
         if is_left_image:
-            boof_distorter = gateway.jvm.boofcv.alg.geo.RectifyImageOps.RectifyImageOps.\
-                rectifyImage(self.intrinsic_left, self.rect1, boof_border, boof_image_type)
+            boof_distorter = gateway.jvm.boofcv.alg.geo.RectifyImageOps.\
+                rectifyImage(self.intrinsic_left.convert_to_boof(), self.rect1, boof_border, boof_image_type)
         else:
-            boof_distorter = gateway.jvm.boofcv.alg.geo.RectifyImageOps.RectifyImageOps. \
-                rectifyImage(self.intrinsic_right, self.rect2, boof_border, boof_image_type)
+            boof_distorter = gateway.jvm.boofcv.alg.geo.RectifyImageOps. \
+                rectifyImage(self.intrinsic_right.convert_to_boof(), self.rect2, boof_border, boof_image_type)
         return pyboof.ImageDistort(boof_distorter)
 
 
@@ -150,8 +145,11 @@ class StereoDisparity(JavaWrapper):
     def __init__(self, java_object ):
         JavaWrapper.__init__(self, java_object)
 
-    def process(self, image_left , image_right):
-        self.java_obj.process( image_left , image_right)
+    def process(self, image_left, image_right):
+        self.java_obj.process(image_left, image_right)
+
+    def get_disparity_image(self):
+        return self.java_obj.getDisparity()
 
     def getBorderX(self):
         return self.java_obj.getBorderX()
@@ -172,12 +170,12 @@ class FactoryStereoDisparity:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
 
-    def regionWta(self, config):
+    def region_wta(self, config):
         if config is None:
             config = ConfigStereoDisparity()
 
         if config.type == DisparityAlgorithms.FIVE_RECT:
-            alg_type = gateway.jvm.boofcv.factory.feature.disparity.DisparityAlgorithms.FIVE_RECT
+            alg_type = gateway.jvm.boofcv.factory.feature.disparity.DisparityAlgorithms.RECT_FIVE
         elif config.type == DisparityAlgorithms.RECT:
             alg_type = gateway.jvm.boofcv.factory.feature.disparity.DisparityAlgorithms.RECT
         else:
@@ -185,15 +183,14 @@ class FactoryStereoDisparity:
 
         if config.subPixel:
             java_obj = gateway.jvm.boofcv.factory.feature.disparity.FactoryStereoDisparity. \
-                regionSubpixelWta(alg_type, config.minDisparity, config.maxDisparity,
-                                  config.regionRadiusX,config.regionRadiusY,config.maxPerPixelError,config.validateRtoL,
-                                  config.texture,self.boof_image_type)
+                regionSubpixelWta(alg_type, int(config.minDisparity), int(config.maxDisparity),
+                                  int(config.regionRadiusX), int(config.regionRadiusY),float(config.maxPerPixelError),
+                                  int(config.validateRtoL), float(config.texture), self.boof_image_type)
         else:
             java_obj = gateway.jvm.boofcv.factory.feature.disparity.FactoryStereoDisparity. \
-                regionWta(alg_type, config.minDisparity, config.maxDisparity,
-                          config.regionRadiusX, config.regionRadiusY, config.maxPerPixelError,
-                          config.validateRtoL,
-                          config.texture, self.boof_image_type)
+                regionWta(alg_type, int(config.minDisparity), int(config.maxDisparity),
+                          int(config.regionRadiusX), int(config.regionRadiusY), float(config.maxPerPixelError),
+                          int(config.validateRtoL), float(config.texture), self.boof_image_type)
 
         return StereoDisparity(java_obj)
 

@@ -2,6 +2,7 @@ package pyboof;
 
 import boofcv.struct.feature.TupleDesc_F64;
 import boofcv.struct.image.GrayU8;
+import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.InterleavedU8;
 import georegression.struct.point.Point2D_F64;
 
@@ -113,7 +114,7 @@ public class BoofMemoryMapped {
 		}
 	}
 
-	public void writeImage_SU8(GrayU8 image ) {
+	public void writeImage_U8(GrayU8 image ) {
 		mmf.position(0);
 		mmf.putShort((short)Type.IMAGE_U8.ordinal());
 		mmf.putInt(image.getWidth());
@@ -122,6 +123,25 @@ public class BoofMemoryMapped {
 		for (int y = 0; y < image.height; y++) {
 			int start = y*image.stride + image.startIndex;
 			mmf.put(image.data,start,image.width);
+		}
+	}
+
+	public void writeImage_F32(GrayF32 image ) {
+		mmf.position(0);
+		mmf.putShort((short)Type.IMAGE_F32.ordinal());
+		mmf.putInt(image.getWidth());
+		mmf.putInt(image.getHeight());
+		mmf.putInt(1);
+
+		ByteBuffer buffer = ByteBuffer.allocate(4 * image.width);
+
+		for (int y = 0; y < image.height; y++) {
+			int start = y*image.stride + image.startIndex;
+			buffer.clear();
+			for (int x = 0; x < image.width; x++ ) {
+				buffer.putFloat(image.data[start+x]);
+			}
+			mmf.put(buffer.array(),0,image.width);
 		}
 	}
 
@@ -140,6 +160,23 @@ public class BoofMemoryMapped {
 		mmf.get(image.data,0,width*height);
 	}
 
+	public void readImage_F32(GrayF32 image ) {
+		mmf.position(0);
+		if( mmf.getShort() != Type.IMAGE_F32.ordinal() ) {
+			throw new RuntimeException("Not an image!");
+		}
+		int width = mmf.getInt();
+		int height = mmf.getInt();
+		int numBands = mmf.getInt();
+		if( numBands != 1 )
+			throw new RuntimeException("Expected single band image not "+numBands);
+
+		image.reshape(width,height);
+		byte[] tmp = new byte[ width*height*4 ];
+		mmf.get(tmp,0,width*height);
+		image.data = ByteBuffer.wrap(tmp).asFloatBuffer().array();
+	}
+
 	public void readImage_IU8(InterleavedU8 image ) {
 		mmf.position(0);
 		if( mmf.getShort() != Type.IMAGE_U8.ordinal() ) {
@@ -156,6 +193,7 @@ public class BoofMemoryMapped {
 	public enum Type
 	{
 		IMAGE_U8,
+		IMAGE_F32,
 		LIST_POINT2D_F64,
 		LIST_TUPLE_F64
 	}
