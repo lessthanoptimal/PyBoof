@@ -109,16 +109,23 @@ def convert_boof_image( input , output ):
     """
     gateway.jvm.boofcv.core.image.GConvertImage.convert(input,output)
 
-def ndarray_to_boof( npimg ):
+def ndarray_to_boof( npimg , boof_img=None):
+    """
+    Converts an image in ndarray format into a BoofCV image
+
+    :param npimg: numpy image
+    :param boof_img: Optional storage for BoofCV image.  None to declare a new image
+    :return: Converted BoofCV image
+    """
     if npimg is None:
         raise Exception("Input image is None")
 
     if pyboof.mmap_file:
         if len(npimg.shape) == 2:
             if npimg.dtype == np.uint8:
-                return mmap_numpy_to_boof_U8(npimg)
+                return mmap_numpy_to_boof_U8(npimg, boof_img)
             elif npimg.dtype == np.float32:
-                return mmap_numpy_to_boof_F32(npimg)
+                return mmap_numpy_to_boof_F32(npimg, boof_img)
             else:
                 raise Exception("Image type not supported yet")
         else:
@@ -131,14 +138,23 @@ def ndarray_to_boof( npimg ):
     else:
         if len(npimg.shape) == 2:
             if npimg.dtype == np.uint8:
-                b = gateway.jvm.boofcv.struct.image.GrayU8()
+                if boof_img == None:
+                    b = gateway.jvm.boofcv.struct.image.GrayU8()
+                else:
+                    b = boof_img
                 b.setData( bytearray(npimg.data) )
             elif npimg.dtype == np.float32:
-                b = gateway.jvm.boofcv.struct.image.GrayF32()
+                if boof_img == None:
+                    b = gateway.jvm.boofcv.struct.image.GrayF32()
+                else:
+                    b = boof_img
                 b.setData( npimg.data )
             else:
                 raise Exception("Image type not supported yet")
         else:
+            if boof_img != None:
+                raise RuntimeError("multiband images doesn't yet support predeclared storage")
+
             # TODO change this to interleaved images since that's the closest equivalent
             num_bands = npimg.shape[2]
 
@@ -390,7 +406,7 @@ def dtype_to_ImageType( dtype ):
 #        Functions for converting images using mmap files
 
 
-def mmap_numpy_to_boof_U8(numpy_image):
+def mmap_numpy_to_boof_U8(numpy_image, boof_img = None):
     width = numpy_image.shape[1]
     height = numpy_image.shape[0]
     num_bands = 1
@@ -399,12 +415,11 @@ def mmap_numpy_to_boof_U8(numpy_image):
     mm.seek(0)
     mm.write(struct.pack('>HIII',pyboof.MmapType.IMAGE_U8,width,height,num_bands))
     mm.write(numpy_image.data)
-    bimg = gateway.jvm.boofcv.struct.image.GrayU8(1,1)
-    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_SU8(bimg)
-    return bimg
+
+    return gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_SU8(boof_img)
 
 
-def mmap_numpy_to_boof_F32(numpy_image):
+def mmap_numpy_to_boof_F32(numpy_image, boof_img = None):
     width = numpy_image.shape[1]
     height = numpy_image.shape[0]
     num_bands = 1
@@ -413,12 +428,11 @@ def mmap_numpy_to_boof_F32(numpy_image):
     mm.seek(0)
     mm.write(struct.pack('>HIII', pyboof.MmapType.IMAGE_F32, width, height, num_bands))
     mm.write(numpy_image.data)
-    bimg = gateway.jvm.boofcv.struct.image.GrayF32(1, 1)
-    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_F32(bimg)
-    return bimg
+
+    return gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_F32(boof_img)
 
 
-def mmap_numpy_to_boof_IU8( numpy_image ):
+def mmap_numpy_to_boof_IU8( numpy_image , boof_img=None):
     width = numpy_image.shape[1]
     height = numpy_image.shape[0]
     num_bands = numpy_image.shape[2]
@@ -429,15 +443,9 @@ def mmap_numpy_to_boof_IU8( numpy_image ):
     mm.write(struct.pack('>HIII', pyboof.MmapType.IMAGE_U8, width, height, num_bands))
     mm.write(numpy_image.data)
 
-    # TODO This command alone takes 2 to 3 MS to perform and has random pauses 15ms to 100ms
-    #      The entire performance hit mentioned above is caused by invoking the Java function
-    #      Actually running the function has already been subtracted
-    #
-    bimg = gateway.jvm.boofcv.struct.image.InterleavedU8(width,height,num_bands)
     # TODO again just invoking the java function appears to take 2 to 3 ms even if the function does nothing
     #      Hard to tell how load the actual read takes in the MMAP file.  Probably around 1ms
-    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_IU8(bimg)
-    return bimg
+    return gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_IU8(boof_img)
 
 
 def mmap_boof_to_numpy_U8(boof_image):
@@ -477,4 +485,6 @@ def mmap_boof_to_numpy_F32(boof_image):
     if len(data) != width*height:
         print "Unexpected data length. {}".format(len(data))
 
-    return np.ndarray(shape=(height, width), dtype=np.float, order='C', buffer=np.array(data))
+    # create array in java format then convert into native format
+    tmp = np.ndarray(shape=(height, width), dtype='>f4', order='C', buffer=raw_data)
+    return tmp.astype(dtype=np.float, copy=False)

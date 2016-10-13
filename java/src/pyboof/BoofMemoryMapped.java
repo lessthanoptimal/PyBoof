@@ -145,7 +145,7 @@ public class BoofMemoryMapped {
 		}
 	}
 
-	public void readImage_SU8(GrayU8 image ) {
+	public GrayU8 readImage_U8(GrayU8 image ) {
 		mmf.position(0);
 		if( mmf.getShort() != Type.IMAGE_U8.ordinal() ) {
 			throw new RuntimeException("Not an image!");
@@ -156,11 +156,16 @@ public class BoofMemoryMapped {
 		if( numBands != 1 )
 			throw new RuntimeException("Expected single band image not "+numBands);
 
-		image.reshape(width,height);
+        if( image == null )
+            image = new GrayU8(width,height);
+        else
+    		image.reshape(width,height);
 		mmf.get(image.data,0,width*height);
+
+		return image;
 	}
 
-	public void readImage_F32(GrayF32 image ) {
+	public GrayF32 readImage_F32(GrayF32 image ) {
 		mmf.position(0);
 		if( mmf.getShort() != Type.IMAGE_F32.ordinal() ) {
 			throw new RuntimeException("Not an image!");
@@ -171,23 +176,35 @@ public class BoofMemoryMapped {
 		if( numBands != 1 )
 			throw new RuntimeException("Expected single band image not "+numBands);
 
-		image.reshape(width,height);
+        if( image == null )
+            image = new GrayF32(width,height);
+        else
+    		image.reshape(width,height);
+
 		byte[] tmp = new byte[ width*height*4 ];
 		mmf.get(tmp,0,width*height);
 		image.data = ByteBuffer.wrap(tmp).asFloatBuffer().array();
+
+		return image;
 	}
 
-	public void readImage_IU8(InterleavedU8 image ) {
+	public InterleavedU8 readImage_IU8( InterleavedU8 image ) {
 		mmf.position(0);
 		if( mmf.getShort() != Type.IMAGE_U8.ordinal() ) {
 			throw new RuntimeException("Not an image!");
 		}
 		int width = mmf.getInt();
 		int height = mmf.getInt();
-		image.numBands = mmf.getInt();
+		int numBands = mmf.getInt();
+		if( image == null )
+    		image = new InterleavedU8(width, height, numBands);
+        else {
+            image.numBands = numBands;
+            image.reshape(width,height);
+        }
+		mmf.get(image.data,0,width*height*numBands);
 
-		image.reshape(width,height);
-		mmf.get(image.data,0,width*height*image.numBands);
+		return image;
 	}
 
 	public enum Type

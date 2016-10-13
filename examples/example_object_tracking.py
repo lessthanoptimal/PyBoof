@@ -53,7 +53,9 @@ ret, frame = cap.read()
 if not ret:
     print "Failed to read frame"
     exit(-1)
+
 image_input = tracker.getImageType().create_boof_image(frame.shape[1], frame.shape[0])
+boof_color = None
 
 while True:
     # Capture sequence frame-by-frame
@@ -61,13 +63,13 @@ while True:
 
     time0 = int(round(time.time() * 1000))
     # Convert it into a boofcv image
-    boof_color = pb.ndarray_to_boof(frame)
+    boof_color = pb.ndarray_to_boof(frame, boof_color)
     time1 = int(round(time.time() * 1000))
     # Convert it into the image type required by the tracker
     pb.convert_boof_image(boof_color,image_input)
     time2 = int(round(time.time() * 1000))
 
-    print "time py to boof: {:4d} boof to boof: {:4d}".format(time1-time0,time2-time1)
+    time_tracking = 0
 
     if state == 1:
         cv2.rectangle(frame, refPt[0], refPt[1], (100, 100, 255), 4)
@@ -80,14 +82,18 @@ while True:
             print "Success"
             state = 3
     elif state == 3:
-        time0 = int(round(time.time() * 1000))
+        time3 = int(round(time.time() * 1000))
         if not tracker.process(image_input,quad):
             print "Tracking failed!"
         else:
             lines =  np.array(quad.get_tuple_tuple())
             cv2.polylines(frame,np.int32([lines]),True,(0, 0, 255),4)
-        time1 = int(round(time.time() * 1000))
-        print("     tracking:   "+str(time1-time0))
+        time4 = int(round(time.time() * 1000))
+        time_tracking = time4-time3
+
+    # Print how fast each part runs
+    print "py to boof: {:4d} boof to boof: {:4d}  tracking: {:4d}".\
+        format(time1 - time0, time2 - time1, time_tracking)
 
     # Display the resulting frame
     cv2.imshow(window_name,frame)
