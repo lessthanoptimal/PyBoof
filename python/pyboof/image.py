@@ -16,7 +16,7 @@ class Family:
     Equivalent to boofcv.struct.image.ImageType.Family
     """
     SINGLE_BAND = 0,
-    MULTI_SPECTRAL = 1
+    PLANAR = 1
     INTERLEAVED = 2
 
 
@@ -61,7 +61,7 @@ def create_ImageType(family, dtype, num_bands=1):
     jImageClass = dtype_to_Class_SingleBand(dtype)
     if family == Family.SINGLE_BAND:
         jImageType = gateway.jvm.boofcv.struct.image.ImageType.single(jImageClass)
-    elif family == Family.MULTI_SPECTRAL:
+    elif family == Family.PLANAR:
         jImageType = gateway.jvm.boofcv.struct.image.ImageType.ms(num_bands,jImageClass)
     elif family == Family.INTERLEAVED:
         jImageType = gateway.jvm.boofcv.struct.image.ImageType.interleaved(num_bands,jImageClass)
@@ -87,15 +87,17 @@ def load_single_band( path , dtype ):
         raise Exception("Can't find image or image format can't be read")
     return found
 
+
 def load_planar( path , dtype ):
     file_path = os.path.abspath(path)
 
     buffered_image =  gateway.jvm.boofcv.io.image.UtilImageIO.loadImage(file_path)
     num_bands = buffered_image.getRaster().getNumBands()
-    multi_spectral = create_planar(buffered_image.getWidth(),buffered_image.getHeight(),num_bands,dtype)
-    gateway.jvm.boofcv.io.image.ConvertBufferedImage.convertFrom(buffered_image,multi_spectral,True)
+    PLANAR = create_planar(buffered_image.getWidth(),buffered_image.getHeight(),num_bands,dtype)
+    gateway.jvm.boofcv.io.image.ConvertBufferedImage.convertFrom(buffered_image,PLANAR,True)
 
-    return multi_spectral
+    return PLANAR
+
 
 def convert_boof_image( input , output ):
     """
@@ -108,6 +110,7 @@ def convert_boof_image( input , output ):
     :return:
     """
     gateway.jvm.boofcv.core.image.GConvertImage.convert(input,output)
+
 
 def ndarray_to_boof( npimg , boof_img=None):
     """
@@ -184,6 +187,7 @@ def ndarray_to_boof( npimg , boof_img=None):
 
     return b
 
+
 def boof_to_ndarray( boof ):
     width = boof.getWidth()
     height = boof.getHeight()
@@ -232,6 +236,7 @@ def gradient_dtype( dtype ):
     else:
         raise Exception("Unknown type: "+str(dtype))
 
+
 def create_single_band( width , height , dtype):
     """
     Creates a single band BoofCV image.
@@ -260,6 +265,7 @@ def create_single_band( width , height , dtype):
     else:
         raise Exception("Unsupported type")
 
+
 def create_planar( width , height , num_bands , dtype):
     """
     Creates a Planar BoofCV image.
@@ -275,6 +281,7 @@ def create_planar( width , height , num_bands , dtype):
 
     return gateway.jvm.boofcv.struct.image.Planar(jImageClass,width,height,num_bands)
 
+
 def get_dtype( boof_image ):
     """
     Given a BoofCV image return the dtype which matches the storage format of its pixels
@@ -282,6 +289,7 @@ def get_dtype( boof_image ):
     :return: The NumPy dtype
     """
     return ImageDataType_to_dtype(boof_image.getImageType().getDataType())
+
 
 def JImageDataType_to_dtype( ImageDataType ):
     """
@@ -321,6 +329,7 @@ def JImageDataType_to_dtype( ImageDataType ):
        else:
            raise Exception("Number of bits not supported for floats. "+str(ImageDataType.getNumBits()))
 
+
 def dtype_to_ImageDataType( dtype ):
     if dtype == np.uint8:
         return gateway.jvm.boofcv.struct.image.ImageDataType.U8
@@ -341,15 +350,17 @@ def dtype_to_ImageDataType( dtype ):
     else:
         raise Exception("No BoofCV equivalent")
 
+
 def family_to_Java_Family( family ):
     if family == Family.SINGLE_BAND:
         return gateway.jvm.boofcv.struct.image.ImageType.Family.SINGLE_BAND
-    elif family == Family.MULTI_SPECTRAL:
-        return gateway.jvm.boofcv.struct.image.ImageType.Family.MULTI_SPECTRAL
+    elif family == Family.PLANAR:
+        return gateway.jvm.boofcv.struct.image.ImageType.Family.PLANAR
     elif family == Family.INTERLEAVED:
         return gateway.jvm.boofcv.struct.image.ImageType.Family.INTERLEAVED
     else:
         raise Exception("Unknown family. "+str(family))
+
 
 def dtype_to_Class_SingleBand( dtype ):
     if dtype == np.uint8:
@@ -373,6 +384,7 @@ def dtype_to_Class_SingleBand( dtype ):
 
     return gateway.jvm.java.lang.Class.forName(class_path)
 
+
 def ImageDataType_to_dtype( jdatatype ):
     if jdatatype == gateway.jvm.boofcv.struct.image.ImageDataType.U8:
         return np.uint8
@@ -393,9 +405,11 @@ def ImageDataType_to_dtype( jdatatype ):
     else:
         raise Exception("Unknown ImageDataType. "+str(jdatatype))
 
+
 def ClassSingleBand_to_dtype( jclass ):
     jdatatype = gateway.jvm.boofcv.struct.image.ImageDataType.classToType(jclass)
     return ImageDataType_to_dtype(jdatatype)
+
 
 def dtype_to_ImageType( dtype ):
     java_class = dtype_to_Class_SingleBand(dtype)
@@ -416,7 +430,7 @@ def mmap_numpy_to_boof_U8(numpy_image, boof_img = None):
     mm.write(struct.pack('>HIII',pyboof.MmapType.IMAGE_U8,width,height,num_bands))
     mm.write(numpy_image.data)
 
-    return gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_SU8(boof_img)
+    return gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_U8(boof_img)
 
 
 def mmap_numpy_to_boof_F32(numpy_image, boof_img = None):
