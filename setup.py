@@ -30,7 +30,7 @@ class MyBuild(build_py):
                     print "Gradle build failed."
                     exit(1)
             else:
-                print "javac isn't installed on your systems.  exiting now"
+                print "javac cannot be found. Please install it or correct your path. Exiting now!"
                 # TODO Should download instead if possible?
                 exit(1)
         except Exception as e:
@@ -50,7 +50,7 @@ class MyBuild(build_py):
 
 setup(name='PyBoof',
       cmdclass={'build_py': MyBuild},
-      version='0.24.1r6',
+      version='0.25',
       description='Py4J Python wrapper for BoofCV',
       long_description=open('README.md', 'r').read(),
       url='https://github.com/lessthanoptimal/PyBoof',
@@ -58,6 +58,6 @@ setup(name='PyBoof',
       author_email="peter.abeles@gmail.com",
       eager_resources=['java'],
       packages=['pyboof'],
-      package_data={'pyboof': ['PyBoof-all.jar','build_date.txt']},
-      install_requires=['py4j==0.10.3','numpy'],
+      package_data={'pyboof': ['PyBoof-all.jar', 'build_date.txt']},
+      install_requires=['py4j==0.10.3', 'numpy>=1.11.0'],
       )

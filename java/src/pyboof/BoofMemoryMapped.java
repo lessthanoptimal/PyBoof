@@ -9,6 +9,7 @@ import georegression.struct.point.Point2D_F64;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.List;
@@ -183,7 +184,8 @@ public class BoofMemoryMapped {
 
 		byte[] tmp = new byte[ width*height*4 ];
 		mmf.get(tmp,0,width*height);
-		image.data = ByteBuffer.wrap(tmp).asFloatBuffer().array();
+		image.data = new float[width*height];
+		ByteBuffer.wrap(tmp).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer().get(image.data);
 
 		return image;
 	}

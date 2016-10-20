@@ -53,7 +53,7 @@ class Point2D:
         self.y = y
 
     def convert_to_boof(self):
-        return gateway.jvm.georegression.struct.point.Point2D_F64(float(self.x),float(self.y))
+        return gateway.jvm.georegression.struct.point.Point2D_F64(float(self.x), float(self.y))
 
     def set(self, o):
         if type(o) is Point2D:
@@ -62,7 +62,7 @@ class Point2D:
         if type(o) is tuple:
             self.x = o[0]
             self.y = o[1]
-        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.point.Point2D_F64 ):
+        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.point.Point2D_F64):
             self.x = o.getX()
             self.y = o.getY()
         else:

@@ -237,7 +237,7 @@ def gradient_dtype( dtype ):
         raise Exception("Unknown type: "+str(dtype))
 
 
-def create_single_band( width , height , dtype):
+def create_single_band(width, height, dtype):
     """
     Creates a single band BoofCV image.
 
@@ -416,6 +416,11 @@ def dtype_to_ImageType( dtype ):
     return gateway.jvm.boofcv.struct.image.ImageType.single(java_class)
 
 
+def fill_uniform(image, min_value, max_value):
+    java_random = gateway.jvm.java.util.Random()
+    gateway.jvm.boofcv.alg.misc.GImageMiscOps.fillUniform(image, java_random, float(min_value), float(max_value))
+
+
 # ================================================================
 #        Functions for converting images using mmap files
 
@@ -427,7 +432,7 @@ def mmap_numpy_to_boof_U8(numpy_image, boof_img = None):
 
     mm = pyboof.mmap_file
     mm.seek(0)
-    mm.write(struct.pack('>HIII',pyboof.MmapType.IMAGE_U8,width,height,num_bands))
+    mm.write(struct.pack('>HIII', pyboof.MmapType.IMAGE_U8,width,height,num_bands))
     mm.write(numpy_image.data)
 
     return gateway.jvm.pyboof.PyBoofEntryPoint.mmap.readImage_U8(boof_img)
@@ -501,4 +506,4 @@ def mmap_boof_to_numpy_F32(boof_image):
 
     # create array in java format then convert into native format
     tmp = np.ndarray(shape=(height, width), dtype='>f4', order='C', buffer=raw_data)
-    return tmp.astype(dtype=np.float, copy=False)
+    return tmp.astype(dtype=np.float32, copy=False)

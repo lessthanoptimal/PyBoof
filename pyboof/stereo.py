@@ -21,7 +21,7 @@ class StereoParameters:
 
     def load(self, path_to_file ):
         abs_path_to_file = os.path.abspath(path_to_file)
-        boof_stereo = gateway.jvm.boofcv.io.UtilIO.loadXML(abs_path_to_file)
+        boof_stereo = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(abs_path_to_file)
 
         if boof_stereo is None:
             raise RuntimeError("Can't load stereo parameters")

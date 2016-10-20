@@ -28,7 +28,7 @@ class Intrinsic:
 
     def load_xml(self, file_name):
         file_path = os.path.abspath(file_name)
-        boof_intrinsic = gateway.jvm.boofcv.io.UtilIO.loadXML(file_path)
+        boof_intrinsic = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
 
         if boof_intrinsic is None:
             raise RuntimeError("Can't load intrinsic parameters")
@@ -76,7 +76,7 @@ class Intrinsic:
         self.t2 = boof_intrinsic.getT2()
 
     def convert_to_boof(self):
-        boof_intrinsic = gateway.jvm.boofcv.struct.calib.IntrinsicParameters()
+        boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraPinholeRadial()
         boof_intrinsic.setFx(self.fx)
         boof_intrinsic.setFy(self.fy)
         boof_intrinsic.setCx(self.cx)
@@ -131,6 +131,6 @@ def create_remove_lens_distortion( intrinsic, image_type, adjustment=AdjustmentT
     java_adjustment = adjustment_to_java(adjustment)
     java_border = border_to_java(border)
     java_intrinsic = intrinsic.convert_to_boof()
-    java_intrinsic_out = gateway.jvm.boofcv.struct.calib.IntrinsicParameters()
+    java_intrinsic_out = gateway.jvm.boofcv.struct.calib.CameraPinholeRadial()
     id =  gateway.jvm.boofcv.alg.distort.LensDistortionOps.imageRemoveDistortion(java_adjustment,java_border,java_intrinsic,java_intrinsic_out,java_image_type)
     return [ImageDistort(id),java_intrinsic_out]

@@ -12,7 +12,7 @@ image1 = pb.load_single_band("../data/example/stereo/chair01_right.jpg", np.uint
 
 # Load stereo rectification
 stereo_param = pb.StereoParameters()
-stereo_param.load("../data/example/calibration/stereo/Bumblebee2_Chess/stereo.xml")
+stereo_param.load("../data/example/calibration/stereo/Bumblebee2_Chess/stereo.yaml")
 
 # Rectify and undistort the images
 model_rectifier = pb.StereoRectification(stereo_param.left, stereo_param.right, stereo_param.right_to_left)

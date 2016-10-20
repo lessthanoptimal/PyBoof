@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+import unittest
+
+from pyboof import gateway
+import pyboof as pb
+import numpy as np
+
+pb.init_memmap()
+
+
+class TestMemMapFunctions(unittest.TestCase):
+
+    def test_mmap_numpy_to_boof_U8(self):
+        np_gray = np.random.randint(0, 256, size=(100, 120), dtype=np.uint8)
+        pb_gray = pb.mmap_numpy_to_boof_U8(np_gray)
+
+        self.assertEqual( np_gray.shape[0], pb_gray.getHeight())
+        self.assertEqual( np_gray.shape[1], pb_gray.getWidth())
+
+        self.assertEqual(np_gray[0, 0], pb_gray.get(0, 0))
+        self.assertEqual(np_gray[20, 10], pb_gray.get(10, 20))
+
+    def test_mmap_numpy_to_boof_F32(self):
+        np_gray = np.random.random((100, 120)).astype(np.float32)
+        pb_gray = pb.mmap_numpy_to_boof_F32(np_gray)
+
+        self.assertEqual(np_gray.shape[0], pb_gray.getHeight())
+        self.assertEqual(np_gray.shape[1], pb_gray.getWidth())
+
+        self.assertAlmostEqual(np_gray[0, 0], pb_gray.get(0, 0))
+        self.assertAlmostEqual(np_gray[20, 10], pb_gray.get(10, 20))
+
+    def test_mmap_numpy_to_boof_IU8(self):
+        np_img = np.random.randint(0,256, size=(100, 120, 3), dtype=np.uint8)
+        pb_img = pb.mmap_numpy_to_boof_IU8(np_img)
+
+        self.assertEqual(np_img.shape[0], pb_img.getHeight())
+        self.assertEqual(np_img.shape[1], pb_img.getWidth())
+        self.assertEqual(np_img.shape[2], pb_img.getNumBands())
+
+        self.assertEqual(np_img[0, 0, 0], pb_img.getBand(0, 0, 0))
+        self.assertEqual(np_img[20, 10, 0], pb_img.getBand(10, 20, 0))
+        self.assertEqual(np_img[20, 10, 1], pb_img.getBand(10, 20, 1))
+        self.assertEqual(np_img[20, 10, 2], pb_img.getBand(10, 20, 2))
+
+    def test_mmap_boof_to_numpy_U8(self):
+        pb_img = pb.create_single_band(100, 120, dtype=np.uint8)
+        pb.fill_uniform(pb_img, 0, 200)
+        np_img = pb.mmap_boof_to_numpy_U8(pb_img)
+
+        self.assertEquals(np_img.dtype, np.uint8)
+        self.assertEqual(np_img.shape[0], pb_img.getHeight())
+        self.assertEqual(np_img.shape[1], pb_img.getWidth())
+
+        self.assertAlmostEqual(np_img[0, 0], pb_img.get(0, 0))
+        self.assertAlmostEqual(np_img[20, 10], pb_img.get(10, 20))
+
+    def test_mmap_boof_to_numpy_F32(self):
+        pb_img = pb.create_single_band(100, 120, dtype=np.float32)
+        pb.fill_uniform(pb_img, -2, 2)
+        np_img = pb.mmap_boof_to_numpy_F32(pb_img)
+
+        self.assertEquals(np_img.dtype, np.float32)
+        self.assertEqual(np_img.shape[0], pb_img.getHeight())
+        self.assertEqual(np_img.shape[1], pb_img.getWidth())
+
+        self.assertAlmostEqual(np_img[0, 0], pb_img.get(0, 0))
+        self.assertAlmostEqual(np_img[20, 10], pb_img.get(10, 20))
+
+
+if __name__ == '__main__':
+    unittest.main()

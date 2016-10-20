@@ -1,9 +1,12 @@
+#!/usr/bin/env python
+
 import unittest
 
 from pyboof import gateway
 import pyboof as pb
 
 pb.init_memmap()
+
 
 class TestMemMapFunctions(unittest.TestCase):
     def test_convert_list_tuple64(self):
@@ -44,6 +47,7 @@ class TestMemMapFunctions(unittest.TestCase):
             b = found[i]
             self.assertEquals(a[0], b[0])
             self.assertEquals(a[1], b[1])
+
 
 if __name__ == '__main__':
     unittest.main()
