@@ -6,7 +6,7 @@ data_path = "../data/example/fiducial/image/examples/"
 
 # Load the camera parameters
 intrinsic = pb.CameraPinhole()
-intrinsic.load_disk(os.path.join(data_path, "intrinsic.yaml"))
+intrinsic.load(os.path.join(data_path, "intrinsic.yaml"))
 
 configFiducial = pb.ConfigFiducialImage()
 configThreshold = pb.ConfigThreshold.create_local(pb.ThresholdType.LOCAL_SQUARE, 10)
