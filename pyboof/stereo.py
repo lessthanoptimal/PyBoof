@@ -12,8 +12,8 @@ class StereoParameters:
     Calibration parameters for a stereo camera system.
     """
     def __init__(self, java_object = None ):
-        self.left = pyboof.Intrinsic()
-        self.right = pyboof.Intrinsic()
+        self.left = pyboof.CameraPinhole()
+        self.right = pyboof.CameraPinhole()
         self.right_to_left = pyboof.Se3_F64()
 
         if java_object is not None:
@@ -79,9 +79,9 @@ class StereoRectification:
         Configures rectification
 
         :param intrinsic_left:  Intrinsic parameters for left camera
-        :type intrinsic_left: pyboof.Intrinsic
+        :type intrinsic_left: pyboof.CameraPinhole
         :param intrinsic_right: Intrinsic parameters for right camera
-        :type intrinsic_right: pyboof.Intrinsic
+        :type intrinsic_right: pyboof.CameraPinhole
         :param right_to_left: Extrinsic parameters for right to left camera
         :type right_to_left: pyboof.Se3_F64
         """

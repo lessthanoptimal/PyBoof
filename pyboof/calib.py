@@ -6,15 +6,15 @@ from ip import *
 # TODO add remove lens distortion
 
 
-class Intrinsic:
+class CameraPinhole:
     """
     BoofCV Intrinsic Camera parameters
     """
     def __init__(self):
         # Intrinsic calibration matrix
-        self.fx=0
-        self.fy=0
-        self.skew=0
+        self.fx = 0
+        self.fy = 0
+        self.skew = 0
         self.cx = 0
         self.cy = 0
         # image shape
@@ -26,7 +26,7 @@ class Intrinsic:
         self.t1 = 0
         self.t2 = 0
 
-    def load_xml(self, file_name):
+    def load_disk(self, file_name):
         file_path = os.path.abspath(file_name)
         boof_intrinsic = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
 
@@ -42,7 +42,7 @@ class Intrinsic:
         self.cx = cx
         self.cy = cy
 
-    def set_image(self, width, height):
+    def set_image_shape(self, width, height):
         self.width = width
         self.height = height
 
@@ -102,6 +102,31 @@ class Intrinsic:
         return out
 
 
+class CameraUniversalOmni(CameraPinhole):
+    def __init__(self):
+        CameraPinhole.__init__(self)
+        self.mirror_offset = 0
+
+    def set_from_boof(self, boof_intrinsic):
+        CameraPinhole.set_from_boof(boof_intrinsic)
+        self.mirror_offset = boof_intrinsic.getMirrorOffset()
+
+    def convert_to_boof(self):
+        boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraUniversalOmni()
+        boof_intrinsic.setFx(self.fx)
+        boof_intrinsic.setFy(self.fy)
+        boof_intrinsic.setCx(self.cx)
+        boof_intrinsic.setCy(self.cy)
+        boof_intrinsic.setSkew(self.skew)
+        boof_intrinsic.setWidth(self.width)
+        boof_intrinsic.setHeight(self.height)
+        boof_intrinsic.setRadial(self.radial)
+        boof_intrinsic.setT1(self.t1)
+        boof_intrinsic.setT2(self.t2)
+        boof_intrinsic.setMirrorOffset(self.mirror_offset)
+        return boof_intrinsic
+
+
 class AdjustmentType:
     NONE=0
     FULL_VIEW=1
@@ -122,7 +147,7 @@ def remove_distortion( input, output, intrinsic, adjustment=AdjustmentType.FULL_
     image_type = ImageType(input.getImageType())
     distorter, java_intrinsic_out = create_remove_lens_distortion(intrinsic,image_type,adjustment,border)
     distorter.apply(input,output)
-    intrinsic_out = Intrinsic()
+    intrinsic_out = CameraPinhole()
     intrinsic_out.set_from_boof(java_intrinsic_out)
     return intrinsic_out
 
