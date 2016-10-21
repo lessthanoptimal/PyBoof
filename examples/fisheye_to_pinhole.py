@@ -6,7 +6,8 @@ import cv2
 data_path = "../data/example/fisheye/theta_front/"
 
 model_pinhole = pb.CameraPinhole()
-model_pinhole.set_matrix(400, 400, 0, 300, 300, 600, 600)
+model_pinhole.set_image_shape(600, 600)
+model_pinhole.set_matrix(400, 400, 0, 300, 300)
 
 model_fisheye = pb.CameraUniversalOmni()
 model_fisheye.load(os.path.join(data_path, "fisheye.yaml"))
