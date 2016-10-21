@@ -14,21 +14,9 @@ repositories {
     mavenCentral()
     mavenLocal()
 
-   flatDir {
-       dirs '/home/pja/.m2/repository'
-   }
-
     maven {
-        url = "/home/pja/.m2/repository"
+       url = "https://oss.sonatype.org/content/repositories/snapshots/"
     }
-
-    maven {
-        url = "/home/pja/.m2"
-    }
-
-//    maven {
-//       url = "https://oss.sonatype.org/content/repositories/snapshots/"
-//    }
 }
 
 dependencies {
