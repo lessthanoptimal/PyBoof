@@ -31,7 +31,7 @@ class MyBuild(build_py):
                     exit(1)
             else:
                 print "javac cannot be found. Please install it or correct your path."
-                if os.path.isfile('python/pyboof/PyBoof-all.jar'):
+                if os.path.isfile('pyboof/PyBoof-all.jar'):
                     print "     Found a precompiled jar.  Using that"
                 else:
                     exit(1)
@@ -40,7 +40,7 @@ class MyBuild(build_py):
             print str(e)
             print e.message
             print
-            if not os.path.isfile('python/pyboof/PyBoof-all.jar'):
+            if not os.path.isfile('pyboof/PyBoof-all.jar'):
                 print "Gradle build failed AND there is no PyBoof-all.jar"
                 print ""
                 print "Did you run build as a regular user first?"

@@ -44,6 +44,7 @@ class JavaConfig:
     Provides a nice python wrapper around Java classes.  Public variables are automatically turned into Python
     attributes
     """
+    # TODO variables which are java classes are a little messed up
     def __init__(self, java_class_path ):
         if isinstance(java_class_path, basestring):
             self.java_class_path = java_class_path

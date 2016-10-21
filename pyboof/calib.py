@@ -3,6 +3,7 @@ from ip import *
 from geo import real_nparray_to_ejml
 
 
+# TODO Turn this into JavaConfig instead?
 class CameraPinhole:
     """
     BoofCV Intrinsic Camera parameters

@@ -12,17 +12,43 @@ class ConfigFiducialImage(JavaConfig):
         JavaConfig.__init__(self,"boofcv.factory.fiducial.ConfigFiducialImage")
 
 
+class ConfigFiducialBinary(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self,"boofcv.factory.fiducial.ConfigFiducialBinary")
+
 class FactoryFiducial:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
 
-    def squareImage(self, configFid, configThresh ):
+    def squareImage(self, config_fiducial, config_threshold):
+        """
+        Creates a square image fiducial detector
+
+        :param config_fiducial: configuration for the fiducial
+        :type config_fiducial: ConfigFiducialImage
+        :param config_threshold: Configuration for image thresholding step
+        :type config_threshold: ThresholdType
+        :return: The detector
+        :rtype: FiducialImageDetector
+        """
         java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial.\
-            squareImage(configFid.java_obj,configThresh.java_obj,self.boof_image_type)
+            squareImage(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
         return FiducialImageDetector(java_detector)
 
-    def squareBinary(self, configFid, configThresh ):
-        pass
+    def squareBinary(self, config_fiducial, config_threshold):
+        """
+        Creates a binary image fiducial detector
+
+        :param config_fiducial: configuration for the fiducial
+        :type config_fiducial: ConfigFiducialBinary
+        :param config_threshold: Configuration for image thresholding step
+        :type config_threshold: ThresholdType
+        :return: The detector
+        :rtype: FiducialImageDetector
+        """
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial.\
+            squareBinary(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
+        return FiducialDetector(java_detector)
 
     def chessboard(self):
         pass
@@ -71,7 +97,7 @@ class FiducialDetector(JavaWrapper):
 
 class FiducialImageDetector(FiducialDetector):
 
-    def addPattern(self, image, side_length, threshold=100.0):
+    def add_pattern(self, image, side_length, threshold=100.0):
         self.java_obj.addPatternImage(image,threshold,side_length)
 
 
@@ -100,9 +126,11 @@ class ConfigTld(Config):
             config = obj
         Config.__init__(self,config)
 
+
 class ConfigMeanShiftComaniciu(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self,"boofcv.abst.tracker.ConfigComaniciu2003")
+
 
 class FactoryTrackerObjectQuad:
     def __init__(self, image_type ):
