@@ -211,8 +211,17 @@ def boof_to_ndarray( boof ):
                 data[i] = boof_data[i]
             print "After painful copy"
             return np.ndarray(shape=(height,width), dtype=nptype, buffer=np.array(data))
+    elif jg.is_instance_of(gateway, boof, gateway.jvm.boofcv.struct.image.Planar):
+        nptype = JImageDataType_to_dtype(boof.getImageType().getDataType())
+        if pyboof.mmap_file:
+            if nptype == np.uint8:
+                return mmap_boof_PU8_to_numpy_IU8(boof)
+            else:
+                raise RuntimeError("Unsupported image type.  Only U8 currently supported")
+        else:
+            raise RuntimeError("Must have mmap turned on for this image type")
     else:
-        raise Exception("Only single band supported so far")
+        raise Exception("Boof image type not yet supported")
 
 
 def gradient_dtype( dtype ):
@@ -510,7 +519,7 @@ def mmap_boof_to_numpy_F32(boof_image):
 
 
 def mmap_boof_PU8_to_numpy_IU8(boof_image):
-    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.writeImage_U8(boof_image)
+    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.writeImage_PU8_as_IU8(boof_image)
 
     mm = pyboof.mmap_file
     mm.seek(0)
@@ -519,8 +528,6 @@ def mmap_boof_PU8_to_numpy_IU8(boof_image):
 
     if data_type is not pyboof.MmapType.IMAGE_U8:
         raise RuntimeError("Expected IMAGE_U8 in mmap file")
-    if num_bands is not 1:
-        raise RuntimeError("Expected single band image. Found {}".format(num_bands))
 
-    data = mm.read(width*height)
-    return np.ndarray(shape=(height, width), dtype=np.uint8, buffer=np.array(data))
+    data = mm.read(width*height*num_bands)
+    return np.ndarray(shape=(height, width, num_bands), dtype=np.uint8, buffer=np.array(data))

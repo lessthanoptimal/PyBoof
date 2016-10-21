@@ -4,6 +4,7 @@ import boofcv.struct.feature.TupleDesc_F64;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.InterleavedU8;
+import boofcv.struct.image.Planar;
 import georegression.struct.point.Point2D_F64;
 
 import java.io.IOException;
@@ -124,6 +125,23 @@ public class BoofMemoryMapped {
 		for (int y = 0; y < image.height; y++) {
 			int start = y*image.stride + image.startIndex;
 			mmf.put(image.data,start,image.width);
+		}
+	}
+
+	public void writeImage_PU8_as_IU8( Planar<GrayU8> image ) {
+		mmf.position(0);
+		mmf.putShort((short)Type.IMAGE_U8.ordinal());
+		mmf.putInt(image.getWidth());
+		mmf.putInt(image.getHeight());
+		mmf.putInt(image.getNumBands());
+
+		int pixelIndex = 0;
+		for (int y = 0; y < image.height; y++) {
+		    for (int x = 0; x < image.width; x++, pixelIndex++) {
+		        for( int band = 0; band < image.bands.length; band++ ) {
+		            mmf.put(image.bands[band].data[pixelIndex]);
+		        }
+		    }
 		}
 	}
 

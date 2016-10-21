@@ -68,6 +68,20 @@ class TestMemMapFunctions(unittest.TestCase):
         self.assertAlmostEqual(np_img[0, 0], pb_img.get(0, 0))
         self.assertAlmostEqual(np_img[20, 10], pb_img.get(10, 20))
 
+    def test_mmap_boof_PU8_to_numpy_IU8(self):
+        pb_img = pb.create_planar(100, 120, 3,dtype=np.uint8)
+        pb.fill_uniform(pb_img, -2, 2)
+        np_img = pb.mmap_boof_PU8_to_numpy_IU8(pb_img)
+
+        self.assertEquals(np_img.dtype, np.uint8)
+        self.assertEqual(np_img.shape[0], pb_img.getHeight())
+        self.assertEqual(np_img.shape[1], pb_img.getWidth())
+        self.assertEqual(np_img.shape[2], pb_img.getNumBands())
+
+        self.assertEqual(np_img[0, 0, 0]  , pb_img.getBand(0).get(0, 0))
+        self.assertEqual(np_img[20, 10, 0], pb_img.getBand(0).get(10, 20))
+        self.assertEqual(np_img[20, 10, 1], pb_img.getBand(1).get(10, 20))
+        self.assertEqual(np_img[20, 10, 2], pb_img.getBand(2).get(10, 20))
 
 if __name__ == '__main__':
     unittest.main()
