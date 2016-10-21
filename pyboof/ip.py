@@ -284,5 +284,5 @@ class FactoryInterpolation:
         java_border = border_to_java(border_type)
         java_interp = interpolation_type_to_java(InterpolationType.BILINEAR)
 
-        return gateway.jvm.boofcv.interpolate.FactoryInterpolation.\
-            createPixel(min_pixel, max_pixel, java_interp, java_border, self.image_type.java_obj)
+        return gateway.jvm.boofcv.factory.interpolate.FactoryInterpolation.\
+            createPixel(float(min_pixel), float(max_pixel), java_interp, java_border, self.image_type.java_obj)

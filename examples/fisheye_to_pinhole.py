@@ -3,7 +3,7 @@ import numpy as np
 import os
 import cv2
 
-data_path = "../data/example/fisheye/theta_front/"
+data_path = "./"
 
 model_pinhole = pb.CameraPinhole()
 model_pinhole.set_image_shape(600, 600)
@@ -14,7 +14,7 @@ model_fisheye.load(os.path.join(data_path, "fisheye.yaml"))
 
 transform = pb.NarrowToWideFovPtoP(narrow_model=model_pinhole,wide_model=model_fisheye)
 
-image_fisheye = pb.load_planar(os.path.join(data_path, "dining_room.jpg"), np.uint8)
+image_fisheye = pb.load_planar(os.path.join(data_path, "building_side.jpg"), np.uint8)
 image_pinhole = image_fisheye.createNew(model_pinhole.width, model_pinhole.height)
 
 image_distorter = transform.create_image_distort(pb.ImageType(image_fisheye.getImageType()))

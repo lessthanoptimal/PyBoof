@@ -131,7 +131,7 @@ class CameraUniversalOmni(CameraPinhole):
         self.mirror_offset = 0
 
     def set_from_boof(self, boof_intrinsic):
-        CameraPinhole.set_from_boof(boof_intrinsic)
+        CameraPinhole.set_from_boof(self, boof_intrinsic)
         self.mirror_offset = boof_intrinsic.getMirrorOffset()
 
     def convert_to_boof(self, storage=None):
@@ -172,15 +172,21 @@ class LensDistortionFactory(JavaWrapper):
 
 
 def create_lens_distorter( camera_model ):
-    if type(camera_model) is CameraPinhole:
+    """
+
+    :param camera_model:
+    :return:
+    :rtype: LensDistortionFactory
+    """
+    if isinstance(camera_model, CameraUniversalOmni):
+        boof_model = camera_model.convert_to_boof()
+        java_obj = gateway.jvm.boofcv.alg.distort.universal.LensDistortionUniversalOmni(boof_model)
+    elif isinstance(camera_model, CameraPinhole):
         boof_model = camera_model.convert_to_boof()
         if camera_model.is_distorted():
-            java_obj = gateway.jvm.boofcv.boofcv.alg.distort.radtan.LensDistortionRadialTangential(boof_model)
+            java_obj = gateway.jvm.boofcv.alg.distort.radtan.LensDistortionRadialTangential(boof_model)
         else:
-            java_obj = gateway.jvm.boofcv.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
-    elif type(camera_model) is CameraUniversalOmni:
-        boof_model = camera_model.convert_to_boof()
-        java_obj = gateway.jvm.boofcv.boofcv.alg.distort.universal.LensDistortionUniversalOmni(boof_model)
+            java_obj = gateway.jvm.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
     else:
         raise RuntimeError("Unknown camera model {}".format(type(camera_model)))
 
@@ -191,7 +197,7 @@ class NarrowToWideFovPtoP(JavaWrapper):
     def __init__(self, narrow_model, wide_model):
         narrow_distort = create_lens_distorter(narrow_model)
         wide_distort = create_lens_distorter(wide_model)
-        java_object = gateway.jvm.boofcv.boofcv.alg.distort.NarrowToWidePtoP_F32(narrow_distort, wide_distort)
+        java_object = gateway.jvm.boofcv.alg.distort.NarrowToWidePtoP_F32(narrow_distort.java_obj, wide_distort.java_obj)
         JavaWrapper.__init__(self, java_object)
 
     def set_rotation_wide_to_narrow(self, rotation_matrix):
@@ -211,7 +217,7 @@ class NarrowToWideFovPtoP(JavaWrapper):
         java_image_type = image_type.java_obj
         java_interp = FactoryInterpolation(image_type).bilinear(border_type=border_type)
 
-        java_alg = gateway.jvm.boofcv.factory.distortFactoryDistort.distort(False, java_interp, java_image_type)
+        java_alg = gateway.jvm.boofcv.factory.distort.FactoryDistort.distort(False, java_interp, java_image_type)
         java_pixel_transform = gateway.jvm.boofcv.alg.distort.PointToPixelTransform_F32(self.java_obj)
         java_alg.setModel(java_pixel_transform)
         return ImageDistort(java_alg)

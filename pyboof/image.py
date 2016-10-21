@@ -507,3 +507,20 @@ def mmap_boof_to_numpy_F32(boof_image):
     # create array in java format then convert into native format
     tmp = np.ndarray(shape=(height, width), dtype='>f4', order='C', buffer=raw_data)
     return tmp.astype(dtype=np.float32, copy=False)
+
+
+def mmap_boof_PU8_to_numpy_IU8(boof_image):
+    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.writeImage_U8(boof_image)
+
+    mm = pyboof.mmap_file
+    mm.seek(0)
+    header_bytes = mm.read(14) # speed it up significantly by minimizing disk access
+    data_type, width, height, num_bands = struct.unpack('>hiii', header_bytes)
+
+    if data_type is not pyboof.MmapType.IMAGE_U8:
+        raise RuntimeError("Expected IMAGE_U8 in mmap file")
+    if num_bands is not 1:
+        raise RuntimeError("Expected single band image. Found {}".format(num_bands))
+
+    data = mm.read(width*height)
+    return np.ndarray(shape=(height, width), dtype=np.uint8, buffer=np.array(data))

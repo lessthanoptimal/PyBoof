@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+apply plugin: 'maven'
 
 group = 'org.pyboof'
 version = '0.25-SNAPSHOT'
@@ -13,9 +14,21 @@ repositories {
     mavenCentral()
     mavenLocal()
 
+   flatDir {
+       dirs '/home/pja/.m2/repository'
+   }
+
     maven {
-        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        url = "/home/pja/.m2/repository"
     }
+
+    maven {
+        url = "/home/pja/.m2"
+    }
+
+//    maven {
+//       url = "https://oss.sonatype.org/content/repositories/snapshots/"
+//    }
 }
 
 dependencies {
