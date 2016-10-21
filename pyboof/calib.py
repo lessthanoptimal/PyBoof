@@ -1,5 +1,6 @@
 from image import *
 from ip import *
+from geo import real_nparray_to_ejml
 
 
 class CameraPinhole:
@@ -143,13 +144,86 @@ class CameraUniversalOmni(CameraPinhole):
         return boof_intrinsic
 
 
+class LensDistortionFactory(JavaWrapper):
+    def __init__(self, java_object):
+        JavaWrapper.__init__(self, java_object)
+
+    def distort(self, pixel_in, pixel_out):
+        """
+
+        :param pixel_in:
+        :type pixel_in: bool
+        :param pixel_out:
+        :type pixel_in: bool
+        :return: Point2Transform2_F32
+        """
+        return self.java_obj.distort_F32(pixel_in, pixel_out)
+
+    def undistort(self, pixel_in, pixel_out):
+        """
+
+        :param pixel_in:
+        :type pixel_in: bool
+        :param pixel_out:
+        :type pixel_in: bool
+        :return: Point2Transform2_F32
+        """
+        return self.java_obj.undistort_F32(pixel_in, pixel_out)
+
+
+def create_lens_distorter( camera_model ):
+    if type(camera_model) is CameraPinhole:
+        boof_model = camera_model.convert_to_boof()
+        if camera_model.is_distorted():
+            java_obj = gateway.jvm.boofcv.boofcv.alg.distort.radtan.LensDistortionRadialTangential(boof_model)
+        else:
+            java_obj = gateway.jvm.boofcv.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
+    elif type(camera_model) is CameraUniversalOmni:
+        boof_model = camera_model.convert_to_boof()
+        java_obj = gateway.jvm.boofcv.boofcv.alg.distort.universal.LensDistortionUniversalOmni(boof_model)
+    else:
+        raise RuntimeError("Unknown camera model {}".format(type(camera_model)))
+
+    return LensDistortionFactory(java_obj)
+
+
+class NarrowToWideFovPtoP(JavaWrapper):
+    def __init__(self, narrow_model, wide_model):
+        narrow_distort = create_lens_distorter(narrow_model)
+        wide_distort = create_lens_distorter(wide_model)
+        java_object = gateway.jvm.boofcv.boofcv.alg.distort.NarrowToWidePtoP_F32(narrow_distort, wide_distort)
+        JavaWrapper.__init__(self, java_object)
+
+    def set_rotation_wide_to_narrow(self, rotation_matrix):
+        self.java_obj.setRotationWideToNarrow( real_nparray_to_ejml(rotation_matrix) )
+        pass
+
+    def create_image_distort(self, image_type, border_type=Border.ZERO):
+        """
+
+        :param image_type:
+        :type image_type: ImageType
+        :param border_type:
+        :type border_type: Border
+        :return: The image distort based on this transformation
+        :rtype: ImageDistort
+        """
+        java_image_type = image_type.java_obj
+        java_interp = FactoryInterpolation(image_type).bilinear(border_type=border_type)
+
+        java_alg = gateway.jvm.boofcv.factory.distortFactoryDistort.distort(False, java_interp, java_image_type)
+        java_pixel_transform = gateway.jvm.boofcv.alg.distort.PointToPixelTransform_F32(self.java_obj)
+        java_alg.setModel(java_pixel_transform)
+        return ImageDistort(java_alg)
+
+
 class AdjustmentType:
     NONE=0
     FULL_VIEW=1
     EXPAND=2
 
 
-def adjustment_to_java( value ):
+def adjustment_to_java(value):
     if value == AdjustmentType.NONE:
         return gateway.jvm.boofcv.alg.distort.AdjustmentType.valueOf("NONE")
     elif value == AdjustmentType.FULL_VIEW:
@@ -160,7 +234,7 @@ def adjustment_to_java( value ):
         raise RuntimeError("Unknown type")
 
 
-def remove_distortion( input, output, intrinsic, adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO):
+def remove_distortion(input, output, intrinsic, adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO):
     image_type = ImageType(input.getImageType())
     distorter, java_intrinsic_out = create_remove_lens_distortion(intrinsic,image_type,adjustment,border)
     distorter.apply(input,output)

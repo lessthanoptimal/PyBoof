@@ -3,6 +3,7 @@ from pyboof import gateway
 from common import JavaConfig
 from common import JavaWrapper
 from image import dtype_to_Class_SingleBand
+from image import ImageType
 
 
 class Border:
@@ -21,6 +22,7 @@ class GradientType:
     TWO0="two0"
     TWO1="two1"
 
+
 class ThresholdType:
     FIXED          = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.FIXED
     GLOBAL_ENTROPY = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_ENTROPY
@@ -28,6 +30,13 @@ class ThresholdType:
     LOCAL_GAUSSIAN = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_GAUSSIAN
     LOCAL_SQUARE   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SQUARE
     LOCAL_SAVOLA   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SAVOLA
+
+
+class InterpolationType:
+    NEAREST_NEIGHBOR=0,
+    BILINEAR=1,
+    BICUBIC=2,
+    POLYNOMIAL4=3
 
 
 class ConfigThreshold(JavaConfig):
@@ -49,7 +58,27 @@ class ConfigThreshold(JavaConfig):
         java_object = gateway.jvm.boofcv.factory.filter.binary.ConfigThreshold.local(type,int(radius))
         return JavaConfig(java_object)
 
+
+def interpolation_type_to_java( type ):
+    if type == InterpolationType.NEAREST_NEIGHBOR:
+        return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.NEAREST_NEIGHBOR
+    elif type == InterpolationType.BICUBIC:
+        return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.BICUBIC
+    elif type == InterpolationType.BILINEAR:
+        return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.BILINEAR
+    elif type == InterpolationType.POLYNOMIAL4:
+        return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.POLYNOMIAL4
+    else:
+        raise RuntimeError("Unknown interpolation type")
+
+
 def border_to_java( border ):
+    """
+
+    :param border:
+    :type border: Border
+    :return: java_object
+    """
     if border == Border.SKIP:
         return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("SKIP")
     elif border == Border.EXTENDED:
@@ -91,6 +120,7 @@ def gradient(input, derivX , derivY, type=GradientType.SOBEL, border=Border.EXTE
     else:
         raise RuntimeError("Unknown gradient type "+type)
 
+
 class ImageDistort(JavaWrapper):
     """
     Applies a distortion to a BoofCV image.
@@ -111,6 +141,7 @@ class InputToBinary(JavaWrapper):
 
     def process(self, input , output):
         self.java_obj.process(input,output)
+
 
 class FactoryThresholdBinary:
     def __init__(self, dtype ):
@@ -229,3 +260,29 @@ class FactoryThresholdBinary:
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             threshold(config.java_obj,self.boof_image_type)
         return InputToBinary(java_object)
+
+
+class FactoryInterpolation:
+    def __init__(self, image_type ):
+        """
+
+        :param image_type:
+        :type image_type: ImageType
+        """
+        self.image_type = image_type
+
+    def bilinear(self, min_pixel=0, max_pixel=255, border_type=Border.ZERO):
+        """
+        :param min_pixel:
+        :type min_pixel: float
+        :param max_pixel:
+        :type max_pixel: float
+        :param border_type:
+        :type border_type: Border
+        :return: java_object
+        """
+        java_border = border_to_java(border_type)
+        java_interp = interpolation_type_to_java(InterpolationType.BILINEAR)
+
+        return gateway.jvm.boofcv.interpolate.FactoryInterpolation.\
+            createPixel(min_pixel, max_pixel, java_interp, java_border, self.image_type.java_obj)

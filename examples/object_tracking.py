@@ -96,7 +96,7 @@ while True:
         format(time1 - time0, time2 - time1, time_tracking)
 
     # Display the resulting frame
-    cv2.imshow(window_name,frame)
+    cv2.imshow(window_name, frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
