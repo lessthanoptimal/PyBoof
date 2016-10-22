@@ -14,16 +14,16 @@ configThreshold = pb.ConfigThreshold.create_local(pb.ThresholdType.LOCAL_SQUARE,
 print "Configuring detector"
 detector = pb.FactoryFiducial(np.uint8).squareBinary(configFiducial, configThreshold)
 # Without intrinsics only pattern ID and pixel location can be found
-detector.setIntrinsic(intrinsic)
+detector.set_intrinsic(intrinsic)
 
 print "Detecting image"
 detector.detect(pb.load_single_band(os.path.join( data_path, "image0000.jpg"), np.uint8))
 
-print "Number Found = "+str(detector.totalFound())
+print "Number Found = "+str(detector.get_total())
 
-for i in range(detector.totalFound()):
+for i in range(detector.get_total()):
     print "=========== Found #"+str(i)
-    fid_to_cam = detector.getFiducialToCamera(i)
+    fid_to_cam = detector.get_fiducial_to_camera(i)
     # print fid_to_cam
     print "Pattern ID = "+str(detector.get_id(i))
     print "Rotation"

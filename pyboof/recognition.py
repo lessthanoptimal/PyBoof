@@ -56,6 +56,7 @@ class FactoryFiducial:
     def squareGrid(self):
         pass
 
+
 class FiducialDetector(JavaWrapper):
     """
     Detects fiducials and estimates their ID and 3D pose
@@ -65,19 +66,27 @@ class FiducialDetector(JavaWrapper):
     def __init__(self, java_FiducialDetector):
         self.set_java_object(java_FiducialDetector)
 
-    def detect(self, image ):
+    def detect(self, image):
         self.java_obj.detect(image)
 
-    def setIntrinsic(self, intrinsic ):
+    def set_intrinsic(self, intrinsic):
         java_intrinsic = intrinsic.convert_to_boof()
         self.java_obj.setIntrinsic(java_intrinsic)
 
-    def totalFound(self):
+    def get_total(self):
         return self.java_obj.totalFound()
 
-    def getFiducialToCamera(self, which ):
+    def get_fiducial_to_camera(self, which):
+        """
+        Returns the rigid body transform from the fiducial to the camera
+
+        :param which: Index of detected fiducial.
+        :type which: int
+        :return: Rigid Body Transform
+        :rtype: Se3_F64
+        """
         fid_to_cam = Se3_F64()
-        self.java_obj.getFiducialToCamera(which,fid_to_cam.get_java_object())
+        self.java_obj.getFiducialToCamera(which, fid_to_cam.get_java_object())
         return fid_to_cam
 
     def get_image_location(self, which):
@@ -88,17 +97,17 @@ class FiducialDetector(JavaWrapper):
     def get_id(self, which):
         return self.java_obj.getId(which)
 
-    def get_width(self, which ):
+    def get_width(self, which):
         return self.java_obj.getWidth(which)
 
-    def getInputType(self):
+    def get_input_type(self):
         return ImageType(self.java_obj.getInputType())
 
 
 class FiducialImageDetector(FiducialDetector):
 
     def add_pattern(self, image, side_length, threshold=100.0):
-        self.java_obj.addPatternImage(image,threshold,side_length)
+        self.java_obj.addPatternImage(image, threshold, side_length)
 
 
 class ConfigCirculant(Config):
@@ -107,7 +116,7 @@ class ConfigCirculant(Config):
             config = gateway.jvm.boofcv.abst.tracker.ConfigCirculantTracker()
         else:
             config = obj
-        Config.__init__(self,config)
+        Config.__init__(self, config)
 
 
 class ConfigTld(Config):
