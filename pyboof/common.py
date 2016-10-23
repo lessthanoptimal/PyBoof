@@ -27,7 +27,7 @@ class JavaWrapper:
 
 class Config(JavaWrapper):
     def __init__(self, java_ConfigPolygonDetector):
-        self.set_java_object(java_ConfigPolygonDetector)
+        JavaWrapper.__init__(self, java_ConfigPolygonDetector)
 
     def get_property(self, name):
         return java_gateway.get_field(self.java_obj,name)

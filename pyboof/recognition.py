@@ -1,5 +1,5 @@
 from geo import *
-from image import *
+from calib import *
 
 
 class ConfigPolygonDetector(JavaConfig):
@@ -70,8 +70,8 @@ class FiducialDetector(JavaWrapper):
         self.java_obj.detect(image)
 
     def set_intrinsic(self, intrinsic):
-        java_intrinsic = intrinsic.convert_to_boof()
-        self.java_obj.setIntrinsic(java_intrinsic)
+        distortion = create_narrow_lens_distorter(intrinsic)
+        self.java_obj.setLensDistortion(distortion.java_obj)
 
     def get_total(self):
         return self.java_obj.totalFound()

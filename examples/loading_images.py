@@ -4,7 +4,7 @@ import cv2
 import pyboof as pb
 
 # Enable use of memory mapped files for MUCH faster conversion of images between java and python
-pb.init_memmap(5)
+pb.init_memmap()
 
 image_path = '../data/example/outdoors01.jpg'
 

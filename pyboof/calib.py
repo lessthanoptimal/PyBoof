@@ -1,10 +1,31 @@
 from image import *
 from ip import *
 from geo import real_nparray_to_ejml
+from abc import ABCMeta, abstractmethod
+
+
+class CameraModel:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def load(self, file_name):
+        pass
+
+    @abstractmethod
+    def save(self, file_name):
+        pass
+
+    @abstractmethod
+    def set_from_boof(self, boof_intrinsic):
+        pass
+
+    @abstractmethod
+    def convert_to_boof(self, storage=None):
+        pass
 
 
 # TODO Turn this into JavaConfig instead?
-class CameraPinhole:
+class CameraPinhole(CameraModel):
     """
     BoofCV Intrinsic Camera parameters
     """
@@ -145,9 +166,10 @@ class CameraUniversalOmni(CameraPinhole):
         return boof_intrinsic
 
 
-class LensDistortionFactory(JavaWrapper):
-    def __init__(self, java_object):
+class LensNarrowDistortionFactory(JavaWrapper):
+    def __init__(self, java_object, use_32=True):
         JavaWrapper.__init__(self, java_object)
+        self.use_32 = use_32
 
     def distort(self, pixel_in, pixel_out):
         """
@@ -156,9 +178,13 @@ class LensDistortionFactory(JavaWrapper):
         :type pixel_in: bool
         :param pixel_out:
         :type pixel_in: bool
-        :return: Point2Transform2_F32
+        :return: Point2Transform2_F32 or Point2Transform2_F64
         """
-        return self.java_obj.distort_F32(pixel_in, pixel_out)
+        if self.use_32:
+            java_out = self.java_obj.distort_F32(pixel_in, pixel_out)
+        else:
+            java_out = self.java_obj.distort_F64(pixel_in, pixel_out)
+        return Transform2to2(java_out)
 
     def undistort(self, pixel_in, pixel_out):
         """
@@ -167,21 +193,53 @@ class LensDistortionFactory(JavaWrapper):
         :type pixel_in: bool
         :param pixel_out:
         :type pixel_in: bool
-        :return: Point2Transform2_F32
+        :return: Point2Transform2_F32 or Point2Transform2_F64
         """
-        return self.java_obj.undistort_F32(pixel_in, pixel_out)
+        if self.use_32:
+            java_out = self.java_obj.undistort_F32(pixel_in, pixel_out)
+        else:
+            java_out = self.java_obj.undistort_F32(pixel_in, pixel_out)
+        return Transform2to2(java_out)
+
+class LensWideDistortionFactory(JavaWrapper):
+    def __init__(self, java_object, use_32=True):
+        JavaWrapper.__init__(self, java_object)
+        self.use_32 = use_32
+
+    def distort_s_to_p(self):
+        """
+        Transform from unit sphere coordinates to pixel coordinates
+        :return: transform
+        :rtype: Transform3to2
+        """
+        if self.use_32:
+            java_out = self.java_obj.distortStoP_F32()
+        else:
+            java_out = self.java_obj.distortStoP_F64()
+        return Transform3to2(java_out)
+
+    def undistort_p_to_s(self):
+        """
+        Transform from pixels to unit sphere coordinates
+        :return: transform
+        :rtype: Transform2to3
+        """
+        if self.use_32:
+            java_out = self.java_obj.undistortPtoS_F32()
+        else:
+            java_out = self.java_obj.undistortPtoS_F64()
+        return Transform2to3(java_out)
 
 
-def create_lens_distorter( camera_model ):
+def create_narrow_lens_distorter( camera_model ):
     """
 
     :param camera_model:
     :return:
-    :rtype: LensDistortionFactory
+    :rtype: LensNarrowDistortionFactory
     """
     if isinstance(camera_model, CameraUniversalOmni):
-        boof_model = camera_model.convert_to_boof()
-        java_obj = gateway.jvm.boofcv.alg.distort.universal.LensDistortionUniversalOmni(boof_model)
+        raise RuntimeError("CameraUniversalOmni is not a narrow FOV camera model")
     elif isinstance(camera_model, CameraPinhole):
         boof_model = camera_model.convert_to_boof()
         if camera_model.is_distorted():
@@ -191,17 +249,52 @@ def create_lens_distorter( camera_model ):
     else:
         raise RuntimeError("Unknown camera model {}".format(type(camera_model)))
 
-    return LensDistortionFactory(java_obj)
+    return LensNarrowDistortionFactory(java_obj)
+
+def create_wide_lens_distorter( camera_model ):
+    """
+
+    :param camera_model:
+    :return:
+    :rtype: LensWideDistortionFactory
+    """
+    if isinstance(camera_model, CameraUniversalOmni):
+        boof_model = camera_model.convert_to_boof()
+        java_obj = gateway.jvm.boofcv.alg.distort.universal.LensDistortionUniversalOmni(boof_model)
+    else:
+        raise RuntimeError("Unknown camera model {}".format(type(camera_model)))
+
+    return LensWideDistortionFactory(java_obj)
 
 
 class NarrowToWideFovPtoP(JavaWrapper):
+    """
+    Distortion for converting an image from a wide FOV camera (e.g. fisheye) into a narrow FOV camera (e.g. pinhole)
+    Mathematically it performs a conversion from pixels in the narrow camera to the wide camera.  The center of
+    focus for the narrow camera can be changed by rotating the view by invoking set_rotation_wide_to_narrow().
+
+    """
     def __init__(self, narrow_model, wide_model):
-        narrow_distort = create_lens_distorter(narrow_model)
-        wide_distort = create_lens_distorter(wide_model)
+        """
+        Constructor where camera models are specified
+
+        :param narrow_model: Camera model for narrow FOV camera
+        :type narrow_model: CameraModel
+        :param wide_model: Camera model for wide FOV camera
+        :type wide_model: CameraModel
+        """
+        narrow_distort = create_narrow_lens_distorter(narrow_model)
+        wide_distort = create_wide_lens_distorter(wide_model)
         java_object = gateway.jvm.boofcv.alg.distort.NarrowToWidePtoP_F32(narrow_distort.java_obj, wide_distort.java_obj)
         JavaWrapper.__init__(self, java_object)
 
     def set_rotation_wide_to_narrow(self, rotation_matrix):
+        """
+        Used to change the principle axis of the narrow FOC camera by rotating the view
+
+        :param rotation_matrix: 3D rotation matrix
+        :return:
+        """
         self.java_obj.setRotationWideToNarrow( real_nparray_to_ejml(rotation_matrix) )
         pass
 

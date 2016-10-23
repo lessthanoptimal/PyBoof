@@ -1,9 +1,9 @@
 from pyboof import gateway
 
-from common import JavaConfig
-from common import JavaWrapper
 from image import dtype_to_Class_SingleBand
 from image import ImageType
+from geo import *
+from py4j.java_gateway import is_instance_of
 
 
 class Border:
@@ -121,6 +121,70 @@ def gradient(input, derivX , derivY, type=GradientType.SOBEL, border=Border.EXTE
         raise RuntimeError("Unknown gradient type "+type)
 
 
+class Transform2to2(JavaWrapper):
+    def __init__(self, java_object):
+        JavaWrapper.__init__(self, java_object)
+        if is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform2_F32):
+            self.is32 = True
+            self.point_out = create_java_point_2D_f32()
+        elif is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform2_F64):
+            self.is32 = False
+            self.point_out = create_java_point_2D_f64()
+        else:
+            raise RuntimeError("Unexpected java object. "+java_object.getClass().getSimpleName())
+
+    def apply(self, input, output=None):
+        if output is None:
+            output = [0.0, 0.0]
+        self.java_obj.compute(float(input[0]), float(input[1]), self.point_out)
+        output[0] = self.point_out.getX()
+        output[1] = self.point_out.getY()
+        return output
+
+
+class Transform2to3(JavaWrapper):
+    def __init__(self, java_object):
+        JavaWrapper.__init__(self, java_object)
+        if is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform3_F32):
+            self.is32 = True
+            self.point_out = create_java_point_3D_f32()
+        elif is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform3_F64):
+            self.is32 = False
+            self.point_out = create_java_point_3D_f64()
+        else:
+            raise RuntimeError("Unexpected java object. "+java_object.getClass().getSimpleName())
+
+    def apply(self, input, output=None):
+        if output is None:
+            output = [0.0, 0.0, 0.0]
+        self.java_obj.compute(float(input[0]), float(input[1]), self.point_out)
+        output[0] = self.point_out.getX()
+        output[1] = self.point_out.getY()
+        output[2] = self.point_out.getZ()
+        return output
+
+
+class Transform3to2(JavaWrapper):
+    def __init__(self, java_object):
+        JavaWrapper.__init__(self, java_object)
+        if is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point3Transform2_F32):
+            self.is32 = True
+            self.point_out = create_java_point_2D_f32()
+        elif is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point3Transform2_F64):
+            self.is32 = False
+            self.point_out = create_java_point_2D_f64()
+        else:
+            raise RuntimeError("Unexpected java object. "+java_object.getClass().getSimpleName())
+
+    def apply(self, input, output=None):
+        if output is None:
+            output = [0.0, 0.0]
+        self.java_obj.compute(float(input[0]), float(input[1]), float(input[2]), self.point_out)
+        output[0] = self.point_out.getX()
+        output[1] = self.point_out.getY()
+        return output
+
+
 class ImageDistort(JavaWrapper):
     """
     Applies a distortion to a BoofCV image.
@@ -128,7 +192,7 @@ class ImageDistort(JavaWrapper):
     """
 
     def __init__(self, boof_ImageDistort):
-        self.set_java_object(boof_ImageDistort)
+        JavaWrapper.__init__(self, boof_ImageDistort)
 
     def apply(self, imageA , imageB ):
         self.java_obj.apply(imageA,imageB)

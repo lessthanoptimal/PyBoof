@@ -41,6 +41,39 @@ class Se3_F64(JavaWrapper):
         T = self.java_obj.getT()
         return (T.getX(),T.getY(),T.getZ())
 
+
+def create_java_point_2D_f32(x=0., y=0.):
+    return gateway.jvm.georegression.struct.point.Point2D_F32(float(x), float(y))
+
+
+def create_java_point_2D_f64(x=0., y=0.):
+    return gateway.jvm.georegression.struct.point.Point2D_F64(float(x), float(y))
+
+
+def create_java_point_3D_f32(x=0., y=0., z=0.):
+    return gateway.jvm.georegression.struct.point.Point3D_F32(float(x), float(y), float(z))
+
+
+def create_java_point_3D_f64(x=0., y=0., z=0.):
+    return gateway.jvm.georegression.struct.point.Point3D_F64(float(x), float(y), float(z))
+
+
+def tuple_to_Point2D_F64(ptuple, jpoint=None):
+    if jpoint == None:
+        return create_java_point_2D_f32(ptuple[0],ptuple[1])
+    else:
+        jpoint.set(float(ptuple[0]),float(ptuple[1]))
+        return jpoint
+
+
+def tuple_to_Point2D_F32(ptuple ,jpoint=None):
+    if jpoint == None:
+        return create_java_point_2D_f64(ptuple[0],ptuple[1])
+    else:
+        jpoint.set(float(ptuple[0]),float(ptuple[1]))
+        return jpoint
+
+
 class Point2D:
     def __init__(self, x=0, y=0):
         """
@@ -53,7 +86,7 @@ class Point2D:
         self.y = y
 
     def convert_to_boof(self):
-        return gateway.jvm.georegression.struct.point.Point2D_F64(float(self.x), float(self.y))
+        return create_java_point_2D_f64(float(self.x), float(self.y))
 
     def set(self, o):
         if type(o) is Point2D:
