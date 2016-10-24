@@ -22,6 +22,9 @@ class Family:
 
 
 class BImage(JavaWrapper):
+    """
+    Use to use wrapper around a BoofCV image.  Universal way to access pixel values
+    """
     def __init__(self, java_image):
         JavaWrapper.__init__(self,java_image)
         self.family = self.java_obj.getImageType().getFamily().ordinal()
@@ -34,15 +37,6 @@ class BImage(JavaWrapper):
         :rtype: ImageType
         """
         return ImageType(self.java_obj.getImageType())
-
-    def get_property(self, name):
-        return gateway.get_field(self.java_obj, name)
-
-    def set_property(self, name, value):
-        return gateway.set_field(self.java_obj, name, value)
-
-    def __dir__(self):
-        return self.java_obj.java_properties
 
     def __getitem__(self, key):
         if isinstance(key, (list, tuple)):
@@ -90,6 +84,14 @@ class BImage(JavaWrapper):
                 raise RuntimeError("Unexpected argument length")
         else:
             raise RuntimeError("Unexpected argument type")
+
+    def __getattr__(self, item):
+        if item is 'shape':
+            if self.family == Family.SINGLE_BAND:
+                return self.java_obj.getHeight(), self.java_obj.getWidth()
+            elif self.family == Family.PLANAR or self.family == Family.INTERLEAVED:
+                return self.java_obj.getHeight(), self.java_obj.getWidth(), self.java_obj.getNumBands()
+        return JavaWrapper.__getattr__(self, item)
 
 
 class ImageType(JavaWrapper):

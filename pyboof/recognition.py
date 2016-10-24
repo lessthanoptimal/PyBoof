@@ -110,16 +110,12 @@ class FiducialImageDetector(FiducialDetector):
         self.java_obj.addPatternImage(image, threshold, side_length)
 
 
-class ConfigCirculant(Config):
-    def __init__(self, obj=None):
-        if obj is None:
-            config = gateway.jvm.boofcv.abst.tracker.ConfigCirculantTracker()
-        else:
-            config = obj
-        Config.__init__(self, config)
+class ConfigCirculant(JavaConfig):
+    def __init__(self, java_object=None):
+        JavaConfig.__init__(self, java_object)
 
 
-class ConfigTld(Config):
+class ConfigTld(JavaConfig):
     def __init__(self, obj=None):
         """
         :param obj: Java object, bool, None
@@ -133,7 +129,7 @@ class ConfigTld(Config):
             config = gateway.jvm.boofcv.abst.tracker.ConfigTld(obj)
         else:
             config = obj
-        Config.__init__(self,config)
+            JavaConfig.__init__(self, config)
 
 
 class ConfigMeanShiftComaniciu(JavaConfig):

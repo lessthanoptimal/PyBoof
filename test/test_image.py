@@ -67,6 +67,28 @@ class TestBImage(unittest.TestCase):
         self.assertEqual(100, b_image.width)
         self.assertEqual(120, b_image.height)
 
+    def test_shape_gray(self):
+        j_img = pb.create_single_band(100, 120, dtype=np.uint8)
+        found = pb.BImage(j_img).shape
+        self.assertEqual(2, len(found))
+        self.assertEqual(120, found[0])
+        self.assertEqual(100, found[1])
+
+    def test_shape_planar(self):
+        j_img = pb.create_planar(100, 120, 3, dtype=np.uint8)
+        found = pb.BImage(j_img).shape
+        self.assertEqual(3, len(found))
+        self.assertEqual(120, found[0])
+        self.assertEqual(100, found[1])
+        self.assertEqual(3, found[2])
+
+    def test_shape_interleaved(self):
+        j_img = pb.create_interleaved(100, 120, 3, dtype=np.uint8)
+        found = pb.BImage(j_img).shape
+        self.assertEqual(3, len(found))
+        self.assertEqual(120, found[0])
+        self.assertEqual(100, found[1])
+        self.assertEqual(3, found[2])
 
 class TestMemMapFunctions(unittest.TestCase):
 
