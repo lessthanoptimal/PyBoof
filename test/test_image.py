@@ -9,6 +9,65 @@ import numpy as np
 pb.init_memmap()
 
 
+class TestBImage(unittest.TestCase):
+
+    dtypes = (np.uint8, np.float32)
+
+    def test_array_read_gray(self):
+        for dtype in self.dtypes:
+            j_img = pb.create_single_band(100, 120, dtype=dtype)
+            b_image = pb.BImage(j_img)
+
+            self.assertEqual(j_img.get(3,2), b_image[2,3])
+
+    def test_array_read_planar(self):
+        for dtype in self.dtypes:
+            j_img = pb.create_planar(20, 30, 3, dtype=dtype)
+            b_image = pb.BImage(j_img)
+
+            self.assertEqual(j_img.getBand(1).get(3,2), b_image[2,3,1])
+
+    def test_array_read_interleaved(self):
+        for dtype in self.dtypes:
+            j_img = pb.create_interleaved(20, 30, 3, dtype=dtype)
+            b_image = pb.BImage(j_img)
+
+            self.assertEqual(j_img.getBand(3,2,1), b_image[2,3,1])
+
+    def test_array_write_gray(self):
+        for dtype in self.dtypes:
+            j_img = pb.create_single_band(100, 120, dtype=dtype)
+            b_image = pb.BImage(j_img)
+
+            b_image[2,3] = 5
+
+            self.assertEqual(5, j_img.get(3,2))
+
+    def test_array_write_planar(self):
+        for dtype in self.dtypes:
+            j_img = pb.create_planar(20, 30, 3, dtype=dtype)
+            b_image = pb.BImage(j_img)
+
+            b_image[2, 3, 0] = 5
+
+            self.assertEqual(5, j_img.getBand(0).get(3, 2))
+
+    def test_array_write_interleaved(self):
+        for dtype in self.dtypes:
+            j_img = pb.create_interleaved(20, 30, 3, dtype=dtype)
+            b_image = pb.BImage(j_img)
+
+            b_image[2, 3, 0] = 5
+
+            self.assertEqual(5, j_img.getBand(3, 2, 0))
+
+    def test_property_reading(self):
+        j_img = pb.create_single_band(100, 120, dtype=np.uint8)
+        b_image = pb.BImage(j_img)
+        self.assertEqual(100, b_image.width)
+        self.assertEqual(120, b_image.height)
+
+
 class TestMemMapFunctions(unittest.TestCase):
 
     def test_mmap_numpy_to_boof_U8(self):

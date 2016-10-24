@@ -36,7 +36,7 @@ class Config(JavaWrapper):
         return java_gateway.set_field(self.java_obj,name, value)
 
     def __dir__(self):
-        return self.java_properties
+        return self.java_obj.java_properties
 
 
 class JavaConfig:

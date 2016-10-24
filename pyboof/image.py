@@ -7,6 +7,7 @@ import pyboof
 from pyboof import gateway
 
 import common
+from common import JavaWrapper
 
 
 class Family:
@@ -15,19 +16,90 @@ class Family:
 
     Equivalent to boofcv.struct.image.ImageType.Family
     """
-    SINGLE_BAND = 0,
+    SINGLE_BAND = 0
     PLANAR = 1
     INTERLEAVED = 2
 
 
-class ImageType(common.JavaWrapper):
+class BImage(JavaWrapper):
+    def __init__(self, java_image):
+        JavaWrapper.__init__(self,java_image)
+        self.family = self.java_obj.getImageType().getFamily().ordinal()
+        self.dtype = get_dtype(java_image)
+
+    def get_image_type(self):
+        """
+        Returns the type of image it is
+        :return: ImageType
+        :rtype: ImageType
+        """
+        return ImageType(self.java_obj.getImageType())
+
+    def get_property(self, name):
+        return gateway.get_field(self.java_obj, name)
+
+    def set_property(self, name, value):
+        return gateway.set_field(self.java_obj, name, value)
+
+    def __dir__(self):
+        return self.java_obj.java_properties
+
+    def __getitem__(self, key):
+        if isinstance(key, (list, tuple)):
+            if len(key) == 2:
+                if self.family is Family.SINGLE_BAND:
+                    return self.java_obj.get(key[1], key[0])
+                else:
+                    raise RuntimeError("2D array like access is only valid for gray scale images")
+            elif len(key) == 3:
+                if self.family is Family.PLANAR:
+                    return self.java_obj.getBand(key[2]).get(key[1], key[0])
+                elif self.family is Family.INTERLEAVED:
+                    return self.java_obj.getBand(key[2], key[1], key[0])
+                else:
+                    raise RuntimeError("Must be a multi band image")
+            else:
+                raise RuntimeError("Unexpected argument length")
+        else:
+            raise RuntimeError("Unexpected argument type")
+
+    def __setitem__(self, key, value):
+        if isinstance(key, (list, tuple)):
+            if len(key) == 2:
+                if self.family == Family.SINGLE_BAND:
+                    if self.dtype == np.uint8:
+                        return self.java_obj.set(key[1], key[0], int(value))
+                    elif self.dtype == np.float32:
+                        return self.java_obj.set(key[1], key[0], float(value))
+                else:
+                    raise RuntimeError("2D array like access is only valid for gray scale images")
+            elif len(key) == 3:
+                if self.family == Family.PLANAR:
+                    if self.dtype == np.uint8:
+                        return self.java_obj.getBand(key[2]).set(key[1], key[0], int(value))
+                    elif self.dtype == np.float32:
+                        return self.java_obj.getBand(key[2]).set(key[1], key[0], float(value))
+                elif self.family == Family.INTERLEAVED:
+                    if self.dtype == np.uint8:
+                        return self.java_obj.setBand(key[1], key[0], key[2], int(value))
+                    elif self.dtype == np.float32:
+                        return self.java_obj.setBand(key[1], key[0], key[2], float(value))
+                else:
+                    raise RuntimeError("Must be a multi band image")
+            else:
+                raise RuntimeError("Unexpected argument length")
+        else:
+            raise RuntimeError("Unexpected argument type")
+
+
+class ImageType(JavaWrapper):
     """
     Description on the image data format.
 
     Equivalent to boofcv.struct.image.ImageType
     """
     def __init__(self, jImageType):
-        self.set_java_object(jImageType)
+        JavaWrapper.__init__(self, jImageType)
 
     def create_boof_image(self, width, height ):
         return self.java_obj.createImage(width,height)
@@ -290,6 +362,35 @@ def create_planar( width , height , num_bands , dtype):
 
     return gateway.jvm.boofcv.struct.image.Planar(jImageClass,width,height,num_bands)
 
+
+def create_interleaved(width, height, num_bands, dtype):
+    """
+    Creates a interleaved BoofCV image.
+
+    :param width: Image width
+    :param height: Image height
+    :param num_bands: Number of bands/channels in the image
+    :param dtype: data type
+    :return: New instance of a BoofCV single band image
+    """
+    if dtype == np.uint8:
+        return gateway.jvm.boofcv.struct.image.InterleavedU8(width, height, num_bands)
+    elif dtype == np.int8:
+        return gateway.jvm.boofcv.struct.image.InterleavedS8(width, height, num_bands)
+    elif dtype == np.uint16:
+        return gateway.jvm.boofcv.struct.image.InterleavedU16(width, height, num_bands)
+    elif dtype == np.int16:
+        return gateway.jvm.boofcv.struct.image.InterleavedS16(width, height, num_bands)
+    elif dtype == np.int32:
+        return gateway.jvm.boofcv.struct.image.InterleavedS32(width, height, num_bands)
+    elif dtype == np.int64:
+        return gateway.jvm.boofcv.struct.image.InterleavedS64(width, height, num_bands)
+    elif dtype == np.float32:
+        return gateway.jvm.boofcv.struct.image.InterleavedF32(width, height, num_bands)
+    elif dtype == np.float64:
+        return gateway.jvm.boofcv.struct.image.InterleavedF64(width, height, num_bands)
+    else:
+        raise Exception("Unsupported type")
 
 def get_dtype( boof_image ):
     """
