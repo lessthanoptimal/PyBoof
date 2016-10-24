@@ -90,6 +90,7 @@ class TestBImage(unittest.TestCase):
         self.assertEqual(100, found[1])
         self.assertEqual(3, found[2])
 
+
 class TestMemMapFunctions(unittest.TestCase):
 
     def test_mmap_numpy_to_boof_U8(self):

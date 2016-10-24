@@ -23,7 +23,7 @@ class Family:
 
 class BImage(JavaWrapper):
     """
-    Use to use wrapper around a BoofCV image.  Universal way to access pixel values
+    Wrapper around a BoofCV image.  Provide a slow but pythonic way to interact with the images.
     """
     def __init__(self, java_image):
         JavaWrapper.__init__(self,java_image)
@@ -37,6 +37,23 @@ class BImage(JavaWrapper):
         :rtype: ImageType
         """
         return ImageType(self.java_obj.getImageType())
+
+    def ndarray(self):
+        """
+        Creates a new ndarray which will have the same values as this image
+        :return: equivalent ndarray
+        :rtype: numpy.ndarray
+        """
+        return boof_to_ndarray(self.java_obj)
+
+    def create_same_shape(self):
+        """
+        Return an image of the same type and shape
+        :return: image
+        :rtype: BImage
+        """
+        java_image = self.java_obj.createSameShape()
+        return BImage(java_image)
 
     def __getitem__(self, key):
         if isinstance(key, (list, tuple)):
@@ -103,8 +120,8 @@ class ImageType(JavaWrapper):
     def __init__(self, jImageType):
         JavaWrapper.__init__(self, jImageType)
 
-    def create_boof_image(self, width, height ):
-        return self.java_obj.createImage(width,height)
+    def create_boof_image(self, width, height):
+        return self.java_obj.createImage(width, height)
 
     def get_family(self):
         return self.java_obj.getFamily().ordinal()
@@ -132,17 +149,17 @@ def create_ImageType(family, dtype, num_bands=1):
     if family == Family.SINGLE_BAND and num_bands != 1:
         raise Exception("SingleBand images must have only one band")
 
-    jImageClass = dtype_to_Class_SingleBand(dtype)
+    j_image_class = dtype_to_Class_SingleBand(dtype)
     if family == Family.SINGLE_BAND:
-        jImageType = gateway.jvm.boofcv.struct.image.ImageType.single(jImageClass)
+        j_image_type = gateway.jvm.boofcv.struct.image.ImageType.single(j_image_class)
     elif family == Family.PLANAR:
-        jImageType = gateway.jvm.boofcv.struct.image.ImageType.ms(num_bands,jImageClass)
+        j_image_type = gateway.jvm.boofcv.struct.image.ImageType.ms(num_bands, j_image_class)
     elif family == Family.INTERLEAVED:
-        jImageType = gateway.jvm.boofcv.struct.image.ImageType.interleaved(num_bands,jImageClass)
+        j_image_type = gateway.jvm.boofcv.struct.image.ImageType.interleaved(num_bands, j_image_class)
     else:
         raise Exception("Unknown family = "+str(family))
 
-    return ImageType(jImageType)
+    return ImageType(j_image_type)
 
 
 def load_single_band( path , dtype ):
@@ -167,8 +184,8 @@ def load_planar( path , dtype ):
 
     buffered_image =  gateway.jvm.boofcv.io.image.UtilImageIO.loadImage(file_path)
     num_bands = buffered_image.getRaster().getNumBands()
-    PLANAR = create_planar(buffered_image.getWidth(),buffered_image.getHeight(),num_bands,dtype)
-    gateway.jvm.boofcv.io.image.ConvertBufferedImage.convertFrom(buffered_image,PLANAR,True)
+    PLANAR = create_planar(buffered_image.getWidth(), buffered_image.getHeight(),num_bands, dtype)
+    gateway.jvm.boofcv.io.image.ConvertBufferedImage.convertFrom(buffered_image,PLANAR, True)
 
     return PLANAR
 
@@ -215,21 +232,21 @@ def ndarray_to_boof( npimg , boof_img=None):
     else:
         if len(npimg.shape) == 2:
             if npimg.dtype == np.uint8:
-                if boof_img == None:
+                if boof_img is None:
                     b = gateway.jvm.boofcv.struct.image.GrayU8()
                 else:
                     b = boof_img
-                b.setData( bytearray(npimg.data) )
+                b.setData( bytearray(npimg.data))
             elif npimg.dtype == np.float32:
-                if boof_img == None:
+                if boof_img is None:
                     b = gateway.jvm.boofcv.struct.image.GrayF32()
                 else:
                     b = boof_img
-                b.setData( npimg.data )
+                b.setData(npimg.data)
             else:
                 raise Exception("Image type not supported yet")
         else:
-            if boof_img != None:
+            if boof_img is not None:
                 raise RuntimeError("multiband images doesn't yet support predeclared storage")
 
             # TODO change this to interleaved images since that's the closest equivalent
@@ -237,7 +254,7 @@ def ndarray_to_boof( npimg , boof_img=None):
 
             bands = []
             for i in range(num_bands):
-                bands.append(npimg[:,:,i])
+                bands.append(npimg[:, :, i])
 
             class_type = dtype_to_Class_SingleBand(npimg.dtype)
 
@@ -330,21 +347,21 @@ def create_single_band(width, height, dtype):
     :return: New instance of a BoofCV single band image
     """
     if dtype == np.uint8:
-        return gateway.jvm.boofcv.struct.image.GrayU8(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayU8(width, height)
     elif dtype == np.int8:
-        return gateway.jvm.boofcv.struct.image.GrayS8(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayS8(width, height)
     elif dtype == np.uint16:
-        return gateway.jvm.boofcv.struct.image.GrayU16(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayU16(width, height)
     elif dtype == np.int16:
-        return gateway.jvm.boofcv.struct.image.GrayS16(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayS16(width, height)
     elif dtype == np.int32:
-        return gateway.jvm.boofcv.struct.image.GrayS32(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayS32(width, height)
     elif dtype == np.int64:
-        return gateway.jvm.boofcv.struct.image.GrayS64(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayS64(width, height)
     elif dtype == np.float32:
-        return gateway.jvm.boofcv.struct.image.GrayF32(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayF32(width, height)
     elif dtype == np.float64:
-        return gateway.jvm.boofcv.struct.image.GrayF64(width,height)
+        return gateway.jvm.boofcv.struct.image.GrayF64(width, height)
     else:
         raise Exception("Unsupported type")
 
