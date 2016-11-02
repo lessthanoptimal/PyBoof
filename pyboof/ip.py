@@ -7,7 +7,7 @@ from py4j.java_gateway import is_instance_of
 
 
 class Border:
-    SKIP=0,
+    SKIP=0
     EXTENDED=1
     NORMALIZED=2
     REFLECT=3
@@ -33,10 +33,11 @@ class ThresholdType:
 
 
 class InterpolationType:
-    NEAREST_NEIGHBOR=0,
-    BILINEAR=1,
-    BICUBIC=2,
-    POLYNOMIAL4=3
+    NEAREST_NEIGHBOR = 0
+    BILINEAR = 1
+    BICUBIC = 2
+    POLYNOMIAL4 = 3
+    INTEGRAL = 4
 
 
 class ConfigThreshold(JavaConfig):
@@ -59,7 +60,7 @@ class ConfigThreshold(JavaConfig):
         return JavaConfig(java_object)
 
 
-def interpolation_type_to_java( type ):
+def interpolation_type_to_java(type):
     if type == InterpolationType.NEAREST_NEIGHBOR:
         return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.NEAREST_NEIGHBOR
     elif type == InterpolationType.BICUBIC:
@@ -68,6 +69,8 @@ def interpolation_type_to_java( type ):
         return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.BILINEAR
     elif type == InterpolationType.POLYNOMIAL4:
         return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.POLYNOMIAL4
+    elif type == InterpolationType.INTEGRAL:
+        raise RuntimeError("Integral is a special case and can't be handled the same way")
     else:
         raise RuntimeError("Unknown interpolation type")
 
@@ -93,14 +96,55 @@ def border_to_java( border ):
         return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("ZERO")
 
 
-def blur_gaussian(input,output,sigma=-1.0,radius=1):
-    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.gaussian(input,output,sigma,radius,None)
+def blur_gaussian(image, output, sigma=-1.0,radius=1):
+    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.gaussian(image, output, sigma, radius, None)
 
-def blur_mean(input,output,radius=1):
-    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.mean(input,output,radius,None)
 
-def blur_median(input,output,radius=1):
-    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.median(input,output,radius,None)
+def blur_mean(image, output, radius=1):
+    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.mean(image, output, radius, None)
+
+
+def blur_median(image, output, radius=1):
+    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.median(image, output, radius, None)
+
+
+def shrink_image(image, output_size, type=InterpolationType.INTEGRAL, output=None):
+    """
+    Shrinks the image using the specified interpolation method.  If the change in scale is larger than a factor
+    of two then integral should be used.  Otherwise bilinear should be sufficient.
+    :param image: Input image.
+    :param output_size: Size of output image.  If a single value then this is the size of the largest axis
+    :param type: Interpolation type
+    :param output: Optional storage for output image.  Will be resized
+    :return:
+    """
+
+    if isinstance(output_size, (int, long)):
+        scale = float(output_size) / max(image.getWidth(), image.getHeight())
+        output_shape = (int(image.getHeight()*scale), int(image.getWidth()*scale))
+    else:
+        output_shape = output_size
+
+    if image.getWidth() < output_shape[1] or image.getHeight() < output_shape[0]:
+        raise RuntimeError("Either width or height is larger in output than input")
+
+    if output is None:
+        output = image.createNew(output_shape[1], output_shape[0])
+    else:
+        output.reshape(output_shape[1], output_shape[0])
+
+    if type == InterpolationType.INTEGRAL:
+        gateway.jvm.boofcv.alg.filter.misc.AverageDownSampleOps.down(image, output)
+    else:
+        scale_x = output_shape[1] / float(image.getWidth())
+        scale_y = output_shape[0] / float(image.getHeight())
+
+        fdist = gateway.jvm.boofcv.abst.distort.FDistort(image, output)
+        fdist.interp(interpolation_type_to_java(type))
+        fdist.affine(scale_x, 0.0, 0.0, scale_y, 0.0, 0.0)
+        fdist.apply()
+
+    return output
 
 
 def gradient(input, derivX , derivY, type=GradientType.SOBEL, border=Border.EXTENDED):
@@ -204,12 +248,12 @@ class InputToBinary(JavaWrapper):
         self.set_java_object(java_object)
 
     def process(self, input , output):
-        self.java_obj.process(input,output)
+        self.java_obj.process(input, output)
 
 
 class FactoryThresholdBinary:
     def __init__(self, dtype ):
-        self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
+        self.boof_image_type = dtype_to_Class_SingleBand(dtype)
 
     def localGaussian(self, radius, scale=0.95, down=True):
         """

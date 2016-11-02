@@ -52,7 +52,7 @@ class MyBuild(build_py):
 
 setup(name='PyBoof',
       cmdclass={'build_py': MyBuild},
-      version='0.25r1',
+      version='0.25r2',
       description='Py4J Python wrapper for BoofCV',
       long_description=open('README.md', 'r').read(),
       url='https://github.com/lessthanoptimal/PyBoof',
