@@ -60,16 +60,22 @@ class ConfigThreshold(JavaConfig):
         return JavaConfig(java_object)
 
 
-def interpolation_type_to_java(type):
-    if type == InterpolationType.NEAREST_NEIGHBOR:
+def interpolation_type_to_java(interp_type):
+    """
+    Converts PyBoof interpolation type into BoofCV java object
+    :param interp_type: Which interpolation method to use
+    :type interp_type: InterpolationType
+    :return: BoofCV interpolation type
+    """
+    if interp_type == InterpolationType.NEAREST_NEIGHBOR:
         return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.NEAREST_NEIGHBOR
-    elif type == InterpolationType.BICUBIC:
+    elif interp_type == InterpolationType.BICUBIC:
         return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.BICUBIC
-    elif type == InterpolationType.BILINEAR:
+    elif interp_type == InterpolationType.BILINEAR:
         return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.BILINEAR
-    elif type == InterpolationType.POLYNOMIAL4:
+    elif interp_type == InterpolationType.POLYNOMIAL4:
         return gateway.jvm.boofcv.alg.interpolate.TypeInterpolate.POLYNOMIAL4
-    elif type == InterpolationType.INTEGRAL:
+    elif interp_type == InterpolationType.INTEGRAL:
         raise RuntimeError("Integral is a special case and can't be handled the same way")
     else:
         raise RuntimeError("Unknown interpolation type")
@@ -108,15 +114,17 @@ def blur_median(image, output, radius=1):
     gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.median(image, output, radius, None)
 
 
-def shrink_image(image, output_size, type=InterpolationType.INTEGRAL, output=None):
+def shrink_image(image, output_size, interp_type=InterpolationType.INTEGRAL, output=None):
     """
     Shrinks the image using the specified interpolation method.  If the change in scale is larger than a factor
     of two then integral should be used.  Otherwise bilinear should be sufficient.
     :param image: Input image.
     :param output_size: Size of output image.  If a single value then this is the size of the largest axis
-    :param type: Interpolation type
+    :type output_size: int or (int,int)
+    :param interp_type: Interpolation type
+    :type interp_type: InterpolationType
     :param output: Optional storage for output image.  Will be resized
-    :return:
+    :return: The shrunk image
     """
 
     if isinstance(output_size, (int, long)):
@@ -133,14 +141,14 @@ def shrink_image(image, output_size, type=InterpolationType.INTEGRAL, output=Non
     else:
         output.reshape(output_shape[1], output_shape[0])
 
-    if type == InterpolationType.INTEGRAL:
+    if interp_type == InterpolationType.INTEGRAL:
         gateway.jvm.boofcv.alg.filter.misc.AverageDownSampleOps.down(image, output)
     else:
         scale_x = output_shape[1] / float(image.getWidth())
         scale_y = output_shape[0] / float(image.getHeight())
 
         fdist = gateway.jvm.boofcv.abst.distort.FDistort(image, output)
-        fdist.interp(interpolation_type_to_java(type))
+        fdist.interp(interpolation_type_to_java(interp_type))
         fdist.affine(scale_x, 0.0, 0.0, scale_y, 0.0, 0.0)
         fdist.apply()
 
