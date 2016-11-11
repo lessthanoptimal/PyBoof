@@ -12,7 +12,7 @@ configFiducial = pb.ConfigFiducialImage()
 configThreshold = pb.ConfigThreshold.create_local(pb.ThresholdType.LOCAL_SQUARE, 10)
 
 print "Configuring detector"
-detector = pb.FactoryFiducial(np.uint8).squareImage(configFiducial, configThreshold)
+detector = pb.FactoryFiducial(np.uint8).square_image(configFiducial, configThreshold)
 detector.set_intrinsic(intrinsic)
 detector.add_pattern(pb.load_single_band(data_path + "../patterns/pentarose.png", np.uint8), 4.0)
 detector.add_pattern(pb.load_single_band(data_path + "../patterns/yu.png", np.uint8), 4.0)

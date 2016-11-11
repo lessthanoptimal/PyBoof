@@ -45,18 +45,18 @@ class ConfigThreshold(JavaConfig):
         JavaConfig.__init__(self,"boofcv.factory.filter.binary.ConfigThreshold")
 
     @staticmethod
-    def create_fixed( threshold ):
+    def create_fixed(threshold):
         java_object = gateway.jvm.boofcv.factory.filter.binary.ConfigThreshold.fixed(float(threshold))
         return JavaConfig(java_object)
 
     @staticmethod
-    def create_global( type ):
-        java_object = gateway.jvm.pyboof.PyBoofEntryPoint.createGlobalThreshold(type)
+    def create_global(threshold_type):
+        java_object = gateway.jvm.pyboof.PyBoofEntryPoint.createGlobalThreshold(threshold_type)
         return JavaConfig(java_object)
 
     @staticmethod
-    def create_local( type , radius ):
-        java_object = gateway.jvm.boofcv.factory.filter.binary.ConfigThreshold.local(type,int(radius))
+    def create_local(threshold_type, radius):
+        java_object = gateway.jvm.boofcv.factory.filter.binary.ConfigThreshold.local(threshold_type, int(radius))
         return JavaConfig(java_object)
 
 
@@ -81,7 +81,7 @@ def interpolation_type_to_java(interp_type):
         raise RuntimeError("Unknown interpolation type")
 
 
-def border_to_java( border ):
+def border_to_java(border):
     """
 
     :param border:
@@ -155,22 +155,22 @@ def shrink_image(image, output_size, interp_type=InterpolationType.INTEGRAL, out
     return output
 
 
-def gradient(input, derivX , derivY, type=GradientType.SOBEL, border=Border.EXTENDED):
-    java_border = border_to_java(border)
+def gradient(input, derivX, derivY, gradient_type=GradientType.SOBEL, border_type=Border.EXTENDED):
+    java_border = border_to_java(border_type)
     java_DerivativeOps = gateway.jvm.boofcv.alg.filter.derivative.GImageDerivativeOps
     java_DerivativeType = gateway.jvm.boofcv.alg.filter.derivative.DerivativeType
-    if type is GradientType.SOBEL:
+    if gradient_type is GradientType.SOBEL:
         java_DerivativeOps.gradient(java_DerivativeType.SOBEL,input,derivX,derivY,java_border)
-    elif type is GradientType.PREWITT:
+    elif gradient_type is GradientType.PREWITT:
         java_DerivativeOps.gradient(java_DerivativeType.PREWITT,input,derivX,derivY,java_border)
-    elif type is GradientType.THREE:
+    elif gradient_type is GradientType.THREE:
         java_DerivativeOps.gradient(java_DerivativeType.THREE,input,derivX,derivY,java_border)
-    elif type is GradientType.TWO0:
+    elif gradient_type is GradientType.TWO0:
         java_DerivativeOps.gradient(java_DerivativeType.TWO_0,input,derivX,derivY,java_border)
-    elif type is GradientType.TWO1:
+    elif gradient_type is GradientType.TWO1:
         java_DerivativeOps.gradient(java_DerivativeType.TWO_1,input,derivX,derivY,java_border)
     else:
-        raise RuntimeError("Unknown gradient type "+type)
+        raise RuntimeError("Unknown gradient type " + gradient_type)
 
 
 class Transform2to2(JavaWrapper):

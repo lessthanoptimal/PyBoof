@@ -27,7 +27,7 @@ print "Detected {:4d} features in image 0".format(len(desc0))
 print "         {:4d}             image 1".format(len(desc1))
 
 factory_association = pb.FactoryAssociate()
-factory_association.set_score(pb.AssocScoreType.DEFAULT,feature_detector.get_descriptor_type())
+factory_association.set_score(pb.AssocScoreType.DEFAULT, feature_detector.get_descriptor_type())
 associator = factory_association.greedy()
 
 associator.set_source(desc0)

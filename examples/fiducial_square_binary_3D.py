@@ -12,7 +12,7 @@ configFiducial = pb.ConfigFiducialBinary()
 configThreshold = pb.ConfigThreshold.create_local(pb.ThresholdType.LOCAL_SQUARE, 10)
 
 print "Configuring detector"
-detector = pb.FactoryFiducial(np.uint8).squareBinary(configFiducial, configThreshold)
+detector = pb.FactoryFiducial(np.uint8).square_binary(configFiducial, configThreshold)
 # Without intrinsics only pattern ID and pixel location can be found
 detector.set_intrinsic(intrinsic)
 

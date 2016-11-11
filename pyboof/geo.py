@@ -1,4 +1,6 @@
 import math
+import struct
+import pyboof
 import numpy as np
 import py4j.java_gateway as jg
 from common import *
@@ -14,6 +16,7 @@ def real_ejml_to_nparray( ejml ):
             M[i,j] = ejml.unsafe_get(i,j)
     return M
 
+
 def real_nparray_to_ejml( array ):
     num_rows = array.shape[0]
     num_cols = array.shape[1]
@@ -23,6 +26,7 @@ def real_nparray_to_ejml( array ):
         for j in xrange(num_cols):
             M.unsafe_set(i,j,array[i,j])
     return M
+
 
 class Se3_F64(JavaWrapper):
     def __init__(self, java_Se3F64=None):
@@ -192,3 +196,90 @@ class Quadrilateral2D:
 
     def get_d(self):
         return self.d
+
+
+def p2b_list_point2DF64( pylist ):
+    """
+    Converts a python list of feature descriptors stored in 64bit floats into a BoofCV compatible format
+    :param pylist: Python list of 2d points
+    :type pylist: list[(float,float)]
+    :return: List of 2d points in BoofCV format
+    """
+    java_list = gateway.jvm.java.util.ArrayList()
+
+    if pyboof.mmap_file:
+        mmap_list_python_to_Point2DF64(pylist,java_list)
+    else:
+        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+    return java_list
+
+
+def b2p_list_point2DF64(boof_list):
+    """
+    Converts a BoofCV list of 2d points into a Python compatible format
+    :param boof_list: Descriptor list in BoofCV format
+    :return: List of 2d points in Python format
+    :type pylist: list[(float,float)]
+    """
+    pylist = []
+
+    if pyboof.mmap_file:
+        mmap_list_Point2DF64_to_python(boof_list,pylist)
+    else:
+        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+    return pylist
+
+
+def mmap_list_python_to_Point2DF64(pylist, java_list):
+    """
+    Converts a python list of 2d float tuples into a list of Point2D_64F in java using memmap file
+
+    :param pylist: (Input) Python list of 2D float tuples.
+    :type pylist: list[(float,float)]
+    :param java_list: (Output) Java list to store Point2D_64F
+    """
+    num_elements = len(pylist)
+    mm = pyboof.mmap_file
+
+    # max number of list elements it can write at once
+    max_elements = (pyboof.mmap_size-100)/(2*8)
+
+    curr = 0
+    while curr < num_elements:
+        # Write as much of the list as it can to the mmap file
+        num_write = min(max_elements,num_elements-curr)
+        mm.seek(0)
+        mm.write(struct.pack('>HI', pyboof.MmapType.LIST_POINT2D_F64, num_elements))
+        for i in range(curr, curr+num_write):
+            mm.write(struct.pack('>2d', *pylist[i]))
+
+        # Now tell the java end to read what it just wrote
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Point2DF64(java_list)
+
+        # move on to the next block
+        curr = curr + num_write
+
+
+def mmap_list_Point2DF64_to_python( java_list , pylist ):
+    """
+    Converts a java list of Point2D_F64 into a python list of float 2D tuples using memmap file
+    :param java_list: Input: java list
+    :param pylist: output: python list
+    :type pylist: list[(float,float)]
+    """
+    num_elements = java_list.size()
+    mm = pyboof.mmap_file
+
+    num_read = 0
+    while num_read < num_elements:
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point2DF64(java_list, num_read)
+        mm.seek(0)
+        data_type, num_found = struct.unpack(">HI", mm.read(2+4))
+        if data_type != pyboof.MmapType.LIST_POINT2D_F64:
+            raise Exception("Unexpected data type in mmap file. %d" % data_type)
+        if num_found > num_elements-num_read:
+            raise Exception("Too many elements returned. "+str(num_found))
+        for i in xrange(num_found):
+            desc = struct.unpack(">2d", mm.read(8*2))
+            pylist.append(desc)
+        num_read += num_found

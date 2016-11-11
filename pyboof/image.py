@@ -315,11 +315,13 @@ def boof_to_ndarray( boof ):
         raise Exception("Boof image type not yet supported")
 
 
-def gradient_dtype( dtype ):
+def gradient_dtype(dtype):
     """
     Returns the appropriate image dtype of the provided image dtype
     :param dtype: Type of input image data
+    :type dtype: np.dtype
     :return: Appropriate image type to store gradient data
+    :rtype: np.dtype
     """
     if dtype == np.uint8:
         return np.int16

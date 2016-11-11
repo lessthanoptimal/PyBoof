@@ -54,7 +54,7 @@ if not ret:
     print "Failed to read frame"
     exit(-1)
 
-image_input = tracker.getImageType().create_boof_image(frame.shape[1], frame.shape[0])
+image_input = tracker.get_image_type().create_boof_image(frame.shape[1], frame.shape[0])
 boof_color = None
 
 while True:

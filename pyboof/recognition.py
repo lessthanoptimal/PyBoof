@@ -16,11 +16,12 @@ class ConfigFiducialBinary(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self,"boofcv.factory.fiducial.ConfigFiducialBinary")
 
+
 class FactoryFiducial:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
 
-    def squareImage(self, config_fiducial, config_threshold):
+    def square_image(self, config_fiducial, config_threshold):
         """
         Creates a square image fiducial detector
 
@@ -35,7 +36,7 @@ class FactoryFiducial:
             squareImage(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
         return FiducialImageDetector(java_detector)
 
-    def squareBinary(self, config_fiducial, config_threshold):
+    def square_binary(self, config_fiducial, config_threshold):
         """
         Creates a binary image fiducial detector
 
@@ -53,8 +54,18 @@ class FactoryFiducial:
     def chessboard(self):
         pass
 
-    def squareGrid(self):
+    def square_grid(self):
         pass
+
+
+class FiducialCalibrationDetector(JavaWrapper):
+    def __init__(self, java_object):
+        JavaWrapper.__init__(self, java_object)
+        self.detected_points = []
+        self.layout = java_object.getLayout()
+
+    def detect(self, image):
+        self.java_obj.detect(image)
 
 
 class FiducialDetector(JavaWrapper):
@@ -64,7 +75,7 @@ class FiducialDetector(JavaWrapper):
     """
 
     def __init__(self, java_FiducialDetector):
-        self.set_java_object(java_FiducialDetector)
+        JavaWrapper.__init__(self, java_FiducialDetector)
 
     def detect(self, image):
         self.java_obj.detect(image)
@@ -129,16 +140,16 @@ class ConfigTld(JavaConfig):
             config = gateway.jvm.boofcv.abst.tracker.ConfigTld(obj)
         else:
             config = obj
-            JavaConfig.__init__(self, config)
+        JavaConfig.__init__(self, config)
 
 
 class ConfigMeanShiftComaniciu(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.abst.tracker.ConfigComaniciu2003")
+        JavaConfig.__init__(self, "boofcv.abst.tracker.ConfigComaniciu2003")
 
 
 class FactoryTrackerObjectQuad:
-    def __init__(self, image_type ):
+    def __init__(self, image_type):
         """
         Creates a factory for a specific image type.
         :param image_type: Specifies the type of image it processes.  Can be a dtype or ImageType
@@ -162,7 +173,7 @@ class FactoryTrackerObjectQuad:
             FactoryTrackerObjectQuad.circulant(config, boof_image_class)
         return TrackerObjectQuad(java_tracker)
 
-    def tld(self, config=None ):
+    def tld(self, config=None):
         """
         Creates a TLD tracker
         :param config: Configuration for tracker or None to use default
@@ -233,5 +244,5 @@ class TrackerObjectQuad(JavaWrapper):
             location.set(boof_quad)
         return success
 
-    def getImageType(self):
+    def get_image_type(self):
         return ImageType(self.java_obj.getImageType())

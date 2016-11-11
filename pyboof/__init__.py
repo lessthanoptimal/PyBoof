@@ -26,7 +26,8 @@ if build_date is None:
     print "Can't find build_data.txt at "+os.path.dirname(os.path.realpath(__file__))
     exit(1)
 
-def check_jvm( set_date ):
+
+def check_jvm(set_date):
     global gateway
     try:
         gateway.jvm.pyboof.PyBoofEntryPoint.nothing()
@@ -62,6 +63,7 @@ def shutdown_jvm():
         gateway = None
         os.kill(java_pid, signal.SIGTERM)
         java_pid = None
+
 
 # Catch control-c and kill the java process "gracefully" first.
 def signal_handler(signal, frame):
