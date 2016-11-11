@@ -17,7 +17,7 @@ detector = pb.FactoryFiducial(np.uint8).square_binary(configFiducial, configThre
 detector.set_intrinsic(intrinsic)
 
 print "Detecting image"
-detector.detect(pb.load_single_band(os.path.join( data_path, "image0000.jpg"), np.uint8))
+detector.detect(pb.load_single_band(os.path.join(data_path, "image0000.jpg"), np.uint8))
 
 print "Number Found = "+str(detector.get_total())
 

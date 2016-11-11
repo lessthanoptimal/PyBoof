@@ -1,25 +1,95 @@
 from geo import *
 from calib import *
+from pyboof import gateway
 
 
 class ConfigPolygonDetector(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.struct.Configuration.ConfigPolygonDetector")
+        JavaConfig.__init__(self, "boofcv.struct.Configuration.ConfigPolygonDetector")
 
 
 class ConfigFiducialImage(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.factory.fiducial.ConfigFiducialImage")
+        JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigFiducialImage")
 
 
 class ConfigFiducialBinary(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.factory.fiducial.ConfigFiducialBinary")
+        JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigFiducialBinary")
+
+
+class ConfigFiducialChessboard(JavaConfig):
+    def __init__(self, num_rows, num_cols, square_width):
+        java_obj = gateway.jvm.boofcv.abst.fiducial.calib.ConfigChessboard(
+            int(num_rows), int(num_cols), float(square_width))
+        JavaConfig.__init__(self, java_obj)
+
+
+class ConfigFiducialSquareGrid(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigSquareGrid")
+
+
+class ConfigFiducialBinaryGrid(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigSquareGridBinary")
+
+
+class FactoryFiducialCalibration:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def chessboard(config):
+        """
+        Creates a chessboard detector
+
+        :param config:  Configuration for the detector
+        :type config: ConfigFiducialChessboard
+        :return: Calibration target detector
+        :rtype: FiducialCalibrationDetector
+        """
+        java_detector = \
+            gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.detectorChessboard(config.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def square_grid(config):
+        """
+        Creates a square grid detector
+
+        :param config:  Configuration for the detector
+        :type config: ConfigFiducialSquareGrid
+        :return: Calibration target detector
+        :rtype: FiducialCalibrationDetector
+        """
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+            detectorSquareGrid(config.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def binary_grid(config):
+        """
+        Creates a binary grid detector
+
+        :param config:  Configuration for the detector
+        :type config: ConfigFiducialBinaryGrid
+        :return: Calibration target detector
+        :rtype: FiducialCalibrationDetector
+        """
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+            detectorBinaryGrid(config.java_obj)
+        return FiducialCalibrationDetector(java_detector)
 
 
 class FactoryFiducial:
-    def __init__(self, dtype ):
-        self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
+    def __init__(self, dtype):
+        """
+        Configures factory for the specific image type
+        :param dtype: Type of single band image
+        :type dtype: np.dtype
+        """
+        self.boof_image_type = dtype_to_Class_SingleBand(dtype)
 
     def square_image(self, config_fiducial, config_threshold):
         """
@@ -51,26 +121,58 @@ class FactoryFiducial:
             squareBinary(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
         return FiducialDetector(java_detector)
 
-    def chessboard(self):
-        pass
+    def chessboard(self, config):
+        """
+        Chessboard detector
 
-    def square_grid(self):
-        pass
+        :param config: Fiducial configuration
+        :type config: ConfigFiducialChessboard
+        :return: FiducialDetector
+        :rtype: FiducialDetector
+        """
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            calibChessboard(config.java_obj, self.boof_image_type)
+        return FiducialDetector(java_detector)
+
+    def square_grid(self, config):
+        """
+        Square grid detector
+
+        :param config: Fiducial configuration
+        :type config: ConfigFiducialSquareGrid
+        :return: FiducialDetector
+        :rtype: FiducialDetector
+        """
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            calibSquareGrid(config.java_obj, self.boof_image_type)
+        return FiducialDetector(java_detector)
 
 
 class FiducialCalibrationDetector(JavaWrapper):
+    """
+    Fiducial detector for calibration targets.  Stores the list of known locations in the 2D fiducial reference
+    frame on self.layout.  After detect is called self.detected_points is a list of all the detected calibration
+    points seen in the image.  (index,x,y) where index refers to which point in the layout and (x,y) is the pixel
+    coordinate.
+    """
     def __init__(self, java_object):
         JavaWrapper.__init__(self, java_object)
         self.detected_points = []
-        self.layout = java_object.getLayout()
+        self.layout = b2p_list_point2DF64(java_object.getLayout())
 
     def detect(self, image):
-        self.java_obj.detect(image)
+        self.java_obj.process(image)
+
+        self.detected_points = []
+        jdetected = self.java_obj.getDetectedPoints()
+        for i in range(jdetected.size()):
+            jp = jdetected.get(i)
+            self.detected_points.append((jp.getIndex(), jp.getX(), jp.getY()))
 
 
 class FiducialDetector(JavaWrapper):
     """
-    Detects fiducials and estimates their ID and 3D pose
+    Detects fiducials and estimates their ID, 3D pose, and image location.
     Wrapper around BoofCV class of the same name
     """
 
@@ -160,7 +262,7 @@ class FactoryTrackerObjectQuad:
         else:
             self.image_type = ImageType(dtype_to_ImageType(image_type))
 
-    def circulant(self, config=None ):
+    def circulant(self, config=None):
         """
         Creates a Circulant tracker
         :param config: Configuration for tracker or None to use default

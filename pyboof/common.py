@@ -47,14 +47,14 @@ class JavaConfig(JavaWrapper):
     attributes
     """
     # TODO variables which are java classes are a little messed up
-    def __init__(self, java_class_path ):
+    def __init__(self, java_class_path):
         if isinstance(java_class_path, basestring):
             self.java_class_path = java_class_path
 
             words = java_class_path.replace('$',".").split(".")
 
             a = gateway.jvm.__getattr__(words[0])
-            for i in range(1,len(words)):
+            for i in range(1, len(words)):
                 a = a.__getattr__(words[i])
 
             self.java_obj = a.__call__()
