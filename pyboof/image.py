@@ -172,11 +172,7 @@ def load_single_band( path , dtype ):
     file_path = os.path.abspath(path)
 
     boof_type = dtype_to_Class_SingleBand(dtype)
-    found = gateway.jvm.boofcv.io.image.UtilImageIO.loadImage(file_path,boof_type)
-    if found is None:
-        print file_path
-        raise Exception("Can't find image or image format can't be read")
-    return found
+    return gateway.jvm.boofcv.io.image.UtilImageIO.loadImage(file_path,boof_type)
 
 
 def load_planar( path , dtype ):

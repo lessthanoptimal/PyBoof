@@ -180,8 +180,11 @@ class FiducialDetector(JavaWrapper):
         self.java_obj.detect(image)
 
     def set_intrinsic(self, intrinsic):
-        distortion = create_narrow_lens_distorter(intrinsic)
-        self.java_obj.setLensDistortion(distortion.java_obj)
+        if intrinsic is None:
+            self.java_obj.setLensDistortion(None)
+        else:
+            distortion = create_narrow_lens_distorter(intrinsic)
+            self.java_obj.setLensDistortion(distortion.java_obj)
 
     def get_total(self):
         return self.java_obj.totalFound()
