@@ -49,8 +49,7 @@ class FactoryFiducialCalibration:
         :return: Calibration target detector
         :rtype: FiducialCalibrationDetector
         """
-        java_detector = \
-            gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.detectorChessboard(config.java_obj)
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboard(config.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
     @staticmethod
@@ -63,8 +62,7 @@ class FactoryFiducialCalibration:
         :return: Calibration target detector
         :rtype: FiducialCalibrationDetector
         """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
-            detectorSquareGrid(config.java_obj)
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.SquareGrid(config.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
     @staticmethod
@@ -77,8 +75,7 @@ class FactoryFiducialCalibration:
         :return: Calibration target detector
         :rtype: FiducialCalibrationDetector
         """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
-            detectorBinaryGrid(config.java_obj)
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.BinaryGrid(config.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
 
