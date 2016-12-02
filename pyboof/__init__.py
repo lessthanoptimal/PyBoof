@@ -103,22 +103,22 @@ class MmapType:
     LIST_TUPLE_F64 = 3
 
 
-def init_memmap( size_MB=2):
+def init_memmap(size_mb=2):
     """
     Call to enable use of memory mapped files for quick communication between Python and Java.  This
     faster communication method requires specialized code so is only used when large amounts of memory
     is being transferred.
 
-    :param size_MB: Size of the memory mapped file in megabytes
-    :type size_MB: int
+    :param size_mb: Size of the memory mapped file in megabytes
+    :type size_mb: int
     """
     global mmap_size, mmap_file
-    mmap_name = "mmap_python_java.mmap"
-    mmap_size = size_MB*1024*1024
-    mmap_name_path = os.path.join(os.getcwd(), mmap_name)
-    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_name_path, size_MB)
+    import tempfile
+    mmap_path = os.path.join(tempfile.gettempdir(),"pyboof_mmap")
+    mmap_size = size_mb * 1024 * 1024
+    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_path, size_mb)
     # Open file in read,write,binary mode
-    mmap_fid = open(mmap_name, "r+b")
+    mmap_fid = open(mmap_path, "r+b")
     mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
                           prot=mmap.PROT_READ | mmap.PROT_WRITE)
 

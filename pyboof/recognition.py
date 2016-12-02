@@ -14,8 +14,10 @@ class ConfigFiducialImage(JavaConfig):
 
 
 class ConfigFiducialBinary(JavaConfig):
-    def __init__(self):
+    def __init__(self, target_width=None):
         JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigFiducialBinary")
+        if target_width is not None:
+            self.targetWidth = float(target_width)
 
 
 class ConfigFiducialChessboard(JavaConfig):
@@ -188,6 +190,9 @@ class FiducialDetector(JavaWrapper):
 
     def get_total(self):
         return self.java_obj.totalFound()
+
+    def is_3d(self):
+        return self.java_obj.is3D()
 
     def get_fiducial_to_camera(self, which):
         """

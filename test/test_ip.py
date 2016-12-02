@@ -18,23 +18,23 @@ class ChecksIP(unittest.TestCase):
 
         # ---------- Single axis specified
         # Shrink with integration
-        found = pb.shrink_image(j_img, 60, interp_type=pb.InterpolationType.INTEGRAL)
+        found = pb.shrink_image(j_img, 60, interp_type=pb.InterpolateType.INTEGRAL)
         self.assertEqual(60*100/120, found.getWidth())
         self.assertEqual(60*120/120, found.getHeight())
 
         # Shrink with interpolation
-        found = pb.shrink_image(j_img, 60, interp_type=pb.InterpolationType.BILINEAR)
+        found = pb.shrink_image(j_img, 60, interp_type=pb.InterpolateType.BILINEAR)
         self.assertEqual(60 * 100 / 120, found.getWidth())
         self.assertEqual(60 * 120 / 120, found.getHeight())
 
         # ---------- Both axises specified
         # Shrink with integration
-        found = pb.shrink_image(j_img, (50, 60), interp_type=pb.InterpolationType.INTEGRAL)
+        found = pb.shrink_image(j_img, (50, 60), interp_type=pb.InterpolateType.INTEGRAL)
         self.assertEqual(60, found.getWidth())
         self.assertEqual(50, found.getHeight())
 
         # Shrink with interpolation
-        found = pb.shrink_image(j_img, (50, 60), interp_type=pb.InterpolationType.BILINEAR)
+        found = pb.shrink_image(j_img, (50, 60), interp_type=pb.InterpolateType.BILINEAR)
         self.assertEqual(60, found.getWidth())
         self.assertEqual(50, found.getHeight())
 

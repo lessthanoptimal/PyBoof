@@ -8,7 +8,7 @@ data_path = "../data/example/fiducial/binary/"
 intrinsic = pb.CameraPinhole()
 intrinsic.load(os.path.join(data_path, "intrinsic.yaml"))
 
-configFiducial = pb.ConfigFiducialBinary()
+configFiducial = pb.ConfigFiducialBinary(target_width=0.3)
 configThreshold = pb.ConfigThreshold.create_local(pb.ThresholdType.LOCAL_SQUARE, 10)
 
 print "Configuring detector"
@@ -24,14 +24,10 @@ print "Number Found = "+str(detector.get_total())
 for i in range(detector.get_total()):
     print "=========== Found #"+str(i)
     fid_to_cam = detector.get_fiducial_to_camera(i)
-    # print fid_to_cam
     print "Pattern ID = "+str(detector.get_id(i))
-    print "Rotation"
-    print "  "+str(fid_to_cam.get_rotation())
-    print "Translation"
-    print "  "+str(fid_to_cam.get_translation())
-    print "Image Location (pixels)"
-    print "  " + str(detector.get_image_location(i))
-
-
-    # TODO Render results
+    print "Image Location " + str(detector.get_image_location(i))
+    if detector.is_3d():
+        print "Rotation"
+        print "  "+str(fid_to_cam.get_rotation())
+        print "Translation"
+        print "  "+str(fid_to_cam.get_translation())
