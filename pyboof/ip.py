@@ -32,7 +32,7 @@ class ThresholdType:
     LOCAL_SAVOLA   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SAVOLA
 
 
-class InterpolateType:
+class InterpolationType:
     NEAREST_NEIGHBOR = 0
     BILINEAR = 1
     BICUBIC = 2
@@ -67,15 +67,15 @@ def interpolation_type_to_java(interp_type):
     :type interp_type: int
     :return: BoofCV interpolation type
     """
-    if interp_type == InterpolateType.NEAREST_NEIGHBOR:
-        return gateway.jvm.boofcv.alg.interpolate.InterpolateType.NEAREST_NEIGHBOR
-    elif interp_type == InterpolateType.BICUBIC:
-        return gateway.jvm.boofcv.alg.interpolate.InterpolateType.BICUBIC
-    elif interp_type == InterpolateType.BILINEAR:
-        return gateway.jvm.boofcv.alg.interpolate.InterpolateType.BILINEAR
-    elif interp_type == InterpolateType.POLYNOMIAL4:
-        return gateway.jvm.boofcv.alg.interpolate.InterpolateType.POLYNOMIAL4
-    elif interp_type == InterpolateType.INTEGRAL:
+    if interp_type == InterpolationType.NEAREST_NEIGHBOR:
+        return gateway.jvm.boofcv.alg.interpolate.InterpolationType.NEAREST_NEIGHBOR
+    elif interp_type == InterpolationType.BICUBIC:
+        return gateway.jvm.boofcv.alg.interpolate.InterpolationType.BICUBIC
+    elif interp_type == InterpolationType.BILINEAR:
+        return gateway.jvm.boofcv.alg.interpolate.InterpolationType.BILINEAR
+    elif interp_type == InterpolationType.POLYNOMIAL4:
+        return gateway.jvm.boofcv.alg.interpolate.InterpolationType.POLYNOMIAL4
+    elif interp_type == InterpolationType.INTEGRAL:
         raise RuntimeError("Integral is a special case and can't be handled the same way")
     else:
         raise RuntimeError("Unknown interpolation type")
@@ -114,7 +114,7 @@ def blur_median(image, output, radius=1):
     gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.median(image, output, radius, None)
 
 
-def shrink_image(image, output_size, interp_type=InterpolateType.INTEGRAL, output=None):
+def shrink_image(image, output_size, interp_type=InterpolationType.INTEGRAL, output=None):
     """
     Shrinks the image using the specified interpolation method.  If the change in scale is larger than a factor
     of two then integral should be used.  Otherwise bilinear should be sufficient.
@@ -122,7 +122,7 @@ def shrink_image(image, output_size, interp_type=InterpolateType.INTEGRAL, outpu
     :param output_size: Size of output image.  If a single value then this is the size of the largest axis
     :type output_size: int or (int,int)
     :param interp_type: Interpolation type
-    :type interp_type: InterpolateType
+    :type interp_type: InterpolationType
     :param output: Optional storage for output image.  Will be resized
     :return: The shrunk image
     """
@@ -141,7 +141,7 @@ def shrink_image(image, output_size, interp_type=InterpolateType.INTEGRAL, outpu
     else:
         output.reshape(output_shape[1], output_shape[0])
 
-    if interp_type == InterpolateType.INTEGRAL:
+    if interp_type == InterpolationType.INTEGRAL:
         gateway.jvm.boofcv.alg.filter.misc.AverageDownSampleOps.down(image, output)
     else:
         scale_x = output_shape[1] / float(image.getWidth())
@@ -398,7 +398,7 @@ class FactoryInterpolation:
         :return: java_object
         """
         java_border = border_to_java(border_type)
-        java_interp = interpolation_type_to_java(InterpolateType.BILINEAR)
+        java_interp = interpolation_type_to_java(InterpolationType.BILINEAR)
 
         return gateway.jvm.boofcv.factory.interpolate.FactoryInterpolation.\
             createPixel(float(min_pixel), float(max_pixel), java_interp, java_border, self.image_type.java_obj)
