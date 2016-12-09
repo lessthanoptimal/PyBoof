@@ -198,6 +198,32 @@ class Quadrilateral2D:
         return self.d
 
 
+def p2b_list_AssociatedPair( pylist ):
+    java_list = gateway.jvm.java.util.ArrayList()
+
+    if pyboof.mmap_file:
+        mmap_list_python_to_AssociatedPair(pylist, java_list)
+    else:
+        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+    return java_list
+
+
+def b2p_list_AssociatedPair(boof_list):
+    """
+    Converts a BoofCV list AssociatedPair into a Python compatible format
+    :param boof_list: Descriptor list in BoofCV format
+    :return: List of 2d points in Python format
+    :type pylist: list[(float,float)]
+    """
+    pylist = []
+
+    if pyboof.mmap_file:
+        mmap_list_AssociatedPair_to_python(boof_list,pylist)
+    else:
+        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+    return pylist
+
+
 def p2b_list_point2DF64( pylist ):
     """
     Converts a python list of feature descriptors stored in 64bit floats into a BoofCV compatible format
@@ -229,6 +255,61 @@ def b2p_list_point2DF64(boof_list):
         raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
     return pylist
 
+
+def mmap_list_python_to_AssociatedPair( pylist, java_list):
+    """
+    Converts a python list of ((x0,y0),(x1,y1)) a java list of AssociatedPair using memmap file
+
+    :param pylist: (Input) Python list of 2D float tuples.
+    :type pylist: list[((float,float),(float,float))]
+    :param java_list: (Output) Java list to store AssociatedPair
+    """
+    num_elements = len(pylist)
+    mm = pyboof.mmap_file
+
+    # max number of list elements it can write at once
+    max_elements = (pyboof.mmap_size-100)/(4*8)
+
+    curr = 0
+    while curr < num_elements:
+        # Write as much of the list as it can to the mmap file
+        num_write = min(max_elements,num_elements-curr)
+        mm.seek(0)
+        mm.write(struct.pack('>HI', pyboof.MmapType.LIST_ASSOCIATEDPAIR_F64, num_elements))
+        for i in range(curr, curr+num_write):
+            p = pylist[i]
+            mm.write(struct.pack('>4d', float(p[0][0]), float(p[0][1]), float(p[1][0]), float(p[1][1])))
+
+        # Now tell the java end to read what it just wrote
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_AssociatedPair_F64(java_list)
+
+        # move on to the next block
+        curr = curr + num_write
+
+
+def mmap_list_AssociatedPair_to_python( java_list , pylist ):
+    """
+    Converts a java list of AssociatedPair into a python list of ((x,y),(x,y)) using memmap file
+    :param java_list: Input: java list
+    :param pylist: output: python list
+    :type pylist: list[((float,float),(float,float))]
+    """
+    num_elements = java_list.size()
+    mm = pyboof.mmap_file
+
+    num_read = 0
+    while num_read < num_elements:
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_AssociatedPair_F64(java_list, num_read)
+        mm.seek(0)
+        data_type, num_found = struct.unpack(">HI", mm.read(2+4))
+        if data_type != pyboof.MmapType.LIST_ASSOCIATEDPAIR_F64:
+            raise Exception("Unexpected data type in mmap file. %d" % data_type)
+        if num_found > num_elements-num_read:
+            raise Exception("Too many elements returned. "+str(num_found))
+        for i in xrange(num_found):
+            desc = struct.unpack(">4d", mm.read(8*4))
+            pylist.append(((desc[0],desc[1]), (desc[2],desc[3])))
+        num_read += num_found
 
 def mmap_list_python_to_Point2DF64(pylist, java_list):
     """

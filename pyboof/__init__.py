@@ -101,6 +101,7 @@ class MmapType:
     IMAGE_F32 = 1
     LIST_POINT2D_F64 = 2
     LIST_TUPLE_F64 = 3
+    LIST_ASSOCIATEDPAIR_F64 = 4
 
 
 def init_memmap(size_mb=2):

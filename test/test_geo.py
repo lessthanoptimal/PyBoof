@@ -10,6 +10,27 @@ pb.init_memmap()
 
 class TestMemMapFunctions(unittest.TestCase):
 
+    def test_convert_list_AssociatedPair(self):
+        original = [((1, 2.34),(4,4.5)), ((-23.4, 934.123),(5.1,3.2))]
+
+        # python to java
+        java_list = gateway.jvm.java.util.ArrayList()
+        pb.mmap_list_python_to_AssociatedPair(original, java_list)
+
+        # java to python
+        found = []
+        pb.mmap_list_AssociatedPair_to_python(java_list, found)
+
+        self.assertEqual(len(original), len(found))
+
+        for i in xrange(len(original)):
+            a = original[i]
+            b = found[i]
+            self.assertEquals(a[0][0], b[0][0])
+            self.assertEquals(a[0][1], b[0][1])
+            self.assertEquals(a[1][0], b[1][0])
+            self.assertEquals(a[1][1], b[1][1])
+
     def test_convert_list_Point2DF64(self):
         original = [(1, 2.34), (-23.4, 934.123)]
 

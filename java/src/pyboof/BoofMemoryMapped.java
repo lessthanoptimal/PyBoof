@@ -6,6 +6,7 @@ import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.InterleavedU8;
 import boofcv.struct.image.Planar;
 import georegression.struct.point.Point2D_F64;
+import boofcv.struct.geo.AssociatedPair;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -113,6 +114,45 @@ public class BoofMemoryMapped {
 
 			mmf.putDouble(p.x);
 			mmf.putDouble(p.y);
+		}
+	}
+
+	public void read_List_AssociatedPair_F64(List<AssociatedPair> list ) {
+		mmf.position(0);
+		if( mmf.getShort() != Type.LIST_ASSOCIATED_PAIR_F64.ordinal() ) {
+			throw new RuntimeException("Not a list of AssociatedPair!");
+		}
+		int numElements = mmf.getInt();
+
+		byte data[] = new byte[8*4];
+		ByteBuffer bb = ByteBuffer.wrap(data);
+		for (int i = 0; i < numElements; i++) {
+			mmf.get(data,0,data.length);
+			AssociatedPair p = new AssociatedPair();
+			p.p1.x = bb.getDouble(0);
+			p.p1.y = bb.getDouble(8);
+			p.p2.x = bb.getDouble(16);
+			p.p2.y = bb.getDouble(24);
+			list.add( p );
+		}
+	}
+
+	public void write_List_AssociatedPair_F64(List<AssociatedPair> list , int startIndex ) {
+
+		int maxElements = (mmf.limit()-100)/(8*4);
+		int numElements = Math.min(list.size(),maxElements);
+
+		mmf.position(0);
+		mmf.putShort((short)Type.LIST_ASSOCIATED_PAIR_F64.ordinal());
+		mmf.putInt(numElements);
+
+		for (int i = 0; i < numElements; i++) {
+			AssociatedPair p = list.get(startIndex+i);
+
+			mmf.putDouble(p.p1.x);
+			mmf.putDouble(p.p1.y);
+			mmf.putDouble(p.p2.x);
+			mmf.putDouble(p.p2.y);
 		}
 	}
 
@@ -232,6 +272,7 @@ public class BoofMemoryMapped {
 		IMAGE_U8,
 		IMAGE_F32,
 		LIST_POINT2D_F64,
-		LIST_TUPLE_F64
+		LIST_TUPLE_F64,
+		LIST_ASSOCIATED_PAIR_F64
 	}
 }
