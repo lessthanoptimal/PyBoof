@@ -131,4 +131,5 @@ from ip import *
 from recognition import *
 from feature import *
 from stereo import *
+from sfm import *
 import swing

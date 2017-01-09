@@ -150,6 +150,23 @@ class AssociateDescription(JavaWrapper):
         return self.java_obj.getMatches()
 
 
+def match_idx_to_point_pairs(matches, list_src, list_dst):
+    """
+
+    :param matches: List of (src index, dst index, ?)
+    :param list_src: List of src points
+    :param list_dst: List of dst points
+    :return: List in point format (src point, dst point)
+    """
+    pairs = [None]*len(matches)
+    for idx,m in enumerate(matches):
+        a = list_src[m[0]]
+        b = list_dst[m[1]]
+
+        pairs[idx] = (a, b)
+    return pairs
+
+
 def read_list_tuple_desc_f64(f, list_length):
     output = []
     for i in xrange(list_length):

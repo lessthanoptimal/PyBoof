@@ -46,6 +46,14 @@ class CameraPinhole(CameraModel):
         self.t2 = 0
 
     def load(self, file_name):
+        """
+        Loads BoofCV formatted intrinsic parameters with radial distortion from a yaml file
+
+        :param file_name: Path to yaml file
+        :type file_name: str
+        :return: this class
+        :rtype: CameraPinhole
+        """
         file_path = os.path.abspath(file_name)
         boof_intrinsic = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
 
@@ -53,6 +61,7 @@ class CameraPinhole(CameraModel):
             raise RuntimeError("Can't load intrinsic parameters")
 
         self.set_from_boof(boof_intrinsic)
+        return self
 
     def save(self, file_name):
         file_path = os.path.abspath(file_name)
