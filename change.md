@@ -1,6 +1,12 @@
 ### Version 0.28
 
 - Python 3
+- TODO Estimate camera motion
+- TODO QR Code Decoder
+- TODO QR Code Encoder
+- TODO Camera Calibration. Pinhole
+- TODO Camera Calibration. Fisheye
+- TODO FDistort
 
 ### Version 0.26
 

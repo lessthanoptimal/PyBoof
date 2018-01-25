@@ -2,7 +2,7 @@ import pyboof as pb
 import numpy as np
 import os
 import cv2
-import transforms3d.euler
+import transforms3d.euler # pip install transforms3d
 
 pb.init_memmap(5)
 
