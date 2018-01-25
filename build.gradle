@@ -7,7 +7,7 @@ group = 'org.pyboof'
 version = '0.26'
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.14'
+    gradleVersion = '4.3'
 }
 
 repositories {
