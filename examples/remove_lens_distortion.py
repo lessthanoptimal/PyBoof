@@ -17,4 +17,4 @@ pb.remove_distortion(original, undistorted, intrinsic)
 image_list = [(original, "Original"), (undistorted, "Undistorted")]
 pb.swing.show_list(image_list, title="Lens Distortion")
 
-raw_input("Press any key to exit")
+input("Press any key to exit")

@@ -35,5 +35,5 @@ transform.set_rotation_wide_to_narrow(transforms3d.euler.euler2mat(-0.1,-0.4,-1.
 image_distorter.apply(image_fisheye, image_pinhole)
 cv2.imshow("Pinhole Rotated", pb.boof_to_ndarray(image_pinhole)[...,[2,1,0]])
 
-print "Close Windows to Exit"
+print("Close Windows to Exit")
 cv2.waitKey(0)

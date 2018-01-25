@@ -25,4 +25,4 @@ image_list = [(boof_cv, "OpenCV"),
 
 pb.swing.show_list(image_list, title="Images")
 
-raw_input("Press any key to exit")
+input("Press any key to exit")

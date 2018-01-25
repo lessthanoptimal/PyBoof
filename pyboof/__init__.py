@@ -23,7 +23,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"build_date.t
     build_date = f.readline()
 
 if build_date is None:
-    print "Can't find build_data.txt at "+os.path.dirname(os.path.realpath(__file__))
+    print("Can't find build_data.txt at "+os.path.dirname(os.path.realpath(__file__)))
     exit(1)
 
 
@@ -36,8 +36,8 @@ def check_jvm(set_date):
         else:
             java_build_date = gateway.jvm.pyboof.PyBoofEntryPoint.getBuildDate()
             if build_date != java_build_date:
-                print "Python and Java build dates do not match.  Killing Java process."
-                print "  build dates = {:s} {:s}".format(build_date,java_build_date)
+                print("Python and Java build dates do not match.  Killing Java process.")
+                print("  build dates = {:s} {:s}".format(build_date,java_build_date))
                 gateway.close()
                 time.sleep(1)
                 return False
@@ -45,9 +45,9 @@ def check_jvm(set_date):
     except Py4JNetworkError:
         return False
     except Py4JError as e:
-        print e
-        print "Py4J appears to have attached itself to a process that doesn't have the expected jars.  " \
-              "Try killing py4j processes"
+        print( e )
+        print("Py4J appears to have attached itself to a process that doesn't have the expected jars.  " \
+              "Try killing py4j processes")
         exit(1)
     return True
 
@@ -75,7 +75,7 @@ signal.signal(signal.SIGINT, signal_handler)
 atexit.register(shutdown_jvm)
 
 if not check_jvm(False):
-    print "Launching Java process"
+    print("Launching Java process")
     jar_path = os.path.realpath(__file__)
     jar_path = os.path.join(os.path.dirname(jar_path),"PyBoof-all.jar")
     proc = subprocess.Popen(["java","-jar",jar_path])
@@ -90,7 +90,7 @@ if not check_jvm(False):
             break
 
     if not success:
-        print "Failed to successfully launch the JVM after 5 seconds.  Aborting"
+        print("Failed to successfully launch the JVM after 5 seconds.  Aborting")
         pass
 
 class MmapType:
@@ -123,13 +123,13 @@ def init_memmap(size_mb=2):
     mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
                           prot=mmap.PROT_READ | mmap.PROT_WRITE)
 
-from calib import *
-from common import *
-from geo import *
-from image import *
-from ip import *
-from recognition import *
-from feature import *
-from stereo import *
-from sfm import *
-import swing
+from pyboof.calib import *
+from pyboof.common import *
+from pyboof.geo import *
+from pyboof.image import *
+from pyboof.ip import *
+from pyboof.recognition import *
+from pyboof.feature import *
+from pyboof.stereo import *
+from pyboof.sfm import *
+import pyboof.swing

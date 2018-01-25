@@ -1,8 +1,8 @@
 from pyboof import gateway
 
-from image import dtype_to_Class_SingleBand
-from image import ImageType
-from geo import *
+from pyboof.image import dtype_to_Class_SingleBand
+from pyboof.image import ImageType
+from pyboof.geo import *
 from py4j.java_gateway import is_instance_of
 
 
@@ -127,7 +127,7 @@ def shrink_image(image, output_size, interp_type=InterpolationType.INTEGRAL, out
     :return: The shrunk image
     """
 
-    if isinstance(output_size, (int, long)):
+    if isinstance(output_size, (int, int)):
         scale = float(output_size) / max(image.getWidth(), image.getHeight())
         output_shape = (int(image.getHeight()*scale), int(image.getWidth()*scale))
     else:

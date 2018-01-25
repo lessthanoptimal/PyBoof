@@ -1,4 +1,4 @@
-from image import *
+from pyboof.image import *
 import ip
 
 class GradientFlow:

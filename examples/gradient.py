@@ -36,4 +36,4 @@ image_list = [(original,"original"),
               (buffered_two1,"two1")]
 pb.swing.show_list(image_list,title="Gradients")
 
-raw_input("Press any key to exit")
+input("Press any key to exit")

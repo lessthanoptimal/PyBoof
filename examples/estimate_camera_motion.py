@@ -24,8 +24,8 @@ feature_detector = pb.FactoryDetectDescribe(np.uint8).createSurf(config_detect=c
 locs0, desc0 = feature_detector.detect(image0)
 locs1, desc1 = feature_detector.detect(image1)
 
-print "Detected {:4d} features in image 0".format(len(desc0))
-print "         {:4d}             image 1".format(len(desc1))
+print("Detected {:4d} features in image 0".format(len(desc0)))
+print("         {:4d}             image 1".format(len(desc1)))
 
 factory_association = pb.FactoryAssociate()
 factory_association.set_score(pb.AssocScoreType.DEFAULT, feature_detector.get_descriptor_type())
@@ -35,14 +35,13 @@ associator.set_source(desc0)
 associator.set_destination(desc1)
 matches = associator.associate()
 
-print "Associated {} features".format(len(matches))
+print("Associated {} features".format(len(matches)))
 
 # Convert matches into a format that's understood by model estimator
 associated_pairs = pb.match_idx_to_point_pairs(matches, locs0, locs1)
 
 # TODO convert to normalized image coordinates
-
-confE = pb.ConfigEssentialMatrix(intrinsic) # TODo add this
+confE = pb.ConfigEssentialMatrix(intrinsic)
 confRansac = pb.ConfigRansac()
 
 model_matcher = pb.FactoryMultiViewRobust.essentialRansac(confE, confRansac)
@@ -51,5 +50,5 @@ model_matcher.process(associated_pairs)
 
 camera_motion = model_matcher.model_parameters
 
-print "Motion"
-print camera_motion
+print("Motion")
+print( camera_motion )

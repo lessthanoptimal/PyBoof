@@ -1,3 +1,7 @@
+### Version 0.28
+
+- Python 3
+
 ### Version 0.26
 
 - mmap file py <--> java list of AssociatedPair

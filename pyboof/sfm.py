@@ -3,17 +3,29 @@ import struct
 import pyboof
 import numpy as np
 import py4j.java_gateway as jg
-from common import *
+from pyboof.common import *
+from pyboof.calib import *
 
 
 class ConfigEssentialMatrix(JavaConfig):
-    def __init__(self):
-        JavaConfig.__init__(self, "boofcv.factory.geo.ConfigEssential")
+    def __init__(self, java_object=None):
+        if java_object is None:
+            JavaConfig.__init__(self, "boofcv.factory.geo.ConfigEssential")
+        else:
+            if type(java_object) is CameraPinhole:
+                java_object = pyboof.gateway.jvm.boofcv.factory.geo.\
+                    ConfigEssential(java_object.convert_to_boof())
+
+            JavaWrapper.__init__(self, java_object)
+
 
 
 class ConfigRansac(JavaConfig):
-    def __init__(self):
-        JavaConfig.__init__(self, "boofcv.factory.geo.ConfigRansac")
+    def __init__(self, java_object=None):
+        if java_object is None:
+            JavaConfig.__init__(self, "boofcv.factory.geo.ConfigRansac")
+        else:
+            JavaWrapper.__init__(self, java_object)
 
 
 class ModelMatcher(JavaWrapper):

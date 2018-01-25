@@ -1,5 +1,6 @@
 from py4j import java_gateway
 from pyboof import gateway
+from six import string_types
 
 
 def is_java_class(java_class, string_path):
@@ -48,7 +49,7 @@ class JavaConfig(JavaWrapper):
     """
     # TODO variables which are java classes are a little messed up
     def __init__(self, java_class_path):
-        if isinstance(java_class_path, basestring):
+        if isinstance(java_class_path, string_types):
             self.java_class_path = java_class_path
 
             words = java_class_path.replace('$',".").split(".")

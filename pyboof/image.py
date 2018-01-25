@@ -6,8 +6,8 @@ import py4j.java_gateway as jg
 import pyboof
 from pyboof import gateway
 
-import common
-from common import JavaWrapper
+import pyboof.common
+from pyboof.common import JavaWrapper
 
 
 class Family:
@@ -292,11 +292,11 @@ def boof_to_ndarray( boof ):
         else:
             # create copy the very slow way
             N = len(boof_data)
-            print "Before painful copy {}".format(N)
+            print("Before painful copy {}".format(N))
             data = [0]*N
-            for i in xrange(N):
+            for i in range(N):
                 data[i] = boof_data[i]
-            print "After painful copy"
+            print("After painful copy")
             return np.ndarray(shape=(height,width), dtype=nptype, buffer=np.array(data))
     elif jg.is_instance_of(gateway, boof, gateway.jvm.boofcv.struct.image.Planar):
         nptype = JImageDataType_to_dtype(boof.getImageType().getDataType())
@@ -629,7 +629,7 @@ def mmap_boof_to_numpy_F32(boof_image):
     data = struct.unpack('>{}f'.format(width*height), raw_data)
 
     if len(data) != width*height:
-        print "Unexpected data length. {}".format(len(data))
+        print("Unexpected data length. {}".format(len(data)))
 
     # create array in java format then convert into native format
     tmp = np.ndarray(shape=(height, width), dtype='>f4', order='C', buffer=raw_data)

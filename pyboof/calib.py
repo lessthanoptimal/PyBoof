@@ -1,6 +1,6 @@
-from image import *
-from ip import *
-from geo import real_nparray_to_ejml
+from pyboof.image import *
+from pyboof.ip import *
+from pyboof.geo import real_nparray_to_ejml
 from abc import ABCMeta, abstractmethod
 
 

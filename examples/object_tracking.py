@@ -51,7 +51,7 @@ tracker = pb.FactoryTrackerObjectQuad(np.uint8).tld(pb.ConfigTld(False))
 # initialize data structures
 ret, frame = cap.read()
 if not ret:
-    print "Failed to read frame"
+    print("Failed to read frame")
     exit(-1)
 
 image_input = tracker.get_image_type().create_boof_image(frame.shape[1], frame.shape[0])
@@ -76,15 +76,15 @@ while True:
     elif state == 2:
         pts_to_quad()
         if not tracker.initialize(image_input,quad):
-            print "Initialization failed!"
+            print("Initialization failed!")
             state = 0
         else:
-            print "Success"
+            print("Success")
             state = 3
     elif state == 3:
         time3 = int(round(time.time() * 1000))
         if not tracker.process(image_input,quad):
-            print "Tracking failed!"
+            print("Tracking failed!")
         else:
             lines =  np.array(quad.get_tuple_tuple())
             cv2.polylines(frame,np.int32([lines]),True,(0, 0, 255),4)
@@ -92,8 +92,8 @@ while True:
         time_tracking = time4-time3
 
     # Print how fast each part runs
-    print "py to boof: {:4d} boof to boof: {:4d}  tracking: {:4d}".\
-        format(time1 - time0, time2 - time1, time_tracking)
+    print("py to boof: {:4d} boof to boof: {:4d}  tracking: {:4d}".\
+        format(time1 - time0, time2 - time1, time_tracking))
 
     # Display the resulting frame
     cv2.imshow(window_name, frame)

@@ -58,7 +58,7 @@ pb.blur_mean(original, mean, radius=3)
 image_list = [(original, "original"), (gaussian, "gaussian"), (mean, "mean")]
 pb.swing.show_list(image_list, title="Outputs")
 
-raw_input("Press any key to exit")
+input("Press any key to exit")
 
 ```
 

@@ -47,4 +47,4 @@ disparity_image[disparity_image > 70] = float('nan')
 plt.imshow(disparity_image)
 plt.show()
 
-print "Done!"
+print("Done!")

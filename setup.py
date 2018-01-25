@@ -20,8 +20,8 @@ class MyBuild(build_py):
     def run(self):
         try:
             if os.path.exists('pyboof/PyBoof-all.jar'):
-                print "*** Skipping java build since 'pyboof/PyBoof-all.jar' already exists ***"
-                print "   'rm pyboof/PyBoof-all.jar' if this is not desired"
+                print( "*** Skipping java build since 'pyboof/PyBoof-all.jar' already exists ***")
+                print( "   'rm pyboof/PyBoof-all.jar' if this is not desired")
             else:
                 # Create build date file.  This is used to determine if the java jar and python code are
                 # compatible with each other
@@ -31,26 +31,26 @@ class MyBuild(build_py):
                 # See if javac is available for compiling the java code
                 if check_for_command("javac"):
                     if call(["bash", "gradlew", "allJar"]) != 0:
-                        print "Gradle build failed.  "
+                        print( "Gradle build failed.  ")
                         exit(1)
                 else:
-                    print "javac cannot be found. Please install it or correct your path."
+                    print( "javac cannot be found. Please install it or correct your path.")
                     if os.path.isfile('pyboof/PyBoof-all.jar'):
-                        print "     Found a precompiled jar.  Using that"
+                        print( "     Found a precompiled jar.  Using that")
                     else:
                         exit(1)
         except Exception as e:
-            print "Exception message:"
-            print str(e)
-            print e.message
-            print
+            print( "Exception message:")
+            print( str(e))
+            print( e.message)
+            print()
             if not os.path.isfile('pyboof/PyBoof-all.jar'):
-                print "Gradle build failed AND there is no PyBoof-all.jar"
-                print ""
-                print "Did you run build as a regular user first?"
-                print "    ./setup.py build"
-                print "Is Gradle and Java installed?  Test by typing the following:"
-                print "    gradle allJar"
+                print( "Gradle build failed AND there is no PyBoof-all.jar")
+                print( "")
+                print( "Did you run build as a regular user first?")
+                print( "    ./setup.py build")
+                print( "Is Gradle and Java installed?  Test by typing the following:")
+                print( "    gradle allJar")
                 exit(1)
         build_py.run(self)
 
@@ -65,5 +65,5 @@ setup(name='PyBoof',
       eager_resources=['java'],
       packages=['pyboof'],
       package_data={'pyboof': ['PyBoof-all.jar', 'build_date.txt']},
-      install_requires=['py4j==0.10.3', 'numpy>=1.11.0'],
+      install_requires=['py4j==0.10.6', 'numpy>=1.14.0','six>=1.11.0'],
       )

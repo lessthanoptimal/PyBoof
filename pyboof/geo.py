@@ -3,7 +3,7 @@ import struct
 import pyboof
 import numpy as np
 import py4j.java_gateway as jg
-from common import *
+from pyboof.common import *
 
 
 def real_ejml_to_nparray( ejml ):
@@ -11,8 +11,8 @@ def real_ejml_to_nparray( ejml ):
     num_cols = ejml.getNumCols()
 
     M = np.zeros((num_rows,num_cols))
-    for i in xrange(num_rows):
-        for j in xrange(num_cols):
+    for i in range(num_rows):
+        for j in range(num_cols):
             M[i,j] = ejml.unsafe_get(i,j)
     return M
 
@@ -21,9 +21,9 @@ def real_nparray_to_ejml( array ):
     num_rows = array.shape[0]
     num_cols = array.shape[1]
 
-    M = gateway.jvm.org.ejml.data.DenseMatrix64F(num_rows,num_cols)
-    for i in xrange(num_rows):
-        for j in xrange(num_cols):
+    M = pyboof.gateway.jvm.org.ejml.data.DenseMatrix64F(num_rows,num_cols)
+    for i in range(num_rows):
+        for j in range(num_cols):
             M.unsafe_set(i,j,array[i,j])
     return M
 
@@ -306,7 +306,7 @@ def mmap_list_AssociatedPair_to_python( java_list , pylist ):
             raise Exception("Unexpected data type in mmap file. %d" % data_type)
         if num_found > num_elements-num_read:
             raise Exception("Too many elements returned. "+str(num_found))
-        for i in xrange(num_found):
+        for i in range(num_found):
             desc = struct.unpack(">4d", mm.read(8*4))
             pylist.append(((desc[0],desc[1]), (desc[2],desc[3])))
         num_read += num_found
@@ -360,7 +360,7 @@ def mmap_list_Point2DF64_to_python( java_list , pylist ):
             raise Exception("Unexpected data type in mmap file. %d" % data_type)
         if num_found > num_elements-num_read:
             raise Exception("Too many elements returned. "+str(num_found))
-        for i in xrange(num_found):
+        for i in range(num_found):
             desc = struct.unpack(">2d", mm.read(8*2))
             pylist.append(desc)
         num_read += num_found

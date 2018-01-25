@@ -26,4 +26,4 @@ for a in algorithms:
 
 pb.swing.show_list(image_list, title="Binary Thresholding")
 
-raw_input("Press any key to exit")
+input("Press any key to exit")

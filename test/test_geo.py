@@ -23,7 +23,7 @@ class TestMemMapFunctions(unittest.TestCase):
 
         self.assertEqual(len(original), len(found))
 
-        for i in xrange(len(original)):
+        for i in range(len(original)):
             a = original[i]
             b = found[i]
             self.assertEquals(a[0][0], b[0][0])
@@ -44,7 +44,7 @@ class TestMemMapFunctions(unittest.TestCase):
 
         self.assertEqual(len(original), len(found))
 
-        for i in xrange(len(original)):
+        for i in range(len(original)):
             a = original[i]
             b = found[i]
             self.assertEquals(a[0], b[0])

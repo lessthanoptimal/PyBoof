@@ -1,5 +1,5 @@
-from geo import *
-from calib import *
+from pyboof.geo import *
+from pyboof.calib import *
 from pyboof import gateway
 
 

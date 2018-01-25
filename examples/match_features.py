@@ -23,8 +23,8 @@ feature_detector = pb.FactoryDetectDescribe(np.uint8).createSurf(config_detect=c
 locs0, desc0 = feature_detector.detect(image0)
 locs1, desc1 = feature_detector.detect(image1)
 
-print "Detected {:4d} features in image 0".format(len(desc0))
-print "         {:4d}             image 1".format(len(desc1))
+print("Detected {:4d} features in image 0".format(len(desc0)))
+print("         {:4d}             image 1".format(len(desc1)))
 
 factory_association = pb.FactoryAssociate()
 factory_association.set_score(pb.AssocScoreType.DEFAULT, feature_detector.get_descriptor_type())
@@ -34,11 +34,11 @@ associator.set_source(desc0)
 associator.set_destination(desc1)
 matches = associator.associate()
 
-print "Associated {} features".format(len(matches))
+print("Associated {} features".format(len(matches)))
 
 # Visualize the images using a Java function
 visualize_matches(image0, image1, locs0, locs1, associator.get_java_matches())
 
 # TODO add support for python to java formatted matches
 
-raw_input("Press any key to exit")
+input("Press any key to exit")
