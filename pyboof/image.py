@@ -167,7 +167,7 @@ def load_single_band( path , dtype ):
     Loads a singe band BoofCV image
     :param path: File path to image
     :param dtype: The data type of the image
-    :return:
+    :return: BoofCV image
     """
     file_path = os.path.abspath(path)
 

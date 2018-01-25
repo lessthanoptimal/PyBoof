@@ -29,21 +29,24 @@ class CameraPinhole(CameraModel):
     """
     BoofCV Intrinsic Camera parameters
     """
-    def __init__(self):
-        # Intrinsic calibration matrix
-        self.fx = 0
-        self.fy = 0
-        self.skew = 0
-        self.cx = 0
-        self.cy = 0
-        # image shape
-        self.width = 0
-        self.height = 0
-        # radial distortion
-        self.radial = None
-        # tangential terms
-        self.t1 = 0
-        self.t2 = 0
+    def __init__(self, java_object=None):
+        if java_object is None:
+            # Intrinsic calibration matrix
+            self.fx = 0
+            self.fy = 0
+            self.skew = 0
+            self.cx = 0
+            self.cy = 0
+            # image shape
+            self.width = 0
+            self.height = 0
+            # radial distortion
+            self.radial = None
+            # tangential terms
+            self.t1 = 0
+            self.t2 = 0
+        else:
+            self.set_from_boof(java_object)
 
     def load(self, file_name):
         """
@@ -344,26 +347,101 @@ def adjustment_to_java(value):
 
 
 def remove_distortion(input, output, intrinsic, adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO):
+    """
+    Removes lens distortion from the input image and saves it into the output image. More specifically,
+    it adjusts the camera model such that the radian and tangential distortion is zero. The modified
+    camera model is returned.
+
+    :param input: Java BoofCV Image
+    :type input:
+    :param output: Java BoofCV Image
+    :type output:
+    :param intrinsic: Camera model
+    :type intrinsic: CameraPinhole
+    :param adjustment: Should the camera model be adjusted to ensure the whole image can be seen?
+    :type adjustment: AdjustmentType
+    :param border: Border How should pixels outside the image border be handled?
+    :type border: Border
+    :return: The new camera model
+    :rtype: CameraPinhole
+    """
     image_type = ImageType(input.getImageType())
-    distorter, java_intrinsic_out = create_remove_lens_distortion(intrinsic,image_type,adjustment,border)
-    distorter.apply(input,output)
-    intrinsic_out = CameraPinhole()
-    intrinsic_out.set_from_boof(java_intrinsic_out)
-    return intrinsic_out
-
-
-def create_remove_lens_distortion( intrinsic, image_type, adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO):
     desired = CameraPinhole()
     desired.set(intrinsic)
     desired.radial = [0,0]
     desired.t1 = desired.t2 = 0
 
+    distorter, intrinsic_out = create_change_camera_model(intrinsic,desired,image_type,adjustment,border)
+    distorter.apply(input,output)
+    return intrinsic_out
+
+
+def create_change_camera_model(intrinsic_orig,intrinsic_desired, image_type,
+                               adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO):
+    """
+    Creates an ImageDistort that converts an image from the original camera model to the desired camera model
+    after adjusting the view to ensure that it meets the requested visibility requirements.
+
+    :param intrinsic_orig: Original camera model prior to distortion
+    :type intrinsic_orig: CameraPinhole
+    :param intrinsic_desired: The desired new camera model
+    :type intrinsic_desired: CameraPinhole
+    :param image_type: Type of input image
+    :type image_type: ImageType
+    :param adjustment: Should the camera model be adjusted to ensure the whole image can be seen?
+    :type adjustment: AdjustmentType
+    :param border: Border How should pixels outside the image border be handled?
+    :type border: Border
+    :return: Distortion for removing the camera model and the new camera parameters
+    :rtype: (ImageDistort,CameraPinhole)
+    """
+
     java_image_type = image_type.get_java_object()
     java_adjustment = adjustment_to_java(adjustment)
     java_border = border_to_java(border)
-    java_intrinsic = intrinsic.convert_to_boof()
-    java_desired = desired.convert_to_boof()
+    java_original = intrinsic_orig.convert_to_boof()
+    java_desired = intrinsic_desired.convert_to_boof()
     java_intrinsic_out = gateway.jvm.boofcv.struct.calib.CameraPinholeRadial()
     id = gateway.jvm.boofcv.alg.distort.LensDistortionOps.changeCameraModel(
-        java_adjustment,java_border,java_intrinsic,java_desired,java_intrinsic_out,java_image_type)
-    return [ImageDistort(id),java_intrinsic_out]
+        java_adjustment,java_border,java_original,java_desired,java_intrinsic_out,java_image_type)
+    return (ImageDistort(id), CameraPinhole(java_intrinsic_out))
+
+
+def convert_from_boof_calibration_observations( jobservations ):
+    # TODO For Boof 0.29 and beyond use accessors instead
+    jlist = JavaWrapper(jobservations).points
+    output = []
+    for o in jlist:
+        output.append((o.getIndex(),o.getX(),o.getY()))
+    return output
+
+
+def convert_into_boof_calibration_observations( observations ):
+    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation()
+    # TODO use accessor after 0.29
+    jlist = JavaWrapper(jobs).points
+    for o in observations:
+        jobj = gateway.jvm.boofcv.struct.geo.PointIndex2D_F64(float(o[1]),float(o[2]),int(o[0]))
+        jlist.add(jobj)
+    return jobs
+
+
+def calibrate_pinhole( observations, detector, num_radial=2, tangential=True, zero_skew=True):
+    # TODO For Boof 0.29 use zero argument constructor
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(detector.java_obj)
+    jcalib_planar.configurePinhole(zero_skew,int(num_radial),tangential)
+    jobservations = gateway.jvm.java.util.ArrayList()
+    for o in observations:
+        jobservations.add( convert_into_boof_calibration_observations(o) )
+    # TODO For Boof 0.29 and beyond use add(jobservations)
+    jcalib_planar.getObservations().addAll(jobservations)
+
+    intrinsic = CameraPinhole(jcalib_planar.process())
+
+    errors = []
+    for jerror in jcalib_planar.getErrors():
+        # TODO For Boof 0.29 and beyond use accessors
+        w = JavaWrapper(jerror)
+        errors.append({"mean":w.meanError,"max_error":w.maxError,"bias_x":w.biasX,"bias_y":w.biasY})
+
+    return (intrinsic,errors)
