@@ -28,8 +28,12 @@ class ThresholdType:
     GLOBAL_ENTROPY = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_ENTROPY
     GLOBAL_OTSU    = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_OTSU
     LOCAL_GAUSSIAN = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_GAUSSIAN
-    LOCAL_SQUARE   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SQUARE
+    LOCAL_MEAN     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_MEAN
+    LOCAL_OTSU     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_OTSU
     LOCAL_SAVOLA   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SAVOLA
+    BLOCK_MIN_MAX  = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MIN_MAX
+    BLOCK_MEAN     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MEAN
+    BLOCK_OTSU     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_OTSU
 
 
 class InterpolationType:
@@ -263,12 +267,12 @@ class FactoryThresholdBinary:
     def __init__(self, dtype ):
         self.boof_image_type = dtype_to_Class_SingleBand(dtype)
 
-    def localGaussian(self, radius, scale=0.95, down=True):
+    def localGaussian(self, region_width, scale=0.95, down=True):
         """
         Create an instance of local gaussian threshold
 
-        :param radius: Radius of local region
-        :type radius: int
+        :param region_width: Width of local region
+        :type region_width: int
         :param scale: Threshold scale adjustment
         :type scale: float
         :param down: True for thresholding down and false for up
@@ -276,16 +280,18 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
+        region_width = boof_fixed_length(region_width)
+
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            localGaussian(int(radius),float(scale),down,self.boof_image_type)
+            localGaussian(region_width,float(scale),down,self.boof_image_type)
         return InputToBinary(java_object)
 
-    def localSauvola(self, radius, k=0.3, down=True):
+    def localSauvola(self, region_width, k=0.3, down=True):
         """
         Create an instance of local gaussian threshold
 
-        :param radius: Radius of local region
-        :type radius: int
+        :param region_width: Width of local region
+        :type region_width: int
         :param k: User specified threshold adjustment factor.  Must be positive. Try 0.3
         :type k: float
         :param down: True for thresholding down and false for up
@@ -293,16 +299,18 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
+        region_width = boof_fixed_length(region_width)
+
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            localSauvola(int(radius),float(k),down,self.boof_image_type)
+            localSauvola(region_width,float(k),down,self.boof_image_type)
         return InputToBinary(java_object)
 
-    def localSquare(self, radius, scale=0.95, down=True):
+    def localMean(self, region_width, scale=0.95, down=True):
         """
         Create an instance of local square threshold
 
-        :param radius: Radius of local region
-        :type radius: int
+        :param region_width: Width of local region
+        :type region_width: int
         :param scale: Threshold scale adjustment
         :type scale: float
         :param down: True for thresholding down and false for up
@@ -310,8 +318,103 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            localSquare(int(radius),float(scale),down,self.boof_image_type)
+        region_width = boof_fixed_length(region_width)
+
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+            localMean(region_width,float(scale),down,self.boof_image_type)
+        return InputToBinary(java_object)
+
+    def localOtsu(self, region_width, scale=0.95, down=True, otsu2 = False, tuning=0):
+        """
+        Create an instance of local otsu threshold
+
+        :param region_width: Width of local region
+        :type radius: int
+        :param region_width: Threshold scale adjustment
+        :type scale: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :param otsu2: True to use the otsu2 variant
+        :type otsu2: bool
+        :param tuning: Tuning parameter. 0 = standard Otsu. Greater than 0 will penalize zero texture.
+        :type tuning: int
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        region_width = boof_fixed_length(region_width)
+
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+            localOtsu(otsu2,region_width,float(tuning),float(scale),down,self.boof_image_type)
+        return InputToBinary(java_object)
+
+    def blockMinMax(self, region_width, scale=0.95, down=True, minimumSpread=-1.0,thresholdFromLocalBlocks=True):
+        """
+        Applies a very fast non-overlapping block thresholding algorithm which uses min/max statistics
+
+        :param region_width: Width of local region
+        :type region_width: int
+        :param scale: Threshold scale adjustment
+        :type scale: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :param minimumSpread: If the difference between min max is less than or equal to this  value then it is
+        considered textureless.  Set to <= -1 to disable.
+        :type minimumSpread: float
+        :param thresholdFromLocalBlocks: Should it use the local 3x3 block region
+        :type thresholdFromLocalBlocks: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        region_width = boof_fixed_length(region_width)
+
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+            blockMinMax(region_width, float(scale), down, float(minimumSpread), thresholdFromLocalBlocks,self.boof_image_type)
+        return InputToBinary(java_object)
+
+    def blockMean(self, region_width, scale=0.95, down=True,thresholdFromLocalBlocks=True):
+        """
+        Create an instance of block square threshold
+
+        :param region_width: Width of local region
+        :type region_width: int
+        :param scale: Threshold scale adjustment
+        :type scale: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :param thresholdFromLocalBlocks: Should it use the local 3x3 block region
+        :type thresholdFromLocalBlocks: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        region_width = boof_fixed_length(region_width)
+
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+            blockMean(region_width,float(scale),down,thresholdFromLocalBlocks,self.boof_image_type)
+        return InputToBinary(java_object)
+
+    def blockOtsu(self, region_width, scale=0.95, down=True, otsu2 = False, tuning=0,thresholdFromLocalBlocks=True):
+        """
+        Create an instance of block otsu threshold
+
+        :param region_width: Width of local region
+        :type radius: int
+        :param region_width: Threshold scale adjustment
+        :type scale: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :param otsu2: True to use the otsu2 variant
+        :type otsu2: bool
+        :param tuning: Tuning parameter. 0 = standard Otsu. Greater than 0 will penalize zero texture.
+        :type tuning: int
+        :param thresholdFromLocalBlocks: Should it use the local 3x3 block region
+        :type thresholdFromLocalBlocks: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        region_width = boof_fixed_length(region_width)
+
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+            blockOtsu(otsu2,region_width,float(tuning),float(scale),down,thresholdFromLocalBlocks,self.boof_image_type)
         return InputToBinary(java_object)
 
     def globalEntropy(self, min_value=0, max_value=255, down=True):

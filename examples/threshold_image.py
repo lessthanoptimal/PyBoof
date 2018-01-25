@@ -10,9 +10,13 @@ algorithms = []
 
 factory = pb.FactoryThresholdBinary(np.uint8)
 
-algorithms.append(("localGaussian",factory.localGaussian(radius=5)))
-algorithms.append(("localSauvola" ,factory.localSauvola(radius=5)))
-algorithms.append(("localSquare"  ,factory.localSquare(radius=5)))
+algorithms.append(("localGaussian",factory.localGaussian(region_width=11)))
+algorithms.append(("localSauvola" ,factory.localSauvola(region_width=11)))
+algorithms.append(("localSquare"  ,factory.localMean(region_width=11)))
+# algorithms.append(("localOtsu"  ,factory.localOtsu(region_width=11))) # This can be slow
+algorithms.append(("blockMinMax"  ,factory.blockMinMax(region_width=11)))
+algorithms.append(("blockMean"    ,factory.blockMean(region_width=11)))
+algorithms.append(("blockOtsu"    ,factory.blockOtsu(region_width=11)))
 algorithms.append(("globalEntropy",factory.globalEntropy()))
 algorithms.append(("globalOtsu"   ,factory.globalOtsu()))
 algorithms.append(("globalFixed"  ,factory.globalFixed(threshold=100)))

@@ -12,6 +12,14 @@ def is_java_list(object):
     return True
 
 
+def ejml_matrix_d_to_f( D ):
+    F = gateway.jvm.org.ejml.data.FMatrixRMaj( D.getNumRows(), D.getNumCols() )
+    gateway.jvm.org.ejml.ops.ConvertMatrixData.convert(D, F)
+    return F
+
+def boof_fixed_length( length ):
+    return gateway.jvm.boofcv.struct.ConfigLength(float(length),float(-1))
+
 class JavaWrapper:
     def __init__(self, java_object=None):
         self.java_obj = java_object

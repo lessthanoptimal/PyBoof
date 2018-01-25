@@ -353,10 +353,17 @@ def remove_distortion(input, output, intrinsic, adjustment=AdjustmentType.FULL_V
 
 
 def create_remove_lens_distortion( intrinsic, image_type, adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO):
+    desired = CameraPinhole()
+    desired.set(intrinsic)
+    desired.radial = [0,0]
+    desired.t1 = desired.t2 = 0
+
     java_image_type = image_type.get_java_object()
     java_adjustment = adjustment_to_java(adjustment)
     java_border = border_to_java(border)
     java_intrinsic = intrinsic.convert_to_boof()
+    java_desired = desired.convert_to_boof()
     java_intrinsic_out = gateway.jvm.boofcv.struct.calib.CameraPinholeRadial()
-    id =  gateway.jvm.boofcv.alg.distort.LensDistortionOps.imageRemoveDistortion(java_adjustment,java_border,java_intrinsic,java_intrinsic_out,java_image_type)
+    id = gateway.jvm.boofcv.alg.distort.LensDistortionOps.changeCameraModel(
+        java_adjustment,java_border,java_intrinsic,java_desired,java_intrinsic_out,java_image_type)
     return [ImageDistort(id),java_intrinsic_out]

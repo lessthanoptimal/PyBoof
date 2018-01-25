@@ -146,10 +146,10 @@ class StereoRectification:
 
         if is_left_image:
             boof_distorter = gateway.jvm.boofcv.alg.geo.RectifyImageOps.\
-                rectifyImage(self.intrinsic_left.convert_to_boof(), self.rect1, boof_border, boof_image_type)
+                rectifyImage(self.intrinsic_left.convert_to_boof(), pyboof.ejml_matrix_d_to_f(self.rect1), boof_border, boof_image_type)
         else:
             boof_distorter = gateway.jvm.boofcv.alg.geo.RectifyImageOps. \
-                rectifyImage(self.intrinsic_right.convert_to_boof(), self.rect2, boof_border, boof_image_type)
+                rectifyImage(self.intrinsic_right.convert_to_boof(), pyboof.ejml_matrix_d_to_f(self.rect2), boof_border, boof_image_type)
         return pyboof.ImageDistort(boof_distorter)
 
 
