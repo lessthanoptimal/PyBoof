@@ -150,7 +150,7 @@ class CameraPinhole(CameraModel):
         return (self.radial is not None) or self.t1 != 0 or self.t2 != 0
 
     def __str__(self):
-        out = "Intrinsic{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d} ".\
+        out = "Pinhole{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d} ".\
             format(self.fx,self.fy,self.skew,self.cx,self.cy,self.width,self.height)
         if self.is_distorted():
             out += " | radial="+str(self.radial)+" t1="+str(self.t1)+" t1="+str(self.t2)+" }"
@@ -160,9 +160,12 @@ class CameraPinhole(CameraModel):
 
 
 class CameraUniversalOmni(CameraPinhole):
-    def __init__(self):
-        CameraPinhole.__init__(self)
-        self.mirror_offset = 0
+    def __init__(self, java_object=None):
+        CameraPinhole.__init__(self,java_object)
+        if java_object is None:
+            self.mirror_offset = 0
+        else:
+            self.mirror_offset = java_object.getMirrorOffset()
 
     def set_from_boof(self, boof_intrinsic):
         CameraPinhole.set_from_boof(self, boof_intrinsic)
@@ -176,6 +179,15 @@ class CameraUniversalOmni(CameraPinhole):
         CameraPinhole.convert_to_boof(self, boof_intrinsic)
         boof_intrinsic.setMirrorOffset(float(self.mirror_offset))
         return boof_intrinsic
+
+    def __str__(self):
+        out = "UniversalOmni{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d} | mirror={:f}".\
+            format(self.fx,self.fy,self.skew,self.cx,self.cy,self.width,self.height,self.mirror_offset)
+        if self.is_distorted():
+            out += " | radial="+str(self.radial)+" t1="+str(self.t1)+" t1="+str(self.t2)+" }"
+        else:
+            out += "}}"
+        return out
 
 
 class LensNarrowDistortionFactory(JavaWrapper):
@@ -437,6 +449,40 @@ def calibrate_pinhole( observations, detector, num_radial=2, tangential=True, ze
     jcalib_planar.getObservations().addAll(jobservations)
 
     intrinsic = CameraPinhole(jcalib_planar.process())
+
+    errors = []
+    for jerror in jcalib_planar.getErrors():
+        # TODO For Boof 0.29 and beyond use accessors
+        w = JavaWrapper(jerror)
+        errors.append({"mean":w.meanError,"max_error":w.maxError,"bias_x":w.biasX,"bias_y":w.biasY})
+
+    return (intrinsic, errors)
+
+
+def calibrate_fisheye( observations, detector, num_radial=2, tangential=True, zero_skew=True, mirror_offset=None):
+    """
+
+    :param observations:
+    :param detector:
+    :param num_radial:
+    :param tangential:
+    :param zero_skew:
+    :param mirror_offset: If None it will be estimated. 0.0 = pinhole camera. 1.0 = fisheye
+    :return: (intrinsic, errors)
+    """
+    # TODO For Boof 0.29 use zero argument constructor
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(detector.java_obj)
+    if mirror_offset is None:
+        jcalib_planar.configureUniversalOmni(zero_skew,int(num_radial),tangential)
+    else:
+        jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential, float(mirror_offset))
+    jobservations = gateway.jvm.java.util.ArrayList()
+    for o in observations:
+        jobservations.add(convert_into_boof_calibration_observations(o))
+    # TODO For Boof 0.29 and beyond use add(jobservations)
+    jcalib_planar.getObservations().addAll(jobservations)
+
+    intrinsic = CameraUniversalOmni(jcalib_planar.process())
 
     errors = []
     for jerror in jcalib_planar.getErrors():
