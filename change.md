@@ -2,7 +2,6 @@
 
 - Python 3
 - TODO Estimate camera motion
-- TODO QR Code Decoder
 - TODO QR Code Encoder
 - TODO FDistort
 

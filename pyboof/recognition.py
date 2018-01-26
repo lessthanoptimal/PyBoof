@@ -37,6 +37,11 @@ class ConfigFiducialBinaryGrid(JavaConfig):
         JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigSquareGridBinary")
 
 
+class ConfigQrCode(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigQrCode")
+
+
 class FactoryFiducialCalibration:
     def __init__(self):
         pass
@@ -146,6 +151,16 @@ class FactoryFiducial:
             calibSquareGrid(config.java_obj, self.boof_image_type)
         return FiducialDetector(java_detector)
 
+    def qrcode(self, config=None):
+        if config is None:
+            jconf = None
+        else:
+            jconf = config.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            qrcode(jconf, self.boof_image_type)
+        return QrCodeDetector(java_detector)
+
 
 class FiducialCalibrationDetector(JavaWrapper):
     """
@@ -227,6 +242,50 @@ class FiducialImageDetector(FiducialDetector):
     def add_pattern(self, image, side_length, threshold=100.0):
         self.java_obj.addPatternImage(image, threshold, side_length)
 
+
+class QrCode:
+    def __init__(self, java_object=None):
+        if java_object is None:
+            self.verson = -1
+            self.message = ""
+            self.error_level = ""
+            self.mask_pattern = ""
+            self.mode = ""
+            self.failure_cause = ""
+            self.bounds = Polygon2D(4)
+            self.pp_right = Polygon2D(4)
+            self.pp_corner = Polygon2D(4)
+            self.pp_down = Polygon2D(4)
+        else:
+            jobj = JavaWrapper(java_object)
+            self.verson = jobj.version
+            self.message = jobj.message
+            self.error_level = jobj.error.toString()
+            self.mask_pattern = jobj.mask.toString()
+            self.mode = jobj.mode.toString()
+            self.failure_cause = ""
+            self.bounds = Polygon2D(jobj.bounds)
+            self.pp_right = Polygon2D(jobj.ppRight)
+            self.pp_corner = Polygon2D(jobj.ppCorner)
+            self.pp_down = Polygon2D(jobj.ppDown)
+
+            if jobj.failureCause is not None:
+                self.failure_cause = jobj.failureCause.toString()
+
+class QrCodeDetector(JavaWrapper):
+
+    def __init__(self, java_detector):
+        JavaWrapper.__init__(self, java_detector)
+        self.detections = []
+        self.failures = []
+
+    def detect(self, image):
+        self.java_obj.process(image)
+        self.detections = [QrCode(x) for x in self.java_obj.getDetections()]
+        self.failures = [QrCode(x) for x in self.java_obj.getFailures()]
+
+    def get_image_type(self):
+        return ImageType(self.java_obj.getImageType())
 
 class ConfigCirculant(JavaConfig):
     def __init__(self, java_object=None):

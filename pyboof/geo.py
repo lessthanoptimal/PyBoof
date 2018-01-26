@@ -1,6 +1,7 @@
 import math
 import struct
 import pyboof
+import numbers
 import numpy as np
 import py4j.java_gateway as jg
 from pyboof.common import *
@@ -86,8 +87,11 @@ class Point2D:
         :param y: float
             y-coordinate
         """
-        self.x = x
-        self.y = y
+        if isinstance(x, numbers.Number):
+            self.x = x
+            self.y = y
+        else:
+            self.set(x)
 
     def convert_to_boof(self):
         return create_java_point_2D_f64(float(self.x), float(self.y))
@@ -128,6 +132,51 @@ class Point2D:
 
     def set_y(self,y ):
         self.y = y
+
+    def copy(self):
+        return Point2D(self.x,self.y)
+
+
+class Polygon2D:
+    def __init__(self,data=None):
+        self.vertexes = []
+        if isinstance(data,int):
+            self.vertexes = [Point2D() for i in range(data)]
+        elif isinstance(data,list):
+            if len(data) > 0:
+                if isinstance(data[0],numbers.Number):
+                    for idx in range(0,len(data),2):
+                        self.vertexes.append(Point2D(data[idx],data[idx+1]))
+                elif isinstance(data[0],Point2D):
+                    for p in data:
+                        self.vertexes.append(p)
+                else:
+                    raise RuntimeError("Element type not supported")
+        else:
+            for idx in range(data.size()):
+                self.vertexes.append( Point2D(data.get(idx)))
+
+    def get_tuple(self):
+        """
+        Returns the values of the point inside a tuple: (x,y)
+        """
+        return [(v.x,v.y) for v in self.vertexes]
+
+    def side_length(self, side ):
+        return self.vertexes[side].distance( self.vertexes[(side+1)%len(self.vertexes)])
+
+    def convert_to_boof(self):
+        jobj = gateway.jvm.georegression.struct.shapes.Polygon2D_F64( len(self.vertexes))
+        for idx,v in enumerate(self.vertexes):
+            jobj.set( idx, v.x, v.y)
+        return jobj
+
+    def __str__(self):
+        ret = "Polygon2D( "
+        for p in self.vertexes:
+            ret += "{},{} ".format(p.x,p.y)
+        ret += ")"
+        return ret
 
 
 class Quadrilateral2D:
