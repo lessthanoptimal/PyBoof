@@ -5,7 +5,7 @@ import numbers
 import numpy as np
 import py4j.java_gateway as jg
 from pyboof.common import *
-
+from pyboof import gateway
 
 def real_ejml_to_nparray( ejml ):
     num_rows = ejml.getNumRows()
@@ -22,7 +22,7 @@ def real_nparray_to_ejml( array ):
     num_rows = array.shape[0]
     num_cols = array.shape[1]
 
-    M = pyboof.gateway.jvm.org.ejml.data.DenseMatrix64F(num_rows,num_cols)
+    M = gateway.jvm.org.ejml.data.DenseMatrix64F(num_rows,num_cols)
     for i in range(num_rows):
         for j in range(num_cols):
             M.unsafe_set(i,j,array[i,j])
@@ -106,6 +106,9 @@ class Point2D:
         elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.point.Point2D_F64):
             self.x = o.getX()
             self.y = o.getY()
+        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.point.Point2D_F32):
+            self.x = o.getX()
+            self.y = o.getY()
         else:
             raise Exception("Unknown object type")
 
@@ -139,42 +142,51 @@ class Point2D:
 
 class Polygon2D:
     def __init__(self,data=None):
-        self.vertexes = []
-        if isinstance(data,int):
-            self.vertexes = [Point2D() for i in range(data)]
-        elif isinstance(data,list):
-            if len(data) > 0:
-                if isinstance(data[0],numbers.Number):
-                    for idx in range(0,len(data),2):
-                        self.vertexes.append(Point2D(data[idx],data[idx+1]))
-                elif isinstance(data[0],Point2D):
-                    for p in data:
-                        self.vertexes.append(p)
-                else:
-                    raise RuntimeError("Element type not supported")
+        if data is not None:
+            if isinstance(data, int):
+                self.vertexes = [Point2D() for i in range(data)]
+            else:
+                self.set(data)
         else:
-            for idx in range(data.size()):
-                self.vertexes.append( Point2D(data.get(idx)))
+            self.vertexes = []
 
-    def get_tuple(self):
+    def convert_tuple(self):
         """
         Returns the values of the point inside a tuple: (x,y)
         """
         return [(v.x,v.y) for v in self.vertexes]
 
-    def side_length(self, side ):
-        return self.vertexes[side].distance( self.vertexes[(side+1)%len(self.vertexes)])
-
-    def convert_to_boof(self):
+    def convert_boof(self):
         jobj = gateway.jvm.georegression.struct.shapes.Polygon2D_F64( len(self.vertexes))
         for idx,v in enumerate(self.vertexes):
             jobj.set( idx, v.x, v.y)
         return jobj
 
+    def set(self, src ):
+        if isinstance(src,Polygon2D):
+            self.vertexes = []
+            for v in src.vertexes:
+                self.vertexes.append(v.copy())
+        elif jg.is_instance_of(gateway, src, gateway.jvm.georegression.struct.shapes.Polygon2D_F64):
+            self.vertexes = []
+            for i in range(src.size()):
+                self.vertexes.append(Point2D(src.get(i)))
+        elif jg.is_instance_of(gateway, src, gateway.jvm.georegression.struct.shapes.Polygon2D_F32):
+            self.vertexes = []
+            for i in range(src.size()):
+                self.vertexes.append(Point2D(src.get(i)))
+        else:
+            self.vertexes = []
+            for v in src:
+                self.vertexes.append(Point2D(v[0],v[1]))
+
+    def side_length(self, side ):
+        return self.vertexes[side].distance( self.vertexes[(side+1)%len(self.vertexes)])
+
     def __str__(self):
         ret = "Polygon2D( "
         for p in self.vertexes:
-            ret += "{},{} ".format(p.x,p.y)
+            ret += "({},{}) ".format(p.x,p.y)
         ret += ")"
         return ret
 
