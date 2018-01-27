@@ -272,6 +272,7 @@ class QrCode:
             if jobj.failureCause is not None:
                 self.failure_cause = jobj.failureCause.toString()
 
+
 class QrCodeDetector(JavaWrapper):
 
     def __init__(self, java_detector):
@@ -286,6 +287,46 @@ class QrCodeDetector(JavaWrapper):
 
     def get_image_type(self):
         return ImageType(self.java_obj.getImageType())
+
+def string_to_qrcode_error( error ):
+    if error == "L":
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
+    elif error == "M":
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
+    elif error == "M":
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
+    elif error == "M":
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
+    else:
+        return None
+
+
+class QrCodeGenerator:
+    def __init__(self, pixels_per_module=4 ):
+        self.java_encoder = gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeEncoder()
+        self.java_generator = gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeGeneratorImage(pixels_per_module)
+
+    def reset(self):
+        self.java_encoder.reset()
+
+    def set_version(self , version ):
+        self.java_encoder.setVersion(version)
+
+    def set_error(self, level):
+        # self.java_encoder.setError(version)
+        pass
+
+    def set_mask(self, mask):
+        pass
+
+    def set_message(self, message ):
+        pass
+
+    def generate(self):
+        qr = self.java_encoder.fixate()
+        self.java_generator.render(qr)
+        return self.java_generator.getGray()
+
 
 class ConfigCirculant(JavaConfig):
     def __init__(self, java_object=None):
