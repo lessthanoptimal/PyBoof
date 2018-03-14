@@ -1,6 +1,8 @@
-### Version 0.28
+### Version 0.29
 
 - Python 3
+- Dense Image Features
+- More mmap data types
 - TODO Estimate camera motion
 - TODO QR Code Encoder
 - TODO FDistort

@@ -41,6 +41,11 @@ class TestFactoryDenseDescribe(unittest.TestCase):
         self.assertTrue(len(describer.locations)>10)
         self.assertTrue(len(describer.descriptions)>10)
 
+        describer = factory.createSurf(None)
+        describer.detect(j_img)
+        self.assertTrue(len(describer.locations) > 10)
+        self.assertTrue(len(describer.descriptions) > 10)
+
     def test_createSurf_stable(self):
         j_img = pb.create_single_band(100, 120, dtype=np.uint8)
 
@@ -50,8 +55,23 @@ class TestFactoryDenseDescribe(unittest.TestCase):
         self.assertTrue(len(describer.locations) > 10)
         self.assertTrue(len(describer.descriptions) > 10)
 
-    # TODO SIFT
-    # TODO HOG
+    def test_createSift(self):
+        j_img = pb.create_single_band(100, 120, dtype=np.uint8)
+
+        factory = pb.FactoryDenseDescribe(dtype=np.uint8)
+        describer = factory.createSift(None)
+        describer.detect(j_img)
+        self.assertTrue(len(describer.locations) > 10)
+        self.assertTrue(len(describer.descriptions) > 10)
+
+    def test_createHog(self):
+        j_img = pb.create_single_band(100, 120, dtype=np.uint8)
+
+        factory = pb.FactoryDenseDescribe(dtype=np.uint8)
+        describer = factory.createHoG(None)
+        describer.detect(j_img)
+        self.assertTrue(len(describer.locations) > 10)
+        self.assertTrue(len(describer.descriptions) > 10)
 
 
 if __name__ == '__main__':

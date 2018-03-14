@@ -81,6 +81,16 @@ class ConfigDenseSurfStable(JavaConfig):
         JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseSurfStable")
 
 
+class ConfigDenseSift(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseSift")
+
+
+class ConfigDenseHoG(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseHoG")
+
+
 class AssocScoreType:
     """
     Enum different types of association scoring techniques
@@ -287,7 +297,7 @@ class DenseDescribePointFeatures(JavaWrapper):
 
 class FactoryDetectDescribe:
     def __init__(self, dtype ):
-        self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
+        self.boof_image_class =  dtype_to_Class_SingleBand(dtype)
 
     def createSurf( self, config_detect=None , config_desc=None , config_ori=None ):
         """
@@ -316,10 +326,10 @@ class FactoryDetectDescribe:
 
         if config_desc.__class__.__name__ == "ConfigSurfFast":
             java_object = gateway.jvm.boofcv.factory.feature.detdesc.FactoryDetectDescribe.surfFast(
-                java_config_detect,java_config_desc,java_config_ori, self.boof_image_type)
+                java_config_detect,java_config_desc,java_config_ori, self.boof_image_class)
         elif config_desc.__class__.__name__ == "ConfigSurfStability":
             java_object = gateway.jvm.boofcv.factory.feature.detdesc.FactoryDetectDescribe.surfStable(
-                java_config_detect,java_config_desc,java_config_ori, self.boof_image_type)
+                java_config_detect,java_config_desc,java_config_ori, self.boof_image_class)
         else:
             raise RuntimeError("Unknown description type")
 
@@ -340,33 +350,51 @@ class FactoryDetectDescribe:
 
 class FactoryDenseDescribe:
     def __init__(self, dtype ):
-        self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
+        self.dtype = dtype
+        self.boof_image_class =  dtype_to_Class_SingleBand(dtype)
+        self.py_image_type = pyboof.create_ImageType(pyboof.Family.SINGLE_BAND,self.dtype)
+
 
     def createSurf( self, config_desc=None ):
         if config_desc is None:
-            config_desc = ConfigSurfFast()
+            config_desc = ConfigDenseSurfFast()
 
-        java_config_desc = None
-
-        if config_desc is not None:
-            java_config_desc = config_desc.java_obj
+        java_config_desc = config_desc.java_obj
 
         if config_desc.__class__.__name__ == "ConfigDenseSurfFast":
             java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.surfFast(
-                java_config_desc, self.boof_image_type)
+                java_config_desc, self.boof_image_class)
         elif config_desc.__class__.__name__ == "ConfigDenseSurfStable":
             java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.surfStable(
-                java_config_desc, self.boof_image_type)
+                java_config_desc, self.boof_image_class)
         else:
             raise RuntimeError("Unknown description type")
 
         return DenseDescribePointFeatures(java_object)
 
-    def createSift(self):
-        pass
 
-    def creatHog(self):
-        pass
+    def createSift(self, config=None):
+        if config is None:
+            config = ConfigDenseSift()
+
+        java_config_desc = config.java_obj
+
+        java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.sift(
+            java_config_desc, self.boof_image_class)
+        return DenseDescribePointFeatures(java_object)
+
+
+    def createHoG(self, config=None):
+        if config is None:
+            config = ConfigDenseHoG()
+
+        java_config_desc = config.java_obj
+
+        # HoG supports color images also. For now we will just support gray
+
+        java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.hog(
+            java_config_desc, self.py_image_type.java_obj)
+        return DenseDescribePointFeatures(java_object)
 
 
 class FactoryAssociate:
