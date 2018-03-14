@@ -4,6 +4,7 @@ import unittest
 
 from pyboof import gateway
 import pyboof as pb
+import numpy as np
 
 pb.init_memmap()
 
@@ -28,6 +29,29 @@ class TestMemMapFunctions(unittest.TestCase):
             self.assertEqual(len(a),len(b))
             for j in range(len(a)):
                 self.assertEqual(a[j],b[j])
+
+# Mostly tests to see if it can load an not crash
+class TestFactoryDenseDescribe(unittest.TestCase):
+    def test_createSurf_fast(self):
+        j_img = pb.create_single_band(100, 120, dtype=np.uint8)
+
+        factory = pb.FactoryDenseDescribe(dtype=np.uint8)
+        describer = factory.createSurf(pb.ConfigDenseSurfFast())
+        describer.detect(j_img)
+        self.assertTrue(len(describer.locations)>10)
+        self.assertTrue(len(describer.descriptions)>10)
+
+    def test_createSurf_stable(self):
+        j_img = pb.create_single_band(100, 120, dtype=np.uint8)
+
+        factory = pb.FactoryDenseDescribe(dtype=np.uint8)
+        describer = factory.createSurf(pb.ConfigDenseSurfStable())
+        describer.detect(j_img)
+        self.assertTrue(len(describer.locations) > 10)
+        self.assertTrue(len(describer.descriptions) > 10)
+
+    # TODO SIFT
+    # TODO HOG
 
 
 if __name__ == '__main__':

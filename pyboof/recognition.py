@@ -172,7 +172,7 @@ class FiducialCalibrationDetector(JavaWrapper):
     def __init__(self, java_object):
         JavaWrapper.__init__(self, java_object)
         self.detected_points = []
-        self.layout = b2p_list_point2DF64(java_object.getLayout())
+        self.layout = b2p_list_point2D(java_object.getLayout(),np.double)
 
     def detect(self, image):
         self.java_obj.process(image)

@@ -5,8 +5,9 @@ import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.InterleavedU8;
 import boofcv.struct.image.Planar;
-import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.*;
 import boofcv.struct.geo.AssociatedPair;
+import boofcv.struct.image.ImageDataType;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -82,40 +83,113 @@ public class BoofMemoryMapped {
 	 * Reads elements from the memory map file and appends them to the current list
 	 * @param list List in which the elements are appended into
 	 */
-	public void read_List_Point2DF64(List<Point2D_F64> list ) {
-		mmf.position(0);
-		if( mmf.getShort() != Type.LIST_POINT2D_F64.ordinal() ) {
-			throw new RuntimeException("Not a list of Point2D_F64!");
+	public void read_List_Point2D(List list, int type_ordinal ) {
+	    Type type = Type.values()[type_ordinal];
+	    mmf.position(0);
+		if( mmf.getShort() != type.ordinal() ) {
+			throw new RuntimeException("Memmap not of type "+type);
 		}
+		int numBytes = type.getDataType().getNumBits()/8;
 		int numElements = mmf.getInt();
-
-		byte data[] = new byte[8*2];
+		byte data[] = new byte[numBytes*2];
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		for (int i = 0; i < numElements; i++) {
-			mmf.get(data,0,data.length);
-			Point2D_F64 p = new Point2D_F64();
-			p.x = bb.getDouble(0);
-			p.y = bb.getDouble(8);
-			list.add( p );
-		}
+
+       switch( type ) {
+            case LIST_POINT2D_U16:
+            case LIST_POINT2D_S16: {
+                    for (int i = 0; i < numElements; i++) {
+                        mmf.get(data,0,data.length);
+                        Point2D_I16 p = new Point2D_I16();
+                        p.x = bb.getShort(0);
+                        p.y = bb.getShort(2);
+                        list.add( p );
+                    }
+                } break;
+
+            case LIST_POINT2D_S32: {
+                    for (int i = 0; i < numElements; i++) {
+                        mmf.get(data,0,data.length);
+                        Point2D_I32 p = new Point2D_I32();
+                        p.x = bb.getInt(0);
+                        p.y = bb.getInt(4);
+                        list.add( p );
+                    }
+                } break;
+
+            case LIST_POINT2D_F32: {
+                    for (int i = 0; i < numElements; i++) {
+                        mmf.get(data,0,data.length);
+                        Point2D_F32 p = new Point2D_F32();
+                        p.x = bb.getFloat(0);
+                        p.y = bb.getFloat(4);
+                        list.add( p );
+                    }
+                } break;
+
+            case LIST_POINT2D_F64: {
+                for (int i = 0; i < numElements; i++) {
+                    mmf.get(data,0,data.length);
+                    Point2D_F64 p = new Point2D_F64();
+                    p.x = bb.getDouble(0);
+                    p.y = bb.getDouble(8);
+                    list.add( p );
+                }
+            } break;
+        }
+
 	}
 
-	public void write_List_Point2DF64(List<Point2D_F64> list , int startIndex ) {
+    public void write_List_Point2D(List<?> list , int type_ordinal , int startIndex ) {
+        Type type = Type.values()[type_ordinal];
 
-		int maxElements = (mmf.limit()-100)/(8*2);
+        int numBytes = type.getDataType().getNumBits()/8;
+
+        int maxElements = (mmf.limit()-100)/(numBytes*2);
 		int numElements = Math.min(list.size(),maxElements);
 
 		mmf.position(0);
-		mmf.putShort((short)Type.LIST_POINT2D_F64.ordinal());
+		mmf.putShort((short)type.ordinal());
 		mmf.putInt(numElements);
 
-		for (int i = 0; i < numElements; i++) {
-			Point2D_F64 p = list.get(startIndex+i);
+        switch( type ) {
+            case LIST_POINT2D_U16:
+            case LIST_POINT2D_S16: {
+                    for (int i = 0; i < numElements; i++) {
+                        Point2D_I16 p = (Point2D_I16)list.get(startIndex+i);
 
-			mmf.putDouble(p.x);
-			mmf.putDouble(p.y);
-		}
-	}
+                        mmf.putShort(p.x);
+                        mmf.putShort(p.y);
+                    }
+                } break;
+
+            case LIST_POINT2D_S32: {
+                    for (int i = 0; i < numElements; i++) {
+                        Point2D_I32 p = (Point2D_I32)list.get(startIndex+i);
+
+                        mmf.putInt(p.x);
+                        mmf.putInt(p.y);
+                    }
+                } break;
+
+            case LIST_POINT2D_F32: {
+                    for (int i = 0; i < numElements; i++) {
+                        Point2D_F32 p = (Point2D_F32)list.get(startIndex+i);
+
+                        mmf.putFloat(p.x);
+                        mmf.putFloat(p.y);
+                    }
+                } break;
+
+            case LIST_POINT2D_F64: {
+                for (int i = 0; i < numElements; i++) {
+                    Point2D_F64 p = (Point2D_F64)list.get(startIndex+i);
+
+                    mmf.putDouble(p.x);
+                    mmf.putDouble(p.y);
+                }
+            } break;
+        }
+    }
 
 	public void read_List_AssociatedPair_F64(List<AssociatedPair> list ) {
 		mmf.position(0);
@@ -269,10 +343,26 @@ public class BoofMemoryMapped {
 
 	public enum Type
 	{
-		IMAGE_U8,
-		IMAGE_F32,
-		LIST_POINT2D_F64,
-		LIST_TUPLE_F64,
-		LIST_ASSOCIATED_PAIR_F64
+		IMAGE_U8(ImageDataType.U8),
+		IMAGE_F32(ImageDataType.F32),
+		LIST_POINT2D_U16(ImageDataType.U16),
+		LIST_POINT2D_S16(ImageDataType.S16),
+		LIST_POINT2D_S32(ImageDataType.S32),
+		LIST_POINT2D_F32(ImageDataType.F32),
+		LIST_POINT2D_F64(ImageDataType.F64),
+		LIST_TUPLE_F32(ImageDataType.F32),
+		LIST_TUPLE_F64(ImageDataType.F64),
+		LIST_ASSOCIATED_PAIR_F32(ImageDataType.F32),
+		LIST_ASSOCIATED_PAIR_F64(ImageDataType.F64);
+
+		ImageDataType dataType;
+
+		Type(ImageDataType dataType) {
+		    this.dataType = dataType;
+		}
+
+		public ImageDataType getDataType() {
+    		return dataType;
+		}
 	}
 }

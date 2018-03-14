@@ -465,7 +465,7 @@ class FactoryThresholdBinary:
         :rtype: InputToBinary
         """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            globalOtsu(int(min_value),int(max_value),down,self.boof_image_type)
+            globalOtsu(float(min_value),float(max_value),down,self.boof_image_type)
         return InputToBinary(java_object)
     
     def threshold(self, config ):

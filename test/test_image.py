@@ -131,7 +131,7 @@ class TestMemMapFunctions(unittest.TestCase):
         pb.fill_uniform(pb_img, 0, 200)
         np_img = pb.mmap_boof_to_numpy_U8(pb_img)
 
-        self.assertEquals(np_img.dtype, np.uint8)
+        self.assertEqual(np_img.dtype, np.uint8)
         self.assertEqual(np_img.shape[0], pb_img.getHeight())
         self.assertEqual(np_img.shape[1], pb_img.getWidth())
 
@@ -143,7 +143,7 @@ class TestMemMapFunctions(unittest.TestCase):
         pb.fill_uniform(pb_img, -2, 2)
         np_img = pb.mmap_boof_to_numpy_F32(pb_img)
 
-        self.assertEquals(np_img.dtype, np.float32)
+        self.assertEqual(np_img.dtype, np.float32)
         self.assertEqual(np_img.shape[0], pb_img.getHeight())
         self.assertEqual(np_img.shape[1], pb_img.getWidth())
 
@@ -155,7 +155,7 @@ class TestMemMapFunctions(unittest.TestCase):
         pb.fill_uniform(pb_img, -2, 2)
         np_img = pb.mmap_boof_PU8_to_numpy_IU8(pb_img)
 
-        self.assertEquals(np_img.dtype, np.uint8)
+        self.assertEqual(np_img.dtype, np.uint8)
         self.assertEqual(np_img.shape[0], pb_img.getHeight())
         self.assertEqual(np_img.shape[1], pb_img.getWidth())
         self.assertEqual(np_img.shape[2], pb_img.getNumBands())

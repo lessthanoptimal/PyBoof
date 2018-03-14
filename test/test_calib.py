@@ -21,18 +21,18 @@ class ChecksCameraPinhole(unittest.TestCase):
         self.check_expected_values(calib)
 
     def check_expected_values(self, calib):
-        self.assertEquals(calib.width, 200)
-        self.assertEquals(calib.height, 300)
+        self.assertEqual(calib.width, 200)
+        self.assertEqual(calib.height, 300)
 
-        self.assertEquals(calib.fx, 100)
-        self.assertEquals(calib.fy, 101)
-        self.assertEquals(calib.skew, 102)
-        self.assertEquals(calib.cx, 103)
-        self.assertEquals(calib.cy, 104)
+        self.assertEqual(calib.fx, 100)
+        self.assertEqual(calib.fy, 101)
+        self.assertEqual(calib.skew, 102)
+        self.assertEqual(calib.cx, 103)
+        self.assertEqual(calib.cy, 104)
 
-        self.assertEquals(calib.radial, [0.1, 0.2])
-        self.assertEquals(calib.t1, 103)
-        self.assertEquals(calib.t2, 104)
+        self.assertEqual(calib.radial, [0.1, 0.2])
+        self.assertEqual(calib.t1, 103)
+        self.assertEqual(calib.t2, 104)
 
     def test_save_load(self):
         calib = pb.CameraPinhole()
@@ -58,18 +58,18 @@ class CameraUniversalOmni(unittest.TestCase):
         self.check_expected_values(calib)
 
     def check_expected_values(self, calib):
-        self.assertEquals(calib.width, 200)
-        self.assertEquals(calib.height, 300)
+        self.assertEqual(calib.width, 200)
+        self.assertEqual(calib.height, 300)
 
-        self.assertEquals(calib.fx, 100)
-        self.assertEquals(calib.fy, 101)
-        self.assertEquals(calib.skew, 102)
-        self.assertEquals(calib.cx, 103)
-        self.assertEquals(calib.cy, 104)
+        self.assertEqual(calib.fx, 100)
+        self.assertEqual(calib.fy, 101)
+        self.assertEqual(calib.skew, 102)
+        self.assertEqual(calib.cx, 103)
+        self.assertEqual(calib.cy, 104)
 
-        self.assertEquals(calib.radial, [0.1, 0.2])
-        self.assertEquals(calib.t1, 103)
-        self.assertEquals(calib.t2, 104)
+        self.assertEqual(calib.radial, [0.1, 0.2])
+        self.assertEqual(calib.t1, 103)
+        self.assertEqual(calib.t2, 104)
 
         self.assertEqual(calib.mirror_offset, 3.1)
 

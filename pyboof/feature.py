@@ -8,6 +8,7 @@ from pyboof import gateway
 from pyboof.common import JavaList
 from pyboof.common import JavaList_to_fastqueue
 from pyboof.common import is_java_class
+import numpy as np
 
 
 def p2b_list_descF64(pylist):
@@ -68,6 +69,16 @@ class ConfigDenseSampling(JavaConfig):
         self.scale = scale
         self.periodX = periodX
         self.periodY = periodY
+
+
+class ConfigDenseSurfFast(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseSurfFast")
+
+
+class ConfigDenseSurfStable(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseSurfStable")
 
 
 class AssocScoreType:
@@ -233,7 +244,7 @@ class DetectDescribePointFeatures(JavaWrapper):
         java_descriptions = gateway.jvm.pyboof.PyBoofEntryPoint.extractFeatures(self.java_obj,False)
 
         # Convert into a Python format and return the two lists
-        locations = pyboof.b2p_list_point2DF64(java_locations)
+        locations = pyboof.b2p_list_point2D(java_locations,np.double)
         descriptions = b2p_list_descF64(java_descriptions)
 
         return locations, descriptions
@@ -265,9 +276,13 @@ class DetectDescribePointFeatures(JavaWrapper):
 class DenseDescribePointFeatures(JavaWrapper):
     def __init__(self,java_object):
         self.set_java_object(java_object)
+        self.descriptions = []
+        self.locations = []
 
     def detect(self, image ):
-        pass
+        self.java_obj.process(image)
+        self.locations = pyboof.b2p_list_point2D(self.java_obj.getLocations(),np.int32)
+        self.descriptions = b2p_list_descF64(self.java_obj.getDescriptions())
 
 
 class FactoryDetectDescribe:
@@ -327,12 +342,31 @@ class FactoryDenseDescribe:
     def __init__(self, dtype ):
         self.boof_image_type =  dtype_to_Class_SingleBand(dtype)
 
-    def createSurf( self, config_sampling , config_desc=None ):
+    def createSurf( self, config_desc=None ):
         if config_desc is None:
             config_desc = ConfigSurfFast()
 
-        java_config_sampling = config_sampling.java_obj
-        java_config_desc = config_desc.java_obj
+        java_config_desc = None
+
+        if config_desc is not None:
+            java_config_desc = config_desc.java_obj
+
+        if config_desc.__class__.__name__ == "ConfigDenseSurfFast":
+            java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.surfFast(
+                java_config_desc, self.boof_image_type)
+        elif config_desc.__class__.__name__ == "ConfigDenseSurfStable":
+            java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.surfStable(
+                java_config_desc, self.boof_image_type)
+        else:
+            raise RuntimeError("Unknown description type")
+
+        return DenseDescribePointFeatures(java_object)
+
+    def createSift(self):
+        pass
+
+    def creatHog(self):
+        pass
 
 
 class FactoryAssociate:

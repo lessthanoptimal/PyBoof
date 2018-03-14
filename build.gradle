@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 group = 'org.pyboof'
-version = '0.26'
+version = '0.29'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.3'
@@ -20,8 +20,8 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.boofcv', name: 'boofcv-core', version: '0.28'
-    compile group: 'org.boofcv', name: 'boofcv-swing', version: '0.28'
+    compile group: 'org.boofcv', name: 'boofcv-core', version: '0.29-SNAPSHOT'
+    compile group: 'org.boofcv', name: 'boofcv-swing', version: '0.29-SNAPSHOT'
     compile 'net.sf.py4j:py4j:0.10.3'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
