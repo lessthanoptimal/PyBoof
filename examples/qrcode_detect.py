@@ -1,10 +1,9 @@
 import numpy as np
-
 import pyboof as pb
 
-# Demonstration of how to calibrate a camera using a pinhole model
 pb.init_memmap()
 
+# Detects all the QR Codes in the image and prints their message and location
 data_path = "../data/example/fiducial/qrcode/image03.jpg"
 
 detector = pb.FactoryFiducial(np.uint8).qrcode()

@@ -3,8 +3,9 @@
 - Python 3
 - Dense Image Features
 - More mmap data types
+- QR Code detector
+- QR Code encoder
 - TODO Estimate camera motion
-- TODO QR Code Encoder
 - TODO FDistort
 
 ### Version 0.26
