@@ -6,7 +6,6 @@
 - QR Code detector
 - QR Code encoder
 - TODO Estimate camera motion
-- TODO FDistort
 
 ### Version 0.26
 

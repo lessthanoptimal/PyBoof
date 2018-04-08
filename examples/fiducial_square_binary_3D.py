@@ -25,7 +25,7 @@ for i in range(detector.get_total()):
     print("=========== Found #{}".format(i))
     fid_to_cam = detector.get_fiducial_to_camera(i)
     print("Pattern ID = "+str(detector.get_id(i)))
-    print("Image Location " + str(detector.get_image_location(i)))
+    print("Image Location " + str(detector.get_center(i)))
     if detector.is_3d():
         print("Rotation")
         print("  "+str(fid_to_cam.get_rotation()))
