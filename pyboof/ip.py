@@ -189,13 +189,9 @@ class Transform2to2(JavaWrapper):
         else:
             raise RuntimeError("Unexpected java object. "+java_object.getClass().getSimpleName())
 
-    def apply(self, input, output=None):
-        if output is None:
-            output = [0.0, 0.0]
+    def apply(self, input):
         self.java_obj.compute(float(input[0]), float(input[1]), self.point_out)
-        output[0] = self.point_out.getX()
-        output[1] = self.point_out.getY()
-        return output
+        return self.point_out.getX(), self.point_out.getY()
 
 
 class Transform2to3(JavaWrapper):
@@ -210,14 +206,9 @@ class Transform2to3(JavaWrapper):
         else:
             raise RuntimeError("Unexpected java object. "+java_object.getClass().getSimpleName())
 
-    def apply(self, input, output=None):
-        if output is None:
-            output = [0.0, 0.0, 0.0]
+    def apply(self, input):
         self.java_obj.compute(float(input[0]), float(input[1]), self.point_out)
-        output[0] = self.point_out.getX()
-        output[1] = self.point_out.getY()
-        output[2] = self.point_out.getZ()
-        return output
+        return self.point_out.getX(), self.point_out.getY(), self.point_out.getZ()
 
 
 class Transform3to2(JavaWrapper):

@@ -38,17 +38,30 @@ matches = associator.associate()
 print("Associated {} features".format(len(matches)))
 
 # Convert matches into a format that's understood by model estimator
-associated_pairs = pb.match_idx_to_point_pairs(matches, locs0, locs1)
+associated_pairs_pixels = pb.match_idx_to_point_pairs(matches, locs0, locs1)
 
-# TODO convert to normalized image coordinates
+# Convert from pixel to normalized image coordinates
+p2n = pb.create_narrow_lens_distorter(intrinsic).undistort(pixel_in=True,pixel_out=False)
+associated_pairs_norm = []
+for a in associated_pairs_pixels:
+    n0=p2n.apply(a[0])
+    n1=p2n.apply(a[1])
+    associated_pairs_norm.append((n0,n1))
+
+# Robustly estimate the essential matrix using RANSAC
 confE = pb.ConfigEssentialMatrix(intrinsic)
 confRansac = pb.ConfigRansac()
+confRansac.maxIterations = 200
+confRansac.inlierThreshold = 0.5 # Units = pixels
 
 model_matcher = pb.FactoryMultiViewRobust.essentialRansac(confE, confRansac)
 
-model_matcher.process(associated_pairs)
+if not model_matcher.process(associated_pairs_norm):
+    print("model matched fail!")
+    exit(1)
 
 camera_motion = model_matcher.model_parameters
 
+print("Inlier Size ",len(model_matcher.match_set))
 print("Motion")
 print( camera_motion )

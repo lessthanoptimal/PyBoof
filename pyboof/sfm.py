@@ -40,15 +40,18 @@ class ModelMatcher(JavaWrapper):
     def process(self, data_set):
         # TODO use type information (not available yet) to convert the dataset.
         java_list = pyboof.p2b_list_AssociatedPair(data_set)
-        self.java_obj.process( java_list )
+        if not self.java_obj.process( java_list ):
+            return False
 
         # TODO convert model based on model type info
         self.model_parameters = pyboof.Se3_F64(self.java_obj.getModelParameters())
-        self.match_set = pyboof.b2p_list_AssociatedPair(self.getMatchSet())
+        self.match_set = pyboof.b2p_list_AssociatedPair(self.java_obj.getMatchSet())
         self.input_indexes = [0]*len(self.match_set)
         for i in range(len(self.input_indexes)):
             self.input_indexes[i] = self.java_obj.getInputIndex(i)
         self.fit_quality = self.java_obj.getFitQuality()
+
+        return True
 
 
 class FactoryMultiViewRobust:
