@@ -5,7 +5,7 @@
 - More mmap data types
 - QR Code detector
 - QR Code encoder
-- TODO Estimate camera motion
+- Estimate camera motion
 
 ### Version 0.26
 
