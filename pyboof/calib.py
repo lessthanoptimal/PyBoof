@@ -1,6 +1,6 @@
 from pyboof.image import *
 from pyboof.ip import *
-from pyboof.geo import real_nparray_to_ejml
+from pyboof.geo import real_nparray_to_ejml32
 from abc import ABCMeta, abstractmethod
 
 
@@ -319,7 +319,7 @@ class NarrowToWideFovPtoP(JavaWrapper):
         :param rotation_matrix: 3D rotation matrix
         :return:
         """
-        self.java_obj.setRotationWideToNarrow( real_nparray_to_ejml(rotation_matrix) )
+        self.java_obj.setRotationWideToNarrow( real_nparray_to_ejml32(rotation_matrix) )
         pass
 
     def create_image_distort(self, image_type, border_type=Border.ZERO):

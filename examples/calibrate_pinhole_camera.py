@@ -15,7 +15,7 @@ detector = pb.FactoryFiducialCalibration.chessboard(config)
 
 print("Detecting calibration targets")
 observations = []
-for file in glob.glob(os.path.join(data_path,"*.jpg")):
+for file in glob.glob(os.path.join(data_path,"left*.jpg")):
     image = pb.load_single_band(file, np.float32)
     detector.detect(image)
     if detector.detected_points:
@@ -32,4 +32,6 @@ print("Solving for intrinsic parameters")
 intrinsic,errors = pb.calibrate_pinhole(observations,detector,
                                         num_radial=2,tangential=True)
 
+print()
+print("Average Error {:.3f} pixels".format(sum([x["mean"] for x in errors])/len(errors)))
 print(str(intrinsic))

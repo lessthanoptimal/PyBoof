@@ -6,8 +6,7 @@ import glob
 # Demonstration of how to calibrate a camera using a fisheye model
 pb.init_memmap()
 
-data_path = "../data/example/calibration/fisheye/chessboard//"
-
+data_path = "../data/example/calibration/fisheye/chessboard/"
 
 print("Configuring and creating a chessboard detector")
 config = pb.ConfigFiducialChessboard(num_rows=5, num_cols=7, square_width=0.3)
@@ -33,4 +32,6 @@ print("Solving for intrinsic parameters")
 intrinsic,errors = pb.calibrate_fisheye(observations,detector,
                                         num_radial=2,tangential=True)
 
+print()
+print("Average Error {:.3f} pixels".format(sum([x["mean"] for x in errors])/len(errors)))
 print(str(intrinsic))

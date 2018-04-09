@@ -18,11 +18,21 @@ def real_ejml_to_nparray( ejml ):
     return M
 
 
-def real_nparray_to_ejml( array ):
+def real_nparray_to_ejml32( array ):
     num_rows = array.shape[0]
     num_cols = array.shape[1]
 
-    M = gateway.jvm.org.ejml.data.DenseMatrix64F(num_rows,num_cols)
+    M = gateway.jvm.org.ejml.data.FMatrixRMaj(num_rows,num_cols)
+    for i in range(num_rows):
+        for j in range(num_cols):
+            M.unsafe_set(i,j,array[i,j])
+    return M
+
+def real_nparray_to_ejml64( array ):
+    num_rows = array.shape[0]
+    num_cols = array.shape[1]
+
+    M = gateway.jvm.org.ejml.data.DMatrixRMaj(num_rows,num_cols)
     for i in range(num_rows):
         for j in range(num_cols):
             M.unsafe_set(i,j,array[i,j])
