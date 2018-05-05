@@ -2,5 +2,8 @@
 ** build.gradle
 ** setup.py
 ** readme.md
-* gpg --detach-sign -a dist/PyBoof-0.29.post1-py3.5.egg dist/PyBoof-0.29.post1-py3.5.egg.asc
-* twine upload dist/PyBoof-0.29.post1-py3.5.egg dist/PyBoof-0.29.post1-py3.5.egg.asc
+* Make sure you're on venv
+** rm -rf build dist/ pyboof/PyBoof-all.jar
+** ./setup.py build;./setup.py sdist --formats=gztar
+* gpg --detach-sign -a dist/*
+* twine upload dist/*

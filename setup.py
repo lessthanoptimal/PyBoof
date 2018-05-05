@@ -2,9 +2,8 @@
 
 import os.path
 import time
-from distutils.core import setup
+from setuptools import setup
 from setuptools.command.build_py import build_py
-from setuptools import find_packages
 from subprocess import call
 
 
@@ -56,7 +55,7 @@ class MyBuild(build_py):
 
 setup(name='PyBoof',
       cmdclass={'build_py': MyBuild},
-      version='0.29.post1',
+      version='0.29r3',
       description='Py4J Python wrapper for BoofCV',
       long_description=open('README.md', 'r').read(),
       url='https://github.com/lessthanoptimal/PyBoof',
