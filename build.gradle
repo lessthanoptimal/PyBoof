@@ -7,7 +7,8 @@ group = 'org.pyboof'
 version = '0.29'
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.3'
+    distributionType = Wrapper.DistributionType.BIN
+    gradleVersion = '4.10.2'
 }
 
 repositories {
