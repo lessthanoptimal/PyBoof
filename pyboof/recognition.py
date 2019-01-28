@@ -152,6 +152,11 @@ class FactoryFiducial:
         return FiducialDetector(java_detector)
 
     def qrcode(self, config=None):
+        """ Creates a detector for QR Codes
+
+        :param config: ConfigQrCode or None
+        :return: QrCodeDetector
+        """
         if config is None:
             jconf = None
         else:
@@ -201,7 +206,8 @@ class FiducialDetector(JavaWrapper):
             self.java_obj.setLensDistortion(None,-1,-1)
         else:
             distortion = create_narrow_lens_distorter(intrinsic)
-            self.java_obj.setLensDistortion(distortion.java_obj,intrinsic.width,intrinsic.height)
+            self.java_obj.setLensDistortion(distortion.java_obj,
+                                            intrinsic.width,intrinsic.height)
 
     def get_total(self):
         return self.java_obj.totalFound()
@@ -244,6 +250,10 @@ class FiducialImageDetector(FiducialDetector):
 
 
 class QrCode:
+    """Description of a detected QR Code inside an image.
+
+    """
+
     def __init__(self, java_object=None):
         if java_object is None:
             self.verson = -1
@@ -274,6 +284,12 @@ class QrCode:
 
 
 class QrCodeDetector(JavaWrapper):
+    """Detects QR Codes inside of images
+
+    Attributes:
+        detections: List of detected QrCodes
+        failures: List of objects that are highly likely to be a QR Code but were rejected.
+    """
 
     def __init__(self, java_detector):
         JavaWrapper.__init__(self, java_detector)
@@ -292,16 +308,39 @@ def string_to_qrcode_error( error ):
     if error == "L":
         return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
     elif error == "M":
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
-    elif error == "M":
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
-    elif error == "M":
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.M
+    elif error == "Q":
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.Q
+    elif error == "H":
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.H
+    else:
+        return None
+
+def int_to_qrcode_mask( mask ):
+    if mask == 0b000:
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M000
+    elif mask == 0b001:
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M001
+    elif mask == 0b010:
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M010
+    elif mask == 0b011:
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M011
+    elif mask == 0b100:
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M100
+    elif mask == 0b101:
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M101
+    elif mask == 0b110:
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M110
+    elif mask == 0b111:
+        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M111
     else:
         return None
 
 
 class QrCodeGenerator:
+    """Converts a message into a QR Code that meets your specification
+
+    """
     def __init__(self, pixels_per_module=4 ):
         self.java_encoder = gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeEncoder()
         self.java_generator = gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeGeneratorImage(pixels_per_module)
@@ -313,14 +352,22 @@ class QrCodeGenerator:
         self.java_encoder.setVersion(version)
 
     def set_error(self, level):
-        # self.java_encoder.setError(version)
-        pass
+        """Specifies error level for encoded QR Code
+
+        :param level: String that can be "L","M","Q","H"
+        """
+        self.java_encoder.setError(string_to_qrcode_error(level))
 
     def set_mask(self, mask):
-        pass
+        """Specifies the type of mask to use. If not specified then it's automatically selected.
+        Probably shouldn't mess with this unless you have a very good reason.
+
+        :param mask: 0b000, 0b001, 0b010, 0b011, 0b100, 0b101, 0b110, 0b111
+        """
+        self.java_encoder.setMask(string_to_qrcode_error(mask))
 
     def set_message(self, message ):
-        pass
+        self.java_encoder.addAutomatic(str(message))
 
     def generate(self):
         qr = self.java_encoder.fixate()

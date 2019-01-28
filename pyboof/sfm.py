@@ -68,6 +68,8 @@ class ModelMatcherMultiview(ModelMatcher):
         """
         return self.java_obj.getNumberOfViews()
 
+        return True
+
 
 class FactoryMultiViewRobust:
     def __init__(self):

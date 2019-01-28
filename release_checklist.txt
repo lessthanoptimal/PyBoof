@@ -1,0 +1,9 @@
+* Update version
+** build.gradle
+** setup.py
+** readme.md
+* Make sure you're on venv
+** rm -rf build dist/ pyboof/PyBoof-all.jar
+** ./setup.py build;./setup.py sdist --formats=gztar
+* gpg --detach-sign -a dist/*
+* twine upload dist/*

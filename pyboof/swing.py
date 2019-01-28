@@ -2,6 +2,7 @@ import math
 import py4j.java_gateway as jg
 from pyboof import gateway
 import pyboof
+import numpy as np
 
 def show( boof_image , title="Image"):
     gateway.jvm.boofcv.gui.image.ShowImages.showWindow(boof_image,title)
@@ -54,10 +55,10 @@ def visualize_matches(image_left , image_right , points_src , points_dst , match
                       title = "Associated Features"):
 
     if type(points_src) is list:
-        points_src = pyboof.p2b_list_point2DF64(points_src)
+        points_src = pyboof.p2b_list_point2D(points_src,np.double)
 
     if type(points_dst) is list:
-        points_dst = pyboof.p2b_list_point2DF64(points_dst)
+        points_dst = pyboof.p2b_list_point2D(points_dst,np.double)
 
     if type(match_indexes) is list:
         raise Exception("Haven't bothered to implement python to java conversion for match_indexes yet")

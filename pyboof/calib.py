@@ -1,6 +1,6 @@
 from pyboof.image import *
 from pyboof.ip import *
-from pyboof.geo import real_nparray_to_ejml
+from pyboof.geo import real_nparray_to_ejml32
 from abc import ABCMeta, abstractmethod
 from typing import Mapping, List
 
@@ -319,7 +319,7 @@ class NarrowToWideFovPtoP(JavaWrapper):
         :param rotation_matrix: 3D rotation matrix
         :return:
         """
-        self.java_obj.setRotationWideToNarrow( real_nparray_to_ejml(rotation_matrix) )
+        self.java_obj.setRotationWideToNarrow( real_nparray_to_ejml32(rotation_matrix) )
         pass
 
     def create_image_distort(self, image_type, border_type=Border.ZERO):
@@ -428,13 +428,17 @@ def convert_from_boof_calibration_observations( jobservations ):
     return output
 
 
-def convert_into_boof_calibration_observations( observations: List , width: int , height: int ):
-    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation(int(width), int(height))
-    # TODO use accessor after 0.29
-    jlist = JavaWrapper(jobs).points
-    for o in observations:
-        jobj = gateway.jvm.boofcv.struct.geo.PointIndex2D_F64(float(o[1]),float(o[2]),int(o[0]))
-        jlist.add(jobj)
+def convert_into_boof_calibration_observations( observations ):
+    width = int(observations["width"])
+    height = int(observations["height"])
+    pixels = observations["pixels"]
+    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation(width,height)
+    for o in pixels:
+        p = gateway.jvm.georegression.struct.point.Point2D_F64(float(o[1]),float(o[2]))
+        jobs.add(p,int(o[0]))
+        # TODO use this other accessor after 0.30
+        #jobs.add(float(o[1]),float(o[2]),int(o[0]))
+
     return jobs
 
 
@@ -449,18 +453,19 @@ def calibrate_pinhole( observations:List, detector, num_radial=2, tangential=Tru
     :param zero_skew:
     :return:
     """
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(detector.java_obj.getLayout())
+    jlayout = detector.java_obj.getLayout()
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(jlayout)
     jcalib_planar.configurePinhole(zero_skew,int(num_radial),tangential)
     for o in observations:
-        jcalib_planar.addImage( convert_into_boof_calibration_observations(o["points"],o["width"],o["height"]) )
+        jcalib_planar.addImage( convert_into_boof_calibration_observations(o) )
 
     intrinsic = CameraPinhole(jcalib_planar.process())
 
     errors = []
     for jerror in jcalib_planar.getErrors():
-        # TODO For Boof 0.29 and beyond use accessors
-        w = JavaWrapper(jerror)
-        errors.append({"mean":w.meanError,"max_error":w.maxError,"bias_x":w.biasX,"bias_y":w.biasY})
+        errors.append({"mean":jerror.getMeanError(),
+                       "max_error":jerror.getMaxError(),
+                       "bias_x":jerror.getBiasX(),"bias_y":jerror.getBiasY()})
 
     return (intrinsic, errors)
 
@@ -477,20 +482,21 @@ def calibrate_fisheye( observations:List, detector, num_radial=2, tangential=Tru
     :param mirror_offset: If None it will be estimated. 0.0 = pinhole camera. 1.0 = fisheye
     :return: (intrinsic, errors)
     """
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(detector.java_obj.getLayout())
+    jlayout = detector.java_obj.getLayout()
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(jlayout)
     if mirror_offset is None:
-        jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential)
+        jcalib_planar.configureUniversalOmni(zero_skew,int(num_radial),tangential)
     else:
         jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential, float(mirror_offset))
     for o in observations:
-        jcalib_planar.addImage(convert_into_boof_calibration_observations(o["points"],o["width"],o["height"]))
+        jcalib_planar.addImage(convert_into_boof_calibration_observations(o))
 
     intrinsic = CameraUniversalOmni(jcalib_planar.process())
 
     errors = []
     for jerror in jcalib_planar.getErrors():
-        # TODO For Boof 0.29 and beyond use accessors
-        w = JavaWrapper(jerror)
-        errors.append({"mean":w.meanError,"max_error":w.maxError,"bias_x":w.biasX,"bias_y":w.biasY})
+        errors.append({"mean":jerror.getMeanError(),
+                       "max_error":jerror.getMaxError(),
+                       "bias_x":jerror.getBiasX(),"bias_y":jerror.getBiasY()})
 
     return (intrinsic,errors)

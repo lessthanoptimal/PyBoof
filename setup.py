@@ -2,9 +2,8 @@
 
 import os.path
 import time
-from distutils.core import setup
+from setuptools import setup
 from setuptools.command.build_py import build_py
-from setuptools import find_packages
 from subprocess import call
 
 
@@ -62,6 +61,10 @@ setup(name='PyBoof',
       url='https://github.com/lessthanoptimal/PyBoof',
       author="Peter Abeles",
       author_email="peter.abeles@gmail.com",
+      license="Apache 2.0",
+      classifiers=['Intended Audience :: Developers',
+                   'Programming Language :: Python :: 3.5'],
+      python_requires='>=3',
       eager_resources=['java'],
       packages=['pyboof'],
       package_data={'pyboof': ['PyBoof-all.jar', 'build_date.txt']},

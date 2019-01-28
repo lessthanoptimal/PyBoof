@@ -7,6 +7,9 @@
 - Python 3
 - Dense Image Features
 - More mmap data types
+- QR Code detector
+- QR Code encoder
+- Estimate camera motion
 
 ### Version 0.26
 

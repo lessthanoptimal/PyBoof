@@ -1,5 +1,7 @@
 import numpy as np
 
+# pip install matplotlib
+
 import matplotlib.pyplot as plt
 import pyboof as pb
 
