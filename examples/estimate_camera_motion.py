@@ -41,14 +41,19 @@ print("Associated {} features".format(len(matches)))
 associated_pairs = pb.match_idx_to_point_pairs(matches, locs0, locs1)
 
 # TODO convert to normalized image coordinates
-confE = pb.ConfigEssentialMatrix(intrinsic)
+confE = pb.ConfigEssentialMatrix()
 confRansac = pb.ConfigRansac()
 
-model_matcher = pb.FactoryMultiViewRobust.essentialRansac(confE, confRansac)
+model_matcher = pb.FactoryMultiViewRobust.baselineRansac(confE, confRansac)
 
-model_matcher.process(associated_pairs)
+# Same camera took both images. Specifies camera paramters for each ivew
+model_matcher.set_intrinsic(0,intrinsic)
+model_matcher.set_intrinsic(1,intrinsic)
 
-camera_motion = model_matcher.model_parameters
+if not model_matcher.process(associated_pairs):
+    print("Failed!")
+else:
+    camera_motion = model_matcher.model_parameters
 
-print("Motion")
-print( camera_motion )
+    print("Motion")
+    print( camera_motion )

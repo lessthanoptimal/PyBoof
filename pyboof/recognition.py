@@ -196,12 +196,12 @@ class FiducialDetector(JavaWrapper):
     def detect(self, image):
         self.java_obj.detect(image)
 
-    def set_intrinsic(self, intrinsic):
+    def set_intrinsic(self, intrinsic:CameraPinhole):
         if intrinsic is None:
-            self.java_obj.setLensDistortion(None)
+            self.java_obj.setLensDistortion(None,-1,-1)
         else:
             distortion = create_narrow_lens_distorter(intrinsic)
-            self.java_obj.setLensDistortion(distortion.java_obj)
+            self.java_obj.setLensDistortion(distortion.java_obj,intrinsic.width,intrinsic.height)
 
     def get_total(self):
         return self.java_obj.totalFound()
@@ -222,9 +222,9 @@ class FiducialDetector(JavaWrapper):
         self.java_obj.getFiducialToCamera(which, fid_to_cam.get_java_object())
         return fid_to_cam
 
-    def get_image_location(self, which):
+    def get_center(self, which):
         location = gateway.jvm.georegression.struct.point.Point2D_F64()
-        self.java_obj.getImageLocation(which, location)
+        self.java_obj.getCenter(which, location)
         return location.getX(), location.getY()
 
     def get_id(self, which):

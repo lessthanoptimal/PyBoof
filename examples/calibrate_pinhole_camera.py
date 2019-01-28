@@ -20,7 +20,8 @@ for file in glob.glob(os.path.join(data_path,"*.jpg")):
     detector.detect(image)
     if detector.detected_points:
         print("success "+file)
-        observations.append(detector.detected_points)
+        o = {"points":detector.detected_points,"width":image.getWidth(),"height":image.getHeight()}
+        observations.append(o)
     else:
         print("failed "+file)
 
@@ -28,4 +29,9 @@ print("Solving for intrinsic parameters")
 # TODO Next release pass in the layout instead of the detector
 intrinsic,errors = pb.calibrate_pinhole(observations,detector,num_radial=2,tangential=True)
 
+print("\n\nMean Reprojection Error by Image")
+for e in errors:
+    print("  {:.3f} pixels".format(e["mean"]))
+
+print("\n\n Found Parameters")
 print(str(intrinsic))

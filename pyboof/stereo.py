@@ -89,8 +89,10 @@ class StereoRectification:
         boof_left = intrinsic_left.convert_to_boof()
         boof_right = intrinsic_right.convert_to_boof()
 
-        K1 = gateway.jvm.boofcv.alg.geo.PerspectiveOps.calibrationMatrix(boof_left,None)
-        K2 = gateway.jvm.boofcv.alg.geo.PerspectiveOps.calibrationMatrix(boof_right,None)
+        K1 = gateway.jvm.org.ejml.data.DMatrixRMaj(3,3)
+        K2 = gateway.jvm.org.ejml.data.DMatrixRMaj(3,3)
+        gateway.jvm.boofcv.alg.geo.PerspectiveOps.pinholeToMatrix(boof_left,K1)
+        gateway.jvm.boofcv.alg.geo.PerspectiveOps.pinholeToMatrix(boof_right,K2)
         left_to_right = right_to_left.invert()
 
         rectify_alg = gateway.jvm.boofcv.alg.geo.RectifyImageOps.createCalibrated()

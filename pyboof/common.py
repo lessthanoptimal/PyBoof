@@ -47,7 +47,7 @@ class JavaWrapper:
         return self.java_obj
 
     def __str__(self):
-        return "Wrapped Java: "+self.java_obj.toString()
+        return "Wrapped Java:\n"+self.java_obj.toString()
 
 
 class JavaConfig(JavaWrapper):

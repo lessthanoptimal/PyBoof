@@ -2,7 +2,7 @@ from pyboof.image import *
 from pyboof.ip import *
 from pyboof.geo import real_nparray_to_ejml
 from abc import ABCMeta, abstractmethod
-
+from typing import Mapping, List
 
 class CameraModel:
     __metaclass__ = ABCMeta
@@ -428,8 +428,8 @@ def convert_from_boof_calibration_observations( jobservations ):
     return output
 
 
-def convert_into_boof_calibration_observations( observations ):
-    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation()
+def convert_into_boof_calibration_observations( observations: List , width: int , height: int ):
+    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation(int(width), int(height))
     # TODO use accessor after 0.29
     jlist = JavaWrapper(jobs).points
     for o in observations:
@@ -438,15 +438,21 @@ def convert_into_boof_calibration_observations( observations ):
     return jobs
 
 
-def calibrate_pinhole( observations, detector, num_radial=2, tangential=True, zero_skew=True):
-    # TODO For Boof 0.29 use zero argument constructor
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(detector.java_obj)
+def calibrate_pinhole( observations:List, detector, num_radial=2, tangential=True, zero_skew=True):
+    """
+    Calibrates a pinhole camera
+
+    :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
+    :param detector:
+    :param num_radial:
+    :param tangential:
+    :param zero_skew:
+    :return:
+    """
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(detector.java_obj.getLayout())
     jcalib_planar.configurePinhole(zero_skew,int(num_radial),tangential)
-    jobservations = gateway.jvm.java.util.ArrayList()
     for o in observations:
-        jobservations.add( convert_into_boof_calibration_observations(o) )
-    # TODO For Boof 0.29 and beyond use add(jobservations)
-    jcalib_planar.getObservations().addAll(jobservations)
+        jcalib_planar.addImage( convert_into_boof_calibration_observations(o["points"],o["width"],o["height"]) )
 
     intrinsic = CameraPinhole(jcalib_planar.process())
 
@@ -459,10 +465,11 @@ def calibrate_pinhole( observations, detector, num_radial=2, tangential=True, ze
     return (intrinsic, errors)
 
 
-def calibrate_fisheye( observations, detector, num_radial=2, tangential=True, zero_skew=True, mirror_offset=None):
+def calibrate_fisheye( observations:List, detector, num_radial=2, tangential=True, zero_skew=True, mirror_offset=None):
     """
+    Calibrate a fisheye camera.
 
-    :param observations:
+    :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
     :param detector:
     :param num_radial:
     :param tangential:
@@ -470,17 +477,13 @@ def calibrate_fisheye( observations, detector, num_radial=2, tangential=True, ze
     :param mirror_offset: If None it will be estimated. 0.0 = pinhole camera. 1.0 = fisheye
     :return: (intrinsic, errors)
     """
-    # TODO For Boof 0.29 use zero argument constructor
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(detector.java_obj)
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(detector.java_obj.getLayout())
     if mirror_offset is None:
-        jcalib_planar.configureUniversalOmni(zero_skew,int(num_radial),tangential)
+        jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential)
     else:
         jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential, float(mirror_offset))
-    jobservations = gateway.jvm.java.util.ArrayList()
     for o in observations:
-        jobservations.add(convert_into_boof_calibration_observations(o))
-    # TODO For Boof 0.29 and beyond use add(jobservations)
-    jcalib_planar.getObservations().addAll(jobservations)
+        jcalib_planar.addImage(convert_into_boof_calibration_observations(o["points"],o["width"],o["height"]))
 
     intrinsic = CameraUniversalOmni(jcalib_planar.process())
 

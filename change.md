@@ -1,11 +1,12 @@
+### Version 0.32
+
+- Updated for latest BoofCV
+
 ### Version 0.29
 
 - Python 3
 - Dense Image Features
 - More mmap data types
-- TODO Estimate camera motion
-- TODO QR Code Encoder
-- TODO FDistort
 
 ### Version 0.26
 

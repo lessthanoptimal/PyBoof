@@ -12,10 +12,6 @@ class ConfigEssentialMatrix(JavaConfig):
         if java_object is None:
             JavaConfig.__init__(self, "boofcv.factory.geo.ConfigEssential")
         else:
-            if type(java_object) is CameraPinhole:
-                java_object = pyboof.gateway.jvm.boofcv.factory.geo.\
-                    ConfigEssential(java_object.convert_to_boof())
-
             JavaWrapper.__init__(self, java_object)
 
 
@@ -40,15 +36,37 @@ class ModelMatcher(JavaWrapper):
     def process(self, data_set):
         # TODO use type information (not available yet) to convert the dataset.
         java_list = pyboof.p2b_list_AssociatedPair(data_set)
-        self.java_obj.process( java_list )
+        if not self.java_obj.process( java_list ):
+            return False
 
         # TODO convert model based on model type info
         self.model_parameters = pyboof.Se3_F64(self.java_obj.getModelParameters())
-        self.match_set = pyboof.b2p_list_AssociatedPair(self.getMatchSet())
+        self.match_set = pyboof.b2p_list_AssociatedPair(self.java_obj.getMatchSet())
         self.input_indexes = [0]*len(self.match_set)
         for i in range(len(self.input_indexes)):
             self.input_indexes[i] = self.java_obj.getInputIndex(i)
         self.fit_quality = self.java_obj.getFitQuality()
+        return True
+
+
+class ModelMatcherMultiview(ModelMatcher):
+    def __init__(self, java_object):
+        ModelMatcher.__init__(self, java_object)
+
+    def set_intrinsic(self, view:int , intrinsic:CameraPinhole ):
+        """
+        Specifies intrinsic parameters for each view
+
+        :param view: Index of the view
+        :param intrinsic: Intrinsic camera parameters
+        """
+        self.java_obj.setIntrinsic(view,intrinsic.convert_to_boof())
+
+    def get_number_of_views(self):
+        """
+        The number of views which need to have camera parameters specified
+        """
+        return self.java_obj.getNumberOfViews()
 
 
 class FactoryMultiViewRobust:
@@ -56,16 +74,17 @@ class FactoryMultiViewRobust:
         pass
 
     @staticmethod
-    def essentialRansac(configEssential, configRansac):
+    def baselineRansac(configEssential, configRansac):
         """
+        Estimates the stereo baseline (SE3) between two images.
 
         :param configEssential:
         :type configEssential: ConfigEssentialMatrix
         :param configRansac:
         :type configRansac: ConfigRansac
         :return:
-        :rtype: ModelMatcher
+        :rtype: ModelMatcherMultiview
         """
         mm = gateway.jvm.boofcv.factory.geo.FactoryMultiViewRobust. \
-            essentialRansac(configEssential.java_obj, configRansac.java_obj)
-        return ModelMatcher(mm)
+            baselineRansac(configEssential.java_obj, configRansac.java_obj)
+        return ModelMatcherMultiview(mm)
