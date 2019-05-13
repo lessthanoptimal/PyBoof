@@ -93,17 +93,17 @@ def border_to_java(border):
     :return: java_object
     """
     if border == Border.SKIP:
-        return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("SKIP")
+        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("SKIP")
     elif border == Border.EXTENDED:
-        return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("EXTENDED")
+        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("EXTENDED")
     elif border == Border.NORMALIZED:
-        return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("NORMALIZED")
+        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("NORMALIZED")
     elif border == Border.REFLECT:
-        return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("REFLECT")
+        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("REFLECT")
     elif border == Border.WRAP:
-        return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("WRAP")
+        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("WRAP")
     elif border == Border.ZERO:
-        return gateway.jvm.boofcv.core.image.border.BorderType.valueOf("ZERO")
+        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("ZERO")
 
 
 def blur_gaussian(image, output, sigma=-1.0,radius=1):
@@ -111,7 +111,7 @@ def blur_gaussian(image, output, sigma=-1.0,radius=1):
 
 
 def blur_mean(image, output, radius=1):
-    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.mean(image, output, radius, None)
+    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.mean(image, output, radius, None, None)
 
 
 def blur_median(image, output, radius=1):
@@ -293,7 +293,7 @@ class FactoryThresholdBinary:
         region_width = boof_fixed_length(region_width)
 
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            localSauvola(region_width,float(k),down,self.boof_image_type)
+            localSauvola(region_width,down,float(k),self.boof_image_type)
         return InputToBinary(java_object)
 
     def localMean(self, region_width, scale=0.95, down=True):
@@ -359,7 +359,7 @@ class FactoryThresholdBinary:
         region_width = boof_fixed_length(region_width)
 
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
-            blockMinMax(region_width, float(scale), down, float(minimumSpread), thresholdFromLocalBlocks,self.boof_image_type)
+            blockMinMax(region_width, float(scale), down, thresholdFromLocalBlocks, float(minimumSpread), self.boof_image_type)
         return InputToBinary(java_object)
 
     def blockMean(self, region_width, scale=0.95, down=True,thresholdFromLocalBlocks=True):
@@ -405,7 +405,7 @@ class FactoryThresholdBinary:
         region_width = boof_fixed_length(region_width)
 
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
-            blockOtsu(otsu2,region_width,float(tuning),float(scale),down,thresholdFromLocalBlocks,self.boof_image_type)
+            blockOtsu(region_width,float(scale),down,thresholdFromLocalBlocks,otsu2,float(tuning),self.boof_image_type)
         return InputToBinary(java_object)
 
     def globalEntropy(self, min_value=0, max_value=255, down=True):

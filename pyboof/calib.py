@@ -127,7 +127,7 @@ class CameraPinhole(CameraModel):
 
     def convert_to_boof(self, storage=None):
         if storage is None:
-            boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraPinholeRadial()
+            boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
         else:
             boof_intrinsic = storage
         boof_intrinsic.setFx(float(self.fx))
@@ -267,7 +267,7 @@ def create_narrow_lens_distorter( camera_model ):
     elif isinstance(camera_model, CameraPinhole):
         boof_model = camera_model.convert_to_boof()
         if camera_model.is_distorted():
-            java_obj = gateway.jvm.boofcv.alg.distort.radtan.LensDistortionRadialTangential(boof_model)
+            java_obj = gateway.jvm.boofcv.alg.distort.brown.LensDistortionBrown(boof_model)
         else:
             java_obj = gateway.jvm.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
     else:
@@ -413,7 +413,7 @@ def create_change_camera_model(intrinsic_orig,intrinsic_desired, image_type,
     java_border = border_to_java(border)
     java_original = intrinsic_orig.convert_to_boof()
     java_desired = intrinsic_desired.convert_to_boof()
-    java_intrinsic_out = gateway.jvm.boofcv.struct.calib.CameraPinholeRadial()
+    java_intrinsic_out = gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
     id = gateway.jvm.boofcv.alg.distort.LensDistortionOps.changeCameraModel(
         java_adjustment,java_border,java_original,java_desired,java_intrinsic_out,java_image_type)
     return (ImageDistort(id), CameraPinhole(java_intrinsic_out))

@@ -1,3 +1,7 @@
+### Version 0.33.1
+
+- Updated for latest BoofCV
+
 ### Version 0.32
 
 - Updated for latest BoofCV

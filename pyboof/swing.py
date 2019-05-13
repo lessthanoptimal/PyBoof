@@ -44,7 +44,7 @@ def show_list(image_name_pairs, title="Image List"):
 
 
 def colorize_gradient( derivX , derivY ):
-    return gateway.jvm.boofcv.gui.image.VisualizeImageData.colorizeGradient(derivX,derivY,-1)
+    return gateway.jvm.boofcv.gui.image.VisualizeImageData.colorizeGradient(derivX,derivY,-1,None)
 
 
 def render_binary( binary , invert=False):

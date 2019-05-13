@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pyboof as pb
 import numpy as np
 import os

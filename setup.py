@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os.path
 import time
@@ -55,7 +55,7 @@ class MyBuild(build_py):
 
 setup(name='PyBoof',
       cmdclass={'build_py': MyBuild},
-      version='0.32',
+      version='0.33.1',                             # Change in in __init__ too
       description='Py4J Python wrapper for BoofCV',
       long_description=open('README.md', 'r').read(),
       url='https://github.com/lessthanoptimal/PyBoof',
