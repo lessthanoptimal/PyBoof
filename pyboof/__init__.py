@@ -29,6 +29,11 @@ if build_date is None:
     exit(1)
 
 
+# Used to change the number of threads the Java code can run inside of
+def set_max_threads(max_threads):
+    gateway.jvm.pyboof.PyBoofEntryPoint.setMaxThreads(max_threads)
+
+
 def check_jvm(set_date):
     global gateway
     try:

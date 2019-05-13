@@ -1,6 +1,7 @@
 ### Version 0.33.1
 
 - Updated for latest BoofCV
+- Added ability to change number of threads
 
 ### Version 0.32
 

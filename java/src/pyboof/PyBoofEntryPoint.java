@@ -27,6 +27,7 @@ import boofcv.struct.feature.TupleDesc;
 import georegression.struct.point.Point2D_F64;
 import org.ddogleg.struct.FastQueue;
 import py4j.GatewayServer;
+import boofcv.concurrency.BoofConcurrency;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -56,6 +57,13 @@ public class PyBoofEntryPoint {
 		GatewayServer gatewayServer = new GatewayServer(new PyBoofEntryPoint());
 		gatewayServer.start();
 		System.out.println("Gateway Server Started");
+	}
+
+	public static void setMaxThreads( int maxThreads ) {
+		BoofConcurrency.USE_CONCURRENT = maxThreads > 1;
+		if( BoofConcurrency.USE_CONCURRENT ) {
+			BoofConcurrency.setMaxThreads(maxThreads);
+		}
 	}
 
 	public static String getBuildDate() {
