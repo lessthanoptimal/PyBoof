@@ -5,7 +5,7 @@ import time
 from setuptools import setup
 from setuptools.command.build_py import build_py
 from subprocess import call
-
+import re
 
 def check_for_command( command ):
   try:
@@ -58,6 +58,7 @@ setup(name='PyBoof',
       version='0.33.1',                             # Change in in __init__ too
       description='Py4J Python wrapper for BoofCV',
       long_description=open('README.md', 'r').read(),
+      long_description_content_type="text/markdown",
       url='https://github.com/lessthanoptimal/PyBoof',
       author="Peter Abeles",
       author_email="peter.abeles@gmail.com",
