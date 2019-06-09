@@ -9,7 +9,7 @@ from py4j.java_gateway import JavaGateway
 from py4j.protocol import Py4JError
 from py4j.protocol import Py4JNetworkError
 
-__version__ = "0.33.1"
+__version__ = "0.34.0"
 
 gateway = JavaGateway()
 

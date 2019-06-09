@@ -3,6 +3,9 @@ from pyboof import gateway
 from six import string_types
 
 
+def exception_use_mmap():
+    raise Exception("Need to turn on mmap. Add pb.init_memmap() to your code before any other calls to PyBoof")
+
 def is_java_class(java_class, string_path):
     return gateway.jvm.pyboof.PyBoofEntryPoint.isClass(java_class,string_path)
 

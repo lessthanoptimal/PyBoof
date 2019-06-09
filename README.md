@@ -45,6 +45,8 @@ Code for applying a Gaussian and mean spatial filter to an image and displays th
 import numpy as np
 import pyboof as pb
 
+pb.init_memmap() # Use a faster memory copy. Sometimes required
+
 original = pb.load_single_band('../data/example/outdoors01.jpg', np.uint8)
 
 gaussian = original.createSameShape() # useful function which creates a new image of the

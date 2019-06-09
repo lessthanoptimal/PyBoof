@@ -23,7 +23,7 @@ def p2b_list_descF64(pylist):
     if pyboof.mmap_file:
         mmap_list_python_to_TupleF64(pylist, java_list)
     else:
-        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+        exception_use_mmap()
     return java_list
 
 
@@ -39,7 +39,7 @@ def b2p_list_descF64(boof_list):
     if pyboof.mmap_file:
         mmap_list_TupleF64_to_python(boof_list, pylist)
     else:
-        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+        exception_use_mmap()
     return pylist
 
 

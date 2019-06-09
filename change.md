@@ -1,3 +1,8 @@
+### Version 0.34
+
+- Updated for latest BoofCV
+- More informative error message when py4j copy not implemented. Thanks lijingpeng for the bug report.
+
 ### Version 0.33.1
 
 - Updated for latest BoofCV

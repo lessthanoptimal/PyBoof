@@ -275,7 +275,7 @@ def p2b_list_AssociatedPair( pylist ):
     if pyboof.mmap_file:
         mmap_list_python_to_AssociatedPair(pylist, java_list)
     else:
-        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+        exception_use_mmap()
     return java_list
 
 
@@ -291,7 +291,7 @@ def b2p_list_AssociatedPair(boof_list):
     if pyboof.mmap_file:
         mmap_list_AssociatedPair_to_python(boof_list,pylist)
     else:
-        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+        exception_use_mmap()
     return pylist
 
 
@@ -307,7 +307,7 @@ def p2b_list_point2D( pylist , dtype):
     if pyboof.mmap_file:
         mmap_list_python_to_Point2D(pylist,java_list, dtype)
     else:
-        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+        exception_use_mmap()
     return java_list
 
 
@@ -323,7 +323,7 @@ def b2p_list_point2D(boof_list, dtype):
     if pyboof.mmap_file:
         mmap_list_Point2D_to_python(boof_list,pylist,dtype)
     else:
-        raise Exception("Yeah this needs to be implemented.  Turn mmap on if possible")
+        exception_use_mmap()
     return pylist
 
 
