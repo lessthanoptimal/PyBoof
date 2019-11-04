@@ -110,7 +110,7 @@ class Point2D:
         if type(o) is Point2D:
             self.x = o.x
             self.y = o.y
-        if type(o) is tuple:
+        elif type(o) is tuple:
             self.x = o[0]
             self.y = o[1]
         elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.point.Point2D_F64):
@@ -269,6 +269,46 @@ class Quadrilateral2D:
         return self.d
 
 
+class LineParametric2D:
+    def __init__(self, o=None):
+        self.p = Point2D()
+        # In java this is a vector and is distinct from a point
+        self.slope = Point2D()
+        if o:
+            self.set(o)
+
+    def set(self, o):
+        if type(o) is LineParametric2D:
+            self.p.set(o.p)
+            self.slope.set(o.slope)
+        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.line.LineParametric2D_F32):
+            self.p.set((o.getX(), o.getY()))
+            self.slope.set((o.getSlopeX(), o.getSlopeY()))
+        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.line.LineParametric2D_F64):
+            self.p.set((o.getX(), o.getY()))
+            self.slope.set((o.getSlopeX(), o.getSlopeY()))
+        else:
+            raise Exception("Unknown object type")
+
+    def convert_to_boof(self, dtype=np.double):
+        if dtype == np.float:
+            x = float(self.p.x)
+            y = float(self.p.y)
+            sx = float(self.slope.x)
+            sy = float(self.slope.y)
+
+            return gateway.jvm.georegression.struct.line.LineParametric2D_F32(x,y,sx,sy)
+        elif dtype == np.double:
+            x = self.p.x
+            y = self.p.y
+            sx = self.slope.x
+            sy = self.slope.y
+
+            return gateway.jvm.georegression.struct.line.LineParametric2D_F64(x,y,sx,sy)
+        else:
+            raise Exception("Unknown dtype")
+
+
 def p2b_list_AssociatedPair( pylist ):
     java_list = gateway.jvm.java.util.ArrayList()
 
@@ -325,6 +365,21 @@ def b2p_list_point2D(boof_list, dtype):
     else:
         exception_use_mmap()
     return pylist
+
+
+def p2b_list_LineParametric( pylist , dtype):
+    """
+    Converts a python list of feature descriptors stored in 64bit floats into a BoofCV compatible format
+    :param pylist: Python list of 2d points
+    :type pylist: list[(float,float)]
+    :return: List of 2d points in BoofCV format
+    """
+    java_list = gateway.jvm.java.util.ArrayList()
+
+    for o in pylist:
+        java_list.add(o.convert_to_boof(dtype))
+
+    return java_list
 
 
 def mmap_list_python_to_AssociatedPair( pylist, java_list):

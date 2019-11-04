@@ -2,7 +2,6 @@
 - polygon detector
 
 - TODO Estimate camera motion
-- TODO QR Code Encoder
 - TODO FDistort
 
 - unit tests

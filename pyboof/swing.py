@@ -76,3 +76,34 @@ def visualize_matches(image_left , image_right , points_src , points_dst , match
     gateway.jvm.boofcv.gui.image.ShowImages.showWindow(panel, title)
 
 
+def visualize_lines(image, lines, title="Lines"):
+    # If possible, convert images into a BufferedImage data type
+    if jg.is_instance_of(gateway, image, gateway.jvm.boofcv.struct.image.ImageBase):
+        image = gateway.jvm.boofcv.io.image.ConvertBufferedImage.convertTo(image, None, True)
+
+    d = gateway.jvm.java.awt.Dimension(image.getWidth(), image.getHeight())
+
+    if type(lines) is list:
+        if len(lines) > 0 and type(lines[0]) is tuple: # See if it's a list of line and names
+            panel = gateway.jvm.boofcv.gui.ListDisplayPanel()
+            for o in lines:
+                panel_lines = gateway.jvm.boofcv.gui.feature.ImageLinePanel()
+                panel_lines.setImage(image)
+                panel_lines.setLines(pyboof.p2b_list_LineParametric(o[1],np.float))
+                panel_lines.setPreferredSize(d)
+                panel.addItem(panel_lines, o[0])
+
+
+            gateway.jvm.boofcv.gui.image.ShowImages.showWindow(panel, title)
+            return
+        else:
+            lines = pyboof.p2b_list_LineParametric(lines, np.float)
+
+    print("lines {}".format(len(lines)))
+    print("foo {}".format(lines[0]))
+
+    panel = gateway.jvm.boofcv.gui.feature.ImageLinePanel()
+    panel.setImage(image)
+    panel.setLines(lines)
+    panel.setPreferredSize(d)
+    gateway.jvm.boofcv.gui.image.ShowImages.showWindow(panel, title)

@@ -45,27 +45,27 @@ def b2p_list_descF64(boof_list):
 
 class ConfigSurfFast(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.abst.feature.describe.ConfigSurfDescribe$Speed")
+        JavaConfig.__init__(self, "boofcv.abst.feature.describe.ConfigSurfDescribe$Speed")
 
 
 class ConfigSurfStability(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.abst.feature.describe.ConfigSurfDescribe$Stability")
+        JavaConfig.__init__(self, "boofcv.abst.feature.describe.ConfigSurfDescribe$Stability")
 
 
 class ConfigFastHessian(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.abst.feature.detect.interest.ConfigFastHessian")
+        JavaConfig.__init__(self, "boofcv.abst.feature.detect.interest.ConfigFastHessian")
 
 
 class ConfigAverageIntegral(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.abst.feature.orientation.ConfigAverageIntegral")
+        JavaConfig.__init__(self, "boofcv.abst.feature.orientation.ConfigAverageIntegral")
 
 
 class ConfigDenseSampling(JavaConfig):
     def __init__(self, scale,periodX ,periodY):
-        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseSample")
+        JavaConfig.__init__(self, "boofcv.factory.feature.dense.ConfigDenseSample")
         self.scale = scale
         self.periodX = periodX
         self.periodY = periodY
@@ -73,22 +73,44 @@ class ConfigDenseSampling(JavaConfig):
 
 class ConfigDenseSurfFast(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseSurfFast")
+        JavaConfig.__init__(self, "boofcv.factory.feature.dense.ConfigDenseSurfFast")
 
 
 class ConfigDenseSurfStable(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseSurfStable")
+        JavaConfig.__init__(self, "boofcv.factory.feature.dense.ConfigDenseSurfStable")
 
 
 class ConfigDenseSift(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseSift")
+        JavaConfig.__init__(self, "boofcv.factory.feature.dense.ConfigDenseSift")
 
 
 class ConfigDenseHoG(JavaConfig):
     def __init__(self):
-        JavaConfig.__init__(self,"boofcv.factory.feature.dense.ConfigDenseHoG")
+        JavaConfig.__init__(self, "boofcv.factory.feature.dense.ConfigDenseHoG")
+
+
+class ConfigHoughGradient(JavaConfig):
+    def __init__(self, max_lines=10):
+        JavaConfig.__init__(self, "boofcv.factory.feature.detect.line.ConfigHoughGradient")
+        self.maxLines = int(max_lines)
+
+
+class ConfigHoughBinary(JavaConfig):
+    def __init__(self, max_lines=10):
+        JavaConfig.__init__(self, "boofcv.factory.feature.detect.line.ConfigHoughBinary")
+        self.maxLines = int(max_lines)
+
+
+class ConfigParamPolar(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.feature.detect.line.ConfigParamPolar")
+
+
+class ConfigParamFoot(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.feature.detect.line.ConfigParamFoot")
 
 
 class AssocScoreType:
@@ -103,7 +125,7 @@ class AssocScoreType:
 
 
 class ConfigAssociation:
-    def __init__(self,score_type=AssocScoreType.DEFAULT, max_error=sys.float_info.max,backwards_validation=True):
+    def __init__(self, score_type=AssocScoreType.DEFAULT, max_error=sys.float_info.max,backwards_validation=True):
         self.score_type = score_type
         self.max_error = max_error
         self.backwards_validation = backwards_validation
@@ -239,7 +261,7 @@ class DetectDescribePointFeatures(JavaWrapper):
     def __init__(self,java_object):
         self.set_java_object(java_object)
 
-    def detect(self, image ):
+    def detect(self, image):
         """
         Detects features inside the image and returns a list of feature locations and descriptions
         :param image: Image in BoofCV format
@@ -250,8 +272,8 @@ class DetectDescribePointFeatures(JavaWrapper):
 
         # extract a list of locations and descriptions.  Don't copy since it will immediately be convert
         # into a python format
-        java_locations = gateway.jvm.pyboof.PyBoofEntryPoint.extractPoints(self.java_obj,False)
-        java_descriptions = gateway.jvm.pyboof.PyBoofEntryPoint.extractFeatures(self.java_obj,False)
+        java_locations = gateway.jvm.pyboof.PyBoofEntryPoint.extractPoints(self.java_obj, False)
+        java_descriptions = gateway.jvm.pyboof.PyBoofEntryPoint.extractFeatures(self.java_obj, False)
 
         # Convert into a Python format and return the two lists
         locations = pyboof.b2p_list_point2D(java_locations,np.double)
@@ -283,15 +305,30 @@ class DetectDescribePointFeatures(JavaWrapper):
         return self.java_obj.getDescriptionType()
 
 
+class DetectLine(JavaWrapper):
+    def __init__(self, java_object):
+        self.set_java_object(java_object)
+
+    def detect(self, image):
+        """
+        Detects LineParametric2D inside the image
+        """
+        java_lines = self.java_obj.detect(image)
+        output = []
+        for l in java_lines:
+            output.append(pyboof.LineParametric2D(l))
+        return output
+
+
 class DenseDescribePointFeatures(JavaWrapper):
-    def __init__(self,java_object):
+    def __init__(self, java_object):
         self.set_java_object(java_object)
         self.descriptions = []
         self.locations = []
 
-    def detect(self, image ):
+    def detect(self, image):
         self.java_obj.process(image)
-        self.locations = pyboof.b2p_list_point2D(self.java_obj.getLocations(),np.int32)
+        self.locations = pyboof.b2p_list_point2D(self.java_obj.getLocations(), np.int32)
         self.descriptions = b2p_list_descF64(self.java_obj.getDescriptions())
 
 
@@ -429,6 +466,24 @@ class FactoryAssociate:
     def kdRandomForest(self):
         pass
 
+
+class FactoryDetectLine:
+    def __init__(self, dtype ):
+        self.boof_image_class = dtype_to_Class_SingleBand(dtype)
+
+    def houghLinePolar(self, config_hough, config_polar=None):
+        if not config_polar:
+            config_polar = ConfigParamPolar()
+        java_object = gateway.jvm.boofcv.factory.feature.detect.line. \
+            FactoryDetectLine.houghLinePolar(config_hough.java_obj, config_polar.java_obj, self.boof_image_class)
+        return DetectLine(java_object)
+
+    def houghLineFoot(self, config_hough, config_foot=None):
+        if not config_foot:
+            config_foot = ConfigParamFoot()
+        java_object = gateway.jvm.boofcv.factory.feature.detect.line. \
+            FactoryDetectLine.houghLineFoot(config_hough.java_obj, config_foot.java_obj, self.boof_image_class)
+        return DetectLine(java_object)
 
 def mmap_list_python_to_TupleF64(pylist, java_list):
     """
