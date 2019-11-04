@@ -20,21 +20,36 @@ class ConfigFiducialBinary(JavaConfig):
             self.targetWidth = float(target_width)
 
 
-class ConfigFiducialChessboard(JavaConfig):
+class ConfigGridDimen(JavaConfig):
     def __init__(self, num_rows, num_cols, square_width):
-        java_obj = gateway.jvm.boofcv.abst.fiducial.calib.ConfigChessboard(
+        java_obj = gateway.jvm.boofcv.abst.fiducial.calib.ConfigGridDimen(
             int(num_rows), int(num_cols), float(square_width))
         JavaConfig.__init__(self, java_obj)
 
 
-class ConfigFiducialSquareGrid(JavaConfig):
+class ConfigChessboard(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigChessboard")
+
+
+class ConfigSquareGrid(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigSquareGrid")
 
 
-class ConfigFiducialBinaryGrid(JavaConfig):
+class ConfigSquareGridBinary(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigSquareGridBinary")
+
+
+class ConfigCircleHexagonalGrid(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigCircleHexagonalGrid")
+
+
+class ConfigCircleRegularGrid(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigCircleRegularGrid")
 
 
 class ConfigQrCode(JavaConfig):
@@ -47,44 +62,69 @@ class FactoryFiducialCalibration:
         pass
 
     @staticmethod
-    def chessboard(config):
+    def chessboard(config_grid,config_detector=None):
         """
         Creates a chessboard detector
 
-        :param config:  Configuration for the detector
-        :type config: ConfigFiducialChessboard
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
         :return: Calibration target detector
         :rtype: FiducialCalibrationDetector
         """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboard(config.java_obj)
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboard(cdj,config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
     @staticmethod
-    def square_grid(config):
+    def square_grid(config_grid,config_detector=None):
         """
         Creates a square grid detector
 
-        :param config:  Configuration for the detector
-        :type config: ConfigFiducialSquareGrid
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
         :return: Calibration target detector
         :rtype: FiducialCalibrationDetector
         """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.SquareGrid(config.java_obj)
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.SquareGrid(cdj,config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
     @staticmethod
-    def binary_grid(config):
+    def circle_hexagonal_grid(config_grid,config_detector=None):
         """
-        Creates a binary grid detector
+        Detector for hexagonal grid of circles.  All circles must be entirely inside of the image.
 
-        :param config:  Configuration for the detector
-        :type config: ConfigFiducialBinaryGrid
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
         :return: Calibration target detector
         :rtype: FiducialCalibrationDetector
         """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.BinaryGrid(config.java_obj)
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.circleHexagonalGrid(cdj,config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
+    @staticmethod
+    def circle_regular_grid(config_grid,config_detector=None):
+        """
+        Detector for regular grid of circles.  All circles must be entirely inside of the image.
+
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
+        :return: Calibration target detector
+        :rtype: FiducialCalibrationDetector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.circleHexagonalGrid(cdj,config_grid.java_obj)
+        return FiducialCalibrationDetector(java_detector)
 
 class FactoryFiducial:
     def __init__(self, dtype):
