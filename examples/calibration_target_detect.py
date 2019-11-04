@@ -13,8 +13,8 @@ pb.init_memmap()
 data_path = "../data/example/calibration/stereo/Bumblebee2_Chess/"
 
 print("Configuring and creating a chessboard detector")
-config = pb.ConfigFiducialChessboard(num_rows=5, num_cols=7, square_width=0.3)
-detector = pb.FactoryFiducialCalibration.chessboard(config)
+config_grid = pb.ConfigGridDimen(num_rows=5, num_cols=7, square_width=0.3)
+detector = pb.FactoryFiducialCalibration.chessboard(config_grid)
 
 print("Detecting image")
 image = pb.load_single_band(os.path.join(data_path, "left01.jpg"), np.float32)

@@ -315,6 +315,25 @@ class FactoryThresholdBinary:
             localMean(region_width,float(scale),down,self.boof_image_type)
         return InputToBinary(java_object)
 
+    def localNick(self, region_width, down=True, k=-0.1):
+        """
+        Create an instance of local square threshold
+
+        :param region_width: Width of local region
+        :type region_width: int
+        :param scale: Threshold scale adjustment
+        :type scale: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        region_width = boof_fixed_length(region_width)
+
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+            localNick(region_width,down,float(k),self.boof_image_type)
+        return InputToBinary(java_object)
+
     def localOtsu(self, region_width, scale=0.95, down=True, otsu2 = False, tuning=0):
         """
         Create an instance of local otsu threshold
@@ -408,7 +427,7 @@ class FactoryThresholdBinary:
             blockOtsu(region_width,float(scale),down,thresholdFromLocalBlocks,otsu2,float(tuning),self.boof_image_type)
         return InputToBinary(java_object)
 
-    def globalEntropy(self, min_value=0, max_value=255, down=True):
+    def globalEntropy(self, min_value=0, max_value=255, scale=0.95, down=True):
         """
         Applies a global entropy based threshold to the entire image.
 
@@ -422,7 +441,41 @@ class FactoryThresholdBinary:
         :rtype: InputToBinary
         """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            globalEntropy(int(min_value),int(max_value),down,self.boof_image_type)
+            globalEntropy(int(min_value), int(max_value), float(scale), down, self.boof_image_type)
+        return InputToBinary(java_object)
+
+    def globalLi(self, min_value=0, max_value=255, scale=0.95, down=True):
+        """
+        Implements Li's Minimum Cross Entropy thresholding method
+
+        :param min_value: Minimum pixel value.
+        :type min_value: int
+        :param max_value: Maximum pixel value
+        :type min_value: int
+        :param down: True for thresholding down and false for up
+        :type down: bool:
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+            globalLi(float(min_value), float(max_value), float(scale), down, self.boof_image_type)
+        return InputToBinary(java_object)
+
+    def globalHuang(self, min_value=0, max_value=255, scale=0.95, down=True):
+        """
+        Implements Huang's fuzzy thresholding method
+
+        :param min_value: Minimum pixel value.
+        :type min_value: int
+        :param max_value: Maximum pixel value
+        :type min_value: int
+        :param down: True for thresholding down and false for up
+        :type down: bool:
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+            globalHuang(float(min_value), float(max_value), float(scale), down, self.boof_image_type)
         return InputToBinary(java_object)
 
     def globalFixed(self, threshold, down=True):
@@ -442,7 +495,7 @@ class FactoryThresholdBinary:
             globalFixed(float(threshold),down,self.boof_image_type)
         return InputToBinary(java_object)
 
-    def globalOtsu(self, min_value=0, max_value=255, down=True):
+    def globalOtsu(self, min_value=0, max_value=255, scale=0.95, down=True):
         """
         Computes the Otsu threshold and applies it to the entire image.
 
@@ -456,7 +509,7 @@ class FactoryThresholdBinary:
         :rtype: InputToBinary
         """
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
-            globalOtsu(float(min_value),float(max_value),down,self.boof_image_type)
+            globalOtsu(float(min_value), float(max_value), float(scale), down, self.boof_image_type)
         return InputToBinary(java_object)
     
     def threshold(self, config ):
