@@ -2,7 +2,7 @@ PyBoof is [Python](http://www.python.org) wrapper for the computer vision librar
 
 To start using the library simply install the latest stable version using pip
 ```bash
-sudo pip install pyboof
+sudo pip3 install pyboof
 ```
 
 # Installing From Source
