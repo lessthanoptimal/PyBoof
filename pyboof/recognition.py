@@ -62,9 +62,9 @@ class FactoryFiducialCalibration:
         pass
 
     @staticmethod
-    def chessboard(config_grid,config_detector=None):
+    def chessboardX(config_grid,config_detector=None):
         """
-        Creates a chessboard detector
+        Creates a chessboard detector based on x-corners. Slower but very robust.
 
         :param config_detector:  Configuration for the detector
         :param config_grid: Specifies the Grid's shape
@@ -75,7 +75,24 @@ class FactoryFiducialCalibration:
         if config_detector:
             cdj = config_detector.java_obj
 
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboard(cdj,config_grid.java_obj)
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboardX(cdj, config_grid.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def chessboardB(config_grid,config_detector=None):
+        """
+        Creates a chessboard detector based on binary images. Fast but not as robust.
+
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
+        :return: Calibration target detector
+        :rtype: FiducialCalibrationDetector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboardB(cdj, config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
     @staticmethod
