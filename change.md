@@ -1,9 +1,13 @@
+### Version 0.35
+
+- Updated for latest BoofCV
+- TODO Detect black polygons and ellipses
+
 ### Version 0.34
 
 - Updated for latest BoofCV
 - More informative error message when py4j copy not implemented. Thanks lijingpeng for the bug report.
 - Added Hough Line detector for Gradient images
-- TODO Detect black polygons and ellipses
 
 ### Version 0.33.1
 
