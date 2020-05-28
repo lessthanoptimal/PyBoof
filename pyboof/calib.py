@@ -210,7 +210,7 @@ class LensNarrowDistortionFactory(JavaWrapper):
             java_out = self.java_obj.distort_F64(pixel_in, pixel_out)
         return Transform2to2(java_out)
 
-    def undistort(self, pixel_in, pixel_out):
+    def undistort(self, pixel_in: bool, pixel_out: bool):
         """
 
         :param pixel_in:
@@ -222,7 +222,7 @@ class LensNarrowDistortionFactory(JavaWrapper):
         if self.use_32:
             java_out = self.java_obj.undistort_F32(pixel_in, pixel_out)
         else:
-            java_out = self.java_obj.undistort_F32(pixel_in, pixel_out)
+            java_out = self.java_obj.undistort_F64(pixel_in, pixel_out)
         return Transform2to2(java_out)
 
 class LensWideDistortionFactory(JavaWrapper):

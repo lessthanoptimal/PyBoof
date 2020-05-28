@@ -106,6 +106,6 @@ class JavaList(JavaWrapper):
         gateway.jvm.pyboof.FileIO.saveList(self.java_obj,self.java_type,file_name)
 
 
-def JavaList_to_fastqueue(java_list, java_class_type , queue_declare=False):
-    return gateway.jvm.pyboof.PyBoofEntryPoint.listToFastQueue(java_list, java_class_type, queue_declare)
+def JavaList_to_fastarray(java_list, java_class_type):
+    return gateway.jvm.pyboof.PyBoofEntryPoint.listToFastArray(java_list, java_class_type)
 

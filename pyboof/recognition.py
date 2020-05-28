@@ -437,7 +437,7 @@ class ConfigCirculant(JavaConfig):
         JavaConfig.__init__(self, java_object)
 
 
-class ConfigTld(JavaConfig):
+class ConfigTrackerTld(JavaConfig):
     def __init__(self, obj=None):
         """
         :param obj: Java object, bool, None
@@ -446,9 +446,9 @@ class ConfigTld(JavaConfig):
             ConfigTld for user specified configuration
         """
         if obj is None:
-            config = gateway.jvm.boofcv.abst.tracker.ConfigTld()
+            config = gateway.jvm.boofcv.abst.tracker.ConfigTrackerTld()
         elif type(obj) is bool:
-            config = gateway.jvm.boofcv.abst.tracker.ConfigTld(obj)
+            config = gateway.jvm.boofcv.abst.tracker.ConfigTrackerTld(obj)
         else:
             config = obj
         JavaConfig.__init__(self, config)

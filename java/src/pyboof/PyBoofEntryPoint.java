@@ -25,7 +25,7 @@ import boofcv.factory.filter.binary.ThresholdType;
 import boofcv.struct.Configuration;
 import boofcv.struct.feature.TupleDesc;
 import georegression.struct.point.Point2D_F64;
-import org.ddogleg.struct.FastQueue;
+import org.ddogleg.struct.FastArray;
 import py4j.GatewayServer;
 import boofcv.concurrency.BoofConcurrency;
 
@@ -86,8 +86,8 @@ public class PyBoofEntryPoint {
 		return ConfigThreshold.global(type);
 	}
 
-	public static FastQueue listToFastQueue( List list , Class type , boolean declare ) {
-		FastQueue ret = new FastQueue(list.size(),type,declare);
+	public static FastArray listToFastArray( List list , Class type ) {
+		FastArray ret = new FastArray(type,list.size());
 
 		for (int i = 0; i < list.size(); i++) {
 			ret.add(list.get(i));

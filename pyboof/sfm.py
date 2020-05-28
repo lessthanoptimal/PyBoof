@@ -36,7 +36,7 @@ class ModelMatcher(JavaWrapper):
     def process(self, data_set):
         # TODO use type information (not available yet) to convert the dataset.
         java_list = pyboof.p2b_list_AssociatedPair(data_set)
-        if not self.java_obj.process( java_list ):
+        if not self.java_obj.process(java_list):
             return False
 
         # TODO convert model based on model type info

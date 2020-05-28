@@ -28,9 +28,13 @@ locs1, desc1 = feature_detector.detect(image1)
 print("Detected {:4d} features in image 0".format(len(desc0)))
 print("         {:4d}             image 1".format(len(desc1)))
 
+
+config_greedy = pb.ConfigAssociateGreedy()
+config_greedy.forwardsBackwards = True
+config_greedy.scoreRatioThreshold = 0.95
 factory_association = pb.FactoryAssociate()
 factory_association.set_score(pb.AssocScoreType.DEFAULT, feature_detector.get_descriptor_type())
-associator = factory_association.greedy()
+associator = factory_association.greedy(config_greedy)
 
 associator.set_source(desc0)
 associator.set_destination(desc1)

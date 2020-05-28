@@ -1,7 +1,15 @@
+### Version 0.36
+
+- Updated for latest BoofCV
+- TODO add random dot markers
+- TODO Detect black polygons and ellipses
+- TODO Add point cloud viewer for stereo
+- TODO Get visual odometry working
+- TODO add more tests for stereo which go through major types
+
 ### Version 0.35
 
 - Updated for latest BoofCV
-- TODO Detect black polygons and ellipses
 
 ### Version 0.34
 
