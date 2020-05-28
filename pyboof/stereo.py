@@ -56,6 +56,26 @@ class ConfigDisparitySGM(JavaConfig):
         JavaConfig.__init__(self, "boofcv.factory.feature.disparity.ConfigDisparitySGM")
 
 
+class DisparityError:
+    """
+    Error functions which can be used with block-matching stereo disparity approaches
+    """
+    SAD = gateway.jvm.boofcv.factory.feature.disparity.DisparityError.SAD
+    CENSUS = gateway.jvm.boofcv.factory.feature.disparity.DisparityError.CENSUS
+    NCC = gateway.jvm.boofcv.factory.feature.disparity.DisparityError.NCC
+    values = gateway.jvm.boofcv.factory.feature.disparity.DisparityError.values()
+
+
+class DisparitySgmError:
+    """
+    Error functions which can be used with SGM stereo disparity
+    """
+    ABSOLUTE_DIFFERENCE = gateway.jvm.boofcv.factory.feature.disparity.DisparitySgmError.ABSOLUTE_DIFFERENCE
+    CENSUS = gateway.jvm.boofcv.factory.feature.disparity.DisparitySgmError.CENSUS
+    MUTUAL_INFORMATION = gateway.jvm.boofcv.factory.feature.disparity.DisparitySgmError.MUTUAL_INFORMATION
+    values = gateway.jvm.boofcv.factory.feature.disparity.DisparitySgmError.values()
+
+
 class StereoRectification:
     """
     Used to compute distortion for rectified stereo images

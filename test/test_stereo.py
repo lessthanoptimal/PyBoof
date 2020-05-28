@@ -11,7 +11,7 @@ pb.init_memmap()
 
 class FactoryStereoDisparity(unittest.TestCase):
     def test_block_match(self):
-        error_types = gateway.jvm.boofcv.factory.feature.disparity.DisparityError.values()
+        error_types = pb.DisparityError.values
         for input_type in [np.uint8,np.float32]:
             factory = pb.FactoryStereoDisparity(input_type)
             for error_type in error_types:
@@ -21,7 +21,7 @@ class FactoryStereoDisparity(unittest.TestCase):
                 self.assertTrue(factory.block_match(config))
 
     def test_block_match_best5(self):
-        error_types = gateway.jvm.boofcv.factory.feature.disparity.DisparityError.values()
+        error_types = pb.DisparityError.values
         for input_type in [np.uint8,np.float32]:
             factory = pb.FactoryStereoDisparity(input_type)
             for error_type in error_types:
