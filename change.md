@@ -1,12 +1,10 @@
 ### Version 0.36
 
 - Updated for latest BoofCV
-- TODO Add wrapper class for enum. Add disparity error types
+- New stereo API
 - TODO add random dot markers
 - TODO Detect black polygons and ellipses
 - TODO Add point cloud viewer for stereo
-- TODO Get visual odometry working
-- TODO add more tests for stereo which go through major types
 
 ### Version 0.35
 

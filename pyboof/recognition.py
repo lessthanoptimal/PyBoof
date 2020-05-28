@@ -297,7 +297,7 @@ class FiducialDetector(JavaWrapper):
         return self.java_obj.getWidth(which)
 
     def get_input_type(self):
-        return ImageType(self.java_obj.getInputType())
+        return ImageType(self.java_obj.get_input_type())
 
 
 class FiducialImageDetector(FiducialDetector):

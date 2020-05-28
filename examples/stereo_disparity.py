@@ -52,4 +52,7 @@ disparity_image[disparity_image > 60] = float('nan')
 plt.imshow(disparity_image)
 plt.show()
 
+# TODO convert to a colorized point cloud
+# TODO show the colorized point coud
+
 print("Done!")
