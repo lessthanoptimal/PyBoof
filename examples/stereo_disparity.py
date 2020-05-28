@@ -35,6 +35,7 @@ distort_right.apply(image1, rect1)
 config = pb.ConfigDisparityBMBest5()
 config.disparityMin = 10
 config.disparityRange = 50
+config.errorType = pb.gateway.jvm.boofcv.factory.feature.disparity.DisparityError.CENSUS
 
 factory = pb.FactoryStereoDisparity(np.uint8)
 

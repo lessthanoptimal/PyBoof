@@ -56,37 +56,6 @@ class ConfigDisparitySGM(JavaConfig):
         JavaConfig.__init__(self, "boofcv.factory.feature.disparity.ConfigDisparitySGM")
 
 
-# class DisparityAlgorithms:
-#     """
-#     Types of algorithms available for computing disparity
-#     """
-#     RECT = 0,
-#     FIVE_RECT = 1
-#
-#
-# class ConfigStereoDisparity:
-#     def __init__(self):
-#         # Which algorithm it should use
-#         self.type = DisparityAlgorithms.FIVE_RECT
-#
-#         # Minimum disparity that it will check. Must be >= 0 and &lt; maxDisparity
-#         self.minDisparity = 0
-#         # Maximum disparity that it will calculate. Must be > 0
-#         self.maxDisparity = 40
-#         # Radius of the rectangular region along x-axis.
-#         self.regionRadiusX = 5
-#         # Radius of the rectangular region along y-axis.
-#         self.regionRadiusY = 5
-#         # Maximum allowed error in a region per pixel.  Set to <= 0 to disable.
-#         self.maxPerPixelError = 25
-#         # Tolerance for how difference the left to right associated values can be.
-#         self.validateRtoL = 1
-#         # Tolerance for how similar optimal region is to other region.  Closer to zero is more tolerant.
-#         self.texture = 0.2
-#         # Should a sub-pixel algorthm be used?
-#         self.subPixel = True
-
-
 class StereoRectification:
     """
     Used to compute distortion for rectified stereo images
