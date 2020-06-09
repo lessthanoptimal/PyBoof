@@ -45,7 +45,7 @@ def pts_to_quad():
 cv2.setMouseCallback(window_name, click_rect)
 
 # Switch trackers by commenting and uncommenting a line.
-tracker = pb.FactoryTrackerObjectQuad(np.uint8).tld(pb.ConfigTld(False))
+tracker = pb.FactoryTrackerObjectQuad(np.uint8).tld(pb.ConfigTrackerTld(False))
 # tracker = pb.FactoryTrackerObjectQuad(np.uint8).circulant()
 # color_type = pb.create_ImageType(pb.Family.PLANAR,np.uint8,3)
 # tracker = pb.FactoryTrackerObjectQuad(color_type).mean_shift_comaniciu()

@@ -6,7 +6,7 @@ from pyboof import JavaWrapper
 from pyboof import dtype_to_Class_SingleBand
 from pyboof import gateway
 from pyboof.common import JavaList
-from pyboof.common import JavaList_to_fastqueue
+from pyboof.common import JavaList_to_fastarray
 from pyboof.common import is_java_class
 import numpy as np
 
@@ -113,6 +113,21 @@ class ConfigParamFoot(JavaConfig):
         JavaConfig.__init__(self, "boofcv.factory.feature.detect.line.ConfigParamFoot")
 
 
+class ConfigAssociate(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.feature.associate.ConfigAssociate")
+
+
+class ConfigAssociateGreedy(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.feature.associate.ConfigAssociateGreedy")
+
+
+class ConfigAssociateNearestNeighbor(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.feature.associate.ConfigAssociateNearestNeighbor")
+
+
 class AssocScoreType:
     """
     Enum different types of association scoring techniques
@@ -151,8 +166,8 @@ class AssociateDescription(JavaWrapper):
 
         java_type = gateway.jvm.boofcv.struct.feature.TupleDesc_F64(0).getClass()
 
-        fast_queue = JavaList_to_fastqueue(feature_list, java_type, queue_declare=False)
-        self.java_obj.setSource(fast_queue)
+        fast_array= JavaList_to_fastarray(feature_list, java_type)
+        self.java_obj.setSource(fast_array)
 
     def set_destination(self, feature_list):
         """
@@ -170,7 +185,7 @@ class AssociateDescription(JavaWrapper):
 
         java_type = gateway.jvm.boofcv.struct.feature.TupleDesc_F64(0).getClass()
 
-        fast_queue = JavaList_to_fastqueue(feature_list, java_type, queue_declare=False)
+        fast_queue = JavaList_to_fastarray(feature_list, java_type)
         self.java_obj.setDestination(fast_queue)
 
     def associate(self):
@@ -455,16 +470,20 @@ class FactoryAssociate:
             self.score = gateway.jvm.boofcv.factory.feature.associate.\
                 FactoryAssociation.scoreSad(descriptor_type)
 
-    def greedy(self, max_error=sys.float_info.max,backwards_validation=True):
+    def generic(self, config: ConfigAssociate, info):
         java_obj = gateway.jvm.boofcv.factory.feature.associate.\
-                FactoryAssociation.greedy(self.score,max_error,backwards_validation)
+                FactoryAssociation.generic(config.java_obj, info)
         return AssociateDescription(java_obj)
 
-    def kdtree(self):
-        pass
+    def greedy(self, config: ConfigAssociateGreedy):
+        java_obj = gateway.jvm.boofcv.factory.feature.associate.\
+                FactoryAssociation.greedy(config.java_obj, self.score)
+        return AssociateDescription(java_obj)
 
-    def kdRandomForest(self):
-        pass
+    # def nearest_neighbor(self, config: ConfigAssociateNearestNeighbor):
+    #     java_obj = gateway.jvm.boofcv.factory.feature.associate.\
+    #             FactoryAssociation.associateNearestNeighbor(config.java_obj, self.score)
+    #     return AssociateDescription(java_obj)
 
 
 class FactoryDetectLine:

@@ -9,7 +9,7 @@ from py4j.java_gateway import JavaGateway
 from py4j.protocol import Py4JError
 from py4j.protocol import Py4JNetworkError
 
-__version__ = "0.34.0"
+__version__ = "0.36.0"
 
 gateway = JavaGateway()
 
@@ -21,7 +21,7 @@ build_date = None
 java_pid = None
 
 # Read the date everything was build
-with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"build_date.txt"), 'r') as f:
+with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "build_date.txt"), 'r') as f:
     build_date = f.readline()
 
 if build_date is None:

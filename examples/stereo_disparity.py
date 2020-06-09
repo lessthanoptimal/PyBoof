@@ -32,23 +32,27 @@ distort_left.apply(image0, rect0)
 distort_right.apply(image1, rect1)
 
 # Configure and compute disparity
-config = pb.ConfigStereoDisparity()
-config.minDisparity = 10
-config.maxDisparity = 60
+config = pb.ConfigDisparityBMBest5()
+config.disparityMin = 10
+config.disparityRange = 50
+config.errorType = pb.DisparityError.CENSUS
 
 factory = pb.FactoryStereoDisparity(np.uint8)
 
-disparityAlg = factory.region_wta(config)
+disparityAlg = factory.block_match_best5(config)
 
 disparityAlg.process(rect0, rect1)
 
 disparity_image = pb.boof_to_ndarray(disparityAlg.get_disparity_image())
-# disparity images is in a weird format.  disparity - min disparity and a value more than max-min if invalid
+# disparity images is in a weird format.  disparity - min disparity and a value more than range if invalid
 # legacy from 8bit disparity images
-disparity_image[:] += 10
-disparity_image[disparity_image > 70] = float('nan')
+disparity_image[:] += config.disparityMin
+disparity_image[disparity_image > 60] = float('nan')
 
 plt.imshow(disparity_image)
 plt.show()
+
+# TODO convert to a colorized point cloud
+# TODO show the colorized point coud
 
 print("Done!")

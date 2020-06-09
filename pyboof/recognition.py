@@ -62,9 +62,9 @@ class FactoryFiducialCalibration:
         pass
 
     @staticmethod
-    def chessboard(config_grid,config_detector=None):
+    def chessboardX(config_grid,config_detector=None):
         """
-        Creates a chessboard detector
+        Creates a chessboard detector based on x-corners. Slower but very robust.
 
         :param config_detector:  Configuration for the detector
         :param config_grid: Specifies the Grid's shape
@@ -75,7 +75,24 @@ class FactoryFiducialCalibration:
         if config_detector:
             cdj = config_detector.java_obj
 
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboard(cdj,config_grid.java_obj)
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboardX(cdj, config_grid.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def chessboardB(config_grid,config_detector=None):
+        """
+        Creates a chessboard detector based on binary images. Fast but not as robust.
+
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
+        :return: Calibration target detector
+        :rtype: FiducialCalibrationDetector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboardB(cdj, config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
     @staticmethod
@@ -280,7 +297,7 @@ class FiducialDetector(JavaWrapper):
         return self.java_obj.getWidth(which)
 
     def get_input_type(self):
-        return ImageType(self.java_obj.getInputType())
+        return ImageType(self.java_obj.get_input_type())
 
 
 class FiducialImageDetector(FiducialDetector):
@@ -420,7 +437,7 @@ class ConfigCirculant(JavaConfig):
         JavaConfig.__init__(self, java_object)
 
 
-class ConfigTld(JavaConfig):
+class ConfigTrackerTld(JavaConfig):
     def __init__(self, obj=None):
         """
         :param obj: Java object, bool, None
@@ -429,9 +446,9 @@ class ConfigTld(JavaConfig):
             ConfigTld for user specified configuration
         """
         if obj is None:
-            config = gateway.jvm.boofcv.abst.tracker.ConfigTld()
+            config = gateway.jvm.boofcv.abst.tracker.ConfigTrackerTld()
         elif type(obj) is bool:
-            config = gateway.jvm.boofcv.abst.tracker.ConfigTld(obj)
+            config = gateway.jvm.boofcv.abst.tracker.ConfigTrackerTld(obj)
         else:
             config = obj
         JavaConfig.__init__(self, config)

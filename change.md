@@ -1,9 +1,20 @@
+### Version 0.36
+
+- Updated for latest BoofCV
+- New stereo API
+- TODO add random dot markers
+- TODO Detect black polygons and ellipses
+- TODO Add point cloud viewer for stereo
+
+### Version 0.35
+
+- Updated for latest BoofCV
+
 ### Version 0.34
 
 - Updated for latest BoofCV
 - More informative error message when py4j copy not implemented. Thanks lijingpeng for the bug report.
 - Added Hough Line detector for Gradient images
-- TODO Detect black polygons and ellipses
 
 ### Version 0.33.1
 

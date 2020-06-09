@@ -329,7 +329,7 @@ def b2p_list_AssociatedPair(boof_list):
     pylist = []
 
     if pyboof.mmap_file:
-        mmap_list_AssociatedPair_to_python(boof_list,pylist)
+        mmap_list_AssociatedPair_to_python(boof_list, pylist)
     else:
         exception_use_mmap()
     return pylist
@@ -361,13 +361,13 @@ def b2p_list_point2D(boof_list, dtype):
     pylist = []
 
     if pyboof.mmap_file:
-        mmap_list_Point2D_to_python(boof_list,pylist,dtype)
+        mmap_list_Point2D_to_python(boof_list, pylist, dtype)
     else:
         exception_use_mmap()
     return pylist
 
 
-def p2b_list_LineParametric( pylist , dtype):
+def p2b_list_LineParametric(pylist, dtype):
     """
     Converts a python list of feature descriptors stored in 64bit floats into a BoofCV compatible format
     :param pylist: Python list of 2d points
@@ -413,7 +413,7 @@ def mmap_list_python_to_AssociatedPair( pylist, java_list):
         curr = curr + num_write
 
 
-def mmap_list_AssociatedPair_to_python( java_list , pylist ):
+def mmap_list_AssociatedPair_to_python(java_list, pylist):
     """
     Converts a java list of AssociatedPair into a python list of ((x,y),(x,y)) using memmap file
     :param java_list: Input: java list

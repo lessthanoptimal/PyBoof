@@ -29,9 +29,12 @@ locs1, desc1 = feature_detector.detect(image1)
 print("Detected {:4d} features in image 0".format(len(desc0)))
 print("         {:4d}             image 1".format(len(desc1)))
 
+config_greedy = pb.ConfigAssociateGreedy()
+config_greedy.forwardsBackwards = True
+config_greedy.scoreRatioThreshold = 0.95
 factory_association = pb.FactoryAssociate()
 factory_association.set_score(pb.AssocScoreType.DEFAULT, feature_detector.get_descriptor_type())
-associator = factory_association.greedy()
+associator = factory_association.greedy(config_greedy)
 
 associator.set_source(desc0)
 associator.set_destination(desc1)
@@ -43,24 +46,24 @@ print("Associated {} features".format(len(matches)))
 associated_pairs_pixels = pb.match_idx_to_point_pairs(matches, locs0, locs1)
 
 # Convert from pixel to normalized image coordinates
-p2n = pb.create_narrow_lens_distorter(intrinsic).undistort(pixel_in=True,pixel_out=False)
+p2n = pb.create_narrow_lens_distorter(intrinsic).undistort(pixel_in=True, pixel_out=False)
 associated_pairs_norm = []
 for a in associated_pairs_pixels:
     n0=p2n.apply(a[0])
     n1=p2n.apply(a[1])
-    associated_pairs_norm.append((n0,n1))
+    associated_pairs_norm.append((n0, n1))
 
 # Robustly estimate the essential matrix using RANSAC
 confE = pb.ConfigEssentialMatrix()
 confRansac = pb.ConfigRansac()
-confRansac.maxIterations = 200
+confRansac.iterations = 200
 confRansac.inlierThreshold = 0.5 # Units = pixels
 
 model_matcher = pb.FactoryMultiViewRobust.baselineRansac(confE, confRansac)
 
-# Same camera took both images. Specifies camera paramters for each ivew
-model_matcher.set_intrinsic(0,intrinsic)
-model_matcher.set_intrinsic(1,intrinsic)
+# Same camera took both images. Specifies camera parameters for each view
+model_matcher.set_intrinsic(0, intrinsic)
+model_matcher.set_intrinsic(1, intrinsic)
 
 if not model_matcher.process(associated_pairs_norm):
     print("Failed!")
@@ -68,6 +71,6 @@ if not model_matcher.process(associated_pairs_norm):
 
 camera_motion = model_matcher.model_parameters
 
-print("Inlier Size ",len(model_matcher.match_set))
+print("Inlier Size ", len(model_matcher.match_set))
 print("Motion")
-print( camera_motion )
+print( camera_motion)

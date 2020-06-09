@@ -3,6 +3,7 @@
 import numpy as np
 import pyboof as pb
 
+# Load it as a gray scale image
 original = pb.load_single_band('../data/example/outdoors01.jpg', np.uint8)
 
 gaussian = original.createSameShape() # useful function which creates a new image of the
