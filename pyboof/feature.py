@@ -64,7 +64,7 @@ class ConfigAverageIntegral(JavaConfig):
 
 
 class ConfigDenseSampling(JavaConfig):
-    def __init__(self, scale,periodX ,periodY):
+    def __init__(self, scale, periodX, periodY):
         JavaConfig.__init__(self, "boofcv.factory.feature.dense.ConfigDenseSample")
         self.scale = scale
         self.periodX = periodX
@@ -140,14 +140,14 @@ class AssocScoreType:
 
 
 class ConfigAssociation:
-    def __init__(self, score_type=AssocScoreType.DEFAULT, max_error=sys.float_info.max,backwards_validation=True):
+    def __init__(self, score_type=AssocScoreType.DEFAULT, max_error=sys.float_info.max, backwards_validation=True):
         self.score_type = score_type
         self.max_error = max_error
         self.backwards_validation = backwards_validation
 
 
 class AssociateDescription(JavaWrapper):
-    def __init__(self, java_object ):
+    def __init__(self, java_object):
         JavaWrapper.__init__(self, java_object)
 
     def set_source(self, feature_list):
@@ -162,11 +162,11 @@ class AssociateDescription(JavaWrapper):
         elif type(feature_list) is JavaList:
             feature_list = feature_list.java_obj
         else:
-            raise Exception("unexpected list type "+feature_list.__class__.__name__)
+            raise Exception("unexpected list type " + feature_list.__class__.__name__)
 
         java_type = gateway.jvm.boofcv.struct.feature.TupleDesc_F64(0).getClass()
 
-        fast_array= JavaList_to_fastarray(feature_list, java_type)
+        fast_array = JavaList_to_fastarray(feature_list, java_type)
         self.java_obj.setSource(fast_array)
 
     def set_destination(self, feature_list):
@@ -181,7 +181,7 @@ class AssociateDescription(JavaWrapper):
         elif type(feature_list) is JavaList:
             feature_list = feature_list.java_obj
         else:
-            raise Exception("unexpected list type "+feature_list.__class__.__name__)
+            raise Exception("unexpected list type " + feature_list.__class__.__name__)
 
         java_type = gateway.jvm.boofcv.struct.feature.TupleDesc_F64(0).getClass()
 
@@ -200,7 +200,7 @@ class AssociateDescription(JavaWrapper):
         matches = self.java_obj.getMatches()
         for i in range(matches.getSize()):
             association = JavaWrapper(matches.get(i))
-            output.append( (association.src,association.dst,association.fitScore) )
+            output.append((association.src, association.dst, association.fitScore))
 
         return output
 
@@ -216,8 +216,8 @@ def match_idx_to_point_pairs(matches, list_src, list_dst):
     :param list_dst: List of dst points
     :return: List in point format (src point, dst point)
     """
-    pairs = [None]*len(matches)
-    for idx,m in enumerate(matches):
+    pairs = [None] * len(matches)
+    for idx, m in enumerate(matches):
         a = list_src[m[0]]
         b = list_dst[m[1]]
 
@@ -229,7 +229,7 @@ def read_list_tuple_desc_f64(f, list_length):
     output = []
     for i in range(list_length):
         desc_length = struct.unpack('>i', f.read(4))[0]
-        desc = [0.0]*desc_length
+        desc = [0.0] * desc_length
         for j in range(desc_length):
             desc[j] = struct.unpack('>d', f.read(8))[0]
         output.append(desc)
@@ -241,39 +241,40 @@ def read_list(file_name):
     with open(file_name, 'r') as f:
         data_type = f.readline()[0:-1]
         if data_type != "list":
-            raise RuntimeError("Was expecting list in front of file not "+data_type)
+            raise RuntimeError("Was expecting list in front of file not " + data_type)
         class_type = f.readline()
         list_length = struct.unpack('>i', f.read(4))[0]
 
         if "TupleDesc_F64" in class_type:
-            output = read_list_tuple_desc_f64(f,list_length)
+            output = read_list_tuple_desc_f64(f, list_length)
         else:
-            raise RuntimeError("Unknown list data type "+class_type)
+            raise RuntimeError("Unknown list data type " + class_type)
 
     if list_length != len(output):
-        raise RuntimeError("Unexpected list size. "+str(list_length)+" "+str(len(output)))
+        raise RuntimeError("Unexpected list size. " + str(list_length) + " " + str(len(output)))
     return output
 
 
 def java_list_to_python(java_list):
     N = java_list.size()
     output = []
-    if is_java_class(java_list.java_type,"boofcv.struct.feature.TupleDesc_F64"):
+    if is_java_class(java_list.java_type, "boofcv.struct.feature.TupleDesc_F64"):
         for i in range(N):
             d = java_list.java_obj.get(i)
-            value = d.getValue() # some hackery to get around py4j short comings
+            value = d.getValue()  # some hackery to get around py4j short comings
             output.append([x for x in value])
-    elif is_java_class(java_list.java_type,"georegression.struct.point.Point2D_F64"):
+    elif is_java_class(java_list.java_type, "georegression.struct.point.Point2D_F64"):
         for i in range(N):
             p = java_list.java_obj.get(i)
-            output.append((p.x,p.y))
+            output.append((p.x, p.y))
     else:
         raise RuntimeError("Unknown java list type")
 
     return output
 
+
 class DetectDescribePointFeatures(JavaWrapper):
-    def __init__(self,java_object):
+    def __init__(self, java_object):
         self.set_java_object(java_object)
 
     def detect(self, image):
@@ -291,21 +292,21 @@ class DetectDescribePointFeatures(JavaWrapper):
         java_descriptions = gateway.jvm.pyboof.PyBoofEntryPoint.extractFeatures(self.java_obj, False)
 
         # Convert into a Python format and return the two lists
-        locations = pyboof.b2p_list_point2D(java_locations,np.double)
+        locations = pyboof.b2p_list_point2D(java_locations, np.double)
         descriptions = b2p_list_descF64(java_descriptions)
 
         return locations, descriptions
 
     def get_scales(self):
         N = self.java_obj.getNumberOfFeatures()
-        output = [0]*N
+        output = [0] * N
         for i in range(N):
             output[i] = self.java_obj.getScale(i)
         return output
 
-    def get_orientations(self ):
+    def get_orientations(self):
         N = self.java_obj.getNumberOfFeatures()
-        output = [0]*N
+        output = [0] * N
         for i in range(N):
             output[i] = self.java_obj.getOrientation(i)
         return output
@@ -348,10 +349,10 @@ class DenseDescribePointFeatures(JavaWrapper):
 
 
 class FactoryDetectDescribe:
-    def __init__(self, dtype ):
-        self.boof_image_class =  dtype_to_Class_SingleBand(dtype)
+    def __init__(self, dtype):
+        self.boof_image_class = dtype_to_Class_SingleBand(dtype)
 
-    def createSurf( self, config_detect=None , config_desc=None , config_ori=None ):
+    def createSurf(self, config_detect=None, config_desc=None, config_ori=None):
         """
         Creates a SURF detector and describer.
 
@@ -378,10 +379,10 @@ class FactoryDetectDescribe:
 
         if config_desc.__class__.__name__ == "ConfigSurfFast":
             java_object = gateway.jvm.boofcv.factory.feature.detdesc.FactoryDetectDescribe.surfFast(
-                java_config_detect,java_config_desc,java_config_ori, self.boof_image_class)
+                java_config_detect, java_config_desc, java_config_ori, self.boof_image_class)
         elif config_desc.__class__.__name__ == "ConfigSurfStability":
             java_object = gateway.jvm.boofcv.factory.feature.detdesc.FactoryDetectDescribe.surfStable(
-                java_config_detect,java_config_desc,java_config_ori, self.boof_image_class)
+                java_config_detect, java_config_desc, java_config_ori, self.boof_image_class)
         else:
             raise RuntimeError("Unknown description type")
 
@@ -401,13 +402,12 @@ class FactoryDetectDescribe:
 
 
 class FactoryDenseDescribe:
-    def __init__(self, dtype ):
+    def __init__(self, dtype):
         self.dtype = dtype
-        self.boof_image_class =  dtype_to_Class_SingleBand(dtype)
-        self.py_image_type = pyboof.create_ImageType(pyboof.Family.SINGLE_BAND,self.dtype)
+        self.boof_image_class = dtype_to_Class_SingleBand(dtype)
+        self.py_image_type = pyboof.create_ImageType(pyboof.Family.SINGLE_BAND, self.dtype)
 
-
-    def createSurf( self, config_desc=None ):
+    def createSurf(self, config_desc=None):
         if config_desc is None:
             config_desc = ConfigDenseSurfFast()
 
@@ -424,7 +424,6 @@ class FactoryDenseDescribe:
 
         return DenseDescribePointFeatures(java_object)
 
-
     def createSift(self, config=None):
         if config is None:
             config = ConfigDenseSift()
@@ -434,7 +433,6 @@ class FactoryDenseDescribe:
         java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.sift(
             java_config_desc, self.boof_image_class)
         return DenseDescribePointFeatures(java_object)
-
 
     def createHoG(self, config=None):
         if config is None:
@@ -453,31 +451,31 @@ class FactoryAssociate:
     def __init__(self):
         self.score = None
 
-    def set_score(self, score_type , descriptor_type ):
+    def set_score(self, score_type, descriptor_type):
         if score_type == AssocScoreType.DEFAULT:
-            self.score = gateway.jvm.boofcv.factory.feature.associate.\
+            self.score = gateway.jvm.boofcv.factory.feature.associate. \
                 FactoryAssociation.defaultScore(descriptor_type)
         elif score_type == AssocScoreType.EUCLIDEAN:
-            self.score = gateway.jvm.boofcv.factory.feature.associate.\
-                FactoryAssociation.scoreEuclidean(descriptor_type,False)
+            self.score = gateway.jvm.boofcv.factory.feature.associate. \
+                FactoryAssociation.scoreEuclidean(descriptor_type, False)
         elif score_type == AssocScoreType.EUCLIDEAN_SQ:
-            self.score = gateway.jvm.boofcv.factory.feature.associate.\
-                FactoryAssociation.scoreEuclidean(descriptor_type,True)
+            self.score = gateway.jvm.boofcv.factory.feature.associate. \
+                FactoryAssociation.scoreEuclidean(descriptor_type, True)
         elif score_type == AssocScoreType.NCC:
-            self.score = gateway.jvm.boofcv.factory.feature.associate.\
+            self.score = gateway.jvm.boofcv.factory.feature.associate. \
                 FactoryAssociation.scoreNcc()
         elif score_type == AssocScoreType.SAD:
-            self.score = gateway.jvm.boofcv.factory.feature.associate.\
+            self.score = gateway.jvm.boofcv.factory.feature.associate. \
                 FactoryAssociation.scoreSad(descriptor_type)
 
     def generic(self, config: ConfigAssociate, info):
-        java_obj = gateway.jvm.boofcv.factory.feature.associate.\
-                FactoryAssociation.generic(config.java_obj, info)
+        java_obj = gateway.jvm.boofcv.factory.feature.associate. \
+            FactoryAssociation.generic(config.java_obj, info)
         return AssociateDescription(java_obj)
 
     def greedy(self, config: ConfigAssociateGreedy):
-        java_obj = gateway.jvm.boofcv.factory.feature.associate.\
-                FactoryAssociation.greedy(config.java_obj, self.score)
+        java_obj = gateway.jvm.boofcv.factory.feature.associate. \
+            FactoryAssociation.greedy(config.java_obj, self.score)
         return AssociateDescription(java_obj)
 
     # def nearest_neighbor(self, config: ConfigAssociateNearestNeighbor):
@@ -487,7 +485,7 @@ class FactoryAssociate:
 
 
 class FactoryDetectLine:
-    def __init__(self, dtype ):
+    def __init__(self, dtype):
         self.boof_image_class = dtype_to_Class_SingleBand(dtype)
 
     def houghLinePolar(self, config_hough, config_polar=None):
@@ -504,6 +502,7 @@ class FactoryDetectLine:
             FactoryDetectLine.houghLineFoot(config_hough.java_obj, config_foot.java_obj, self.boof_image_class)
         return DetectLine(java_object)
 
+
 def mmap_list_python_to_TupleF64(pylist, java_list):
     """
     Converts a python list of float arrays into a list of TupleDesk64F in java using memmap file
@@ -519,15 +518,15 @@ def mmap_list_python_to_TupleF64(pylist, java_list):
     mm = pyboof.mmap_file
 
     # max number of list elements it can write at once
-    max_elements = (pyboof.mmap_size-100)/(dof*8)
+    max_elements = (pyboof.mmap_size - 100) / (dof * 8)
 
     curr = 0
     while curr < num_elements:
         # Write as much of the list as it can to the mmap file
-        num_write = min(max_elements,num_elements-curr)
+        num_write = min(max_elements, num_elements - curr)
         mm.seek(0)
         mm.write(struct.pack('>HII', pyboof.MmapType.LIST_TUPLE_F64, num_elements, dof))
-        for i in range(curr, curr+num_write):
+        for i in range(curr, curr + num_write):
             mm.write(struct.pack('>%sd' % dof, *pylist[i]))
 
         # Now tell the java end to read what it just wrote
@@ -535,6 +534,7 @@ def mmap_list_python_to_TupleF64(pylist, java_list):
 
         # move on to the next block
         curr = curr + num_write
+
 
 def mmap_list_TupleF64_to_python(java_list, pylist):
     """
@@ -550,14 +550,12 @@ def mmap_list_TupleF64_to_python(java_list, pylist):
     while num_read < num_elements:
         gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_TupleF64(java_list, num_read)
         mm.seek(0)
-        data_type, num_found, dof = struct.unpack(">HII", mm.read(2+4+4))
+        data_type, num_found, dof = struct.unpack(">HII", mm.read(2 + 4 + 4))
         if data_type != pyboof.MmapType.LIST_TUPLE_F64:
             raise Exception("Unexpected data type in mmap file. {%d}" % data_type)
-        if num_found > num_elements-num_read:
-            raise Exception("Too many elements returned. "+str(num_found))
+        if num_found > num_elements - num_read:
+            raise Exception("Too many elements returned. " + str(num_found))
         for i in range(num_found):
-            desc = struct.unpack(">%sd" % dof, mm.read(8*dof))
+            desc = struct.unpack(">%sd" % dof, mm.read(8 * dof))
             pylist.append(desc)
         num_read += num_found
-
-

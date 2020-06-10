@@ -7,35 +7,37 @@ import py4j.java_gateway as jg
 from pyboof.common import *
 from pyboof import gateway
 
-def real_ejml_to_nparray( ejml ):
+
+def real_ejml_to_nparray(ejml):
     num_rows = ejml.getNumRows()
     num_cols = ejml.getNumCols()
 
-    M = np.zeros((num_rows,num_cols))
+    M = np.zeros((num_rows, num_cols))
     for i in range(num_rows):
         for j in range(num_cols):
-            M[i,j] = ejml.unsafe_get(i,j)
+            M[i, j] = ejml.unsafe_get(i, j)
     return M
 
 
-def real_nparray_to_ejml32( array ):
+def real_nparray_to_ejml32(array):
     num_rows = array.shape[0]
     num_cols = array.shape[1]
 
-    M = gateway.jvm.org.ejml.data.FMatrixRMaj(num_rows,num_cols)
+    M = gateway.jvm.org.ejml.data.FMatrixRMaj(num_rows, num_cols)
     for i in range(num_rows):
         for j in range(num_cols):
-            M.unsafe_set(i,j,array[i,j])
+            M.unsafe_set(i, j, array[i, j])
     return M
 
-def real_nparray_to_ejml64( array ):
+
+def real_nparray_to_ejml64(array):
     num_rows = array.shape[0]
     num_cols = array.shape[1]
 
-    M = gateway.jvm.org.ejml.data.DMatrixRMaj(num_rows,num_cols)
+    M = gateway.jvm.org.ejml.data.DMatrixRMaj(num_rows, num_cols)
     for i in range(num_rows):
         for j in range(num_cols):
-            M.unsafe_set(i,j,array[i,j])
+            M.unsafe_set(i, j, array[i, j])
     return M
 
 
@@ -54,7 +56,7 @@ class Se3_F64(JavaWrapper):
 
     def get_translation(self):
         T = self.java_obj.getT()
-        return (T.getX(),T.getY(),T.getZ())
+        return (T.getX(), T.getY(), T.getZ())
 
 
 def create_java_point_2D_f32(x=0., y=0.):
@@ -75,17 +77,17 @@ def create_java_point_3D_f64(x=0., y=0., z=0.):
 
 def tuple_to_Point2D_F64(ptuple, jpoint=None):
     if jpoint == None:
-        return create_java_point_2D_f32(ptuple[0],ptuple[1])
+        return create_java_point_2D_f32(ptuple[0], ptuple[1])
     else:
-        jpoint.set(float(ptuple[0]),float(ptuple[1]))
+        jpoint.set(float(ptuple[0]), float(ptuple[1]))
         return jpoint
 
 
-def tuple_to_Point2D_F32(ptuple ,jpoint=None):
+def tuple_to_Point2D_F32(ptuple, jpoint=None):
     if jpoint == None:
-        return create_java_point_2D_f64(ptuple[0],ptuple[1])
+        return create_java_point_2D_f64(ptuple[0], ptuple[1])
     else:
-        jpoint.set(float(ptuple[0]),float(ptuple[1]))
+        jpoint.set(float(ptuple[0]), float(ptuple[1]))
         return jpoint
 
 
@@ -123,16 +125,15 @@ class Point2D:
             raise Exception("Unknown object type")
 
     def distance(self, point):
-        dx = point.x-self.x
-        dy = point.y-self.y
-        return math.sqrt(dx*dx + dy*dy)
-
+        dx = point.x - self.x
+        dy = point.y - self.y
+        return math.sqrt(dx * dx + dy * dy)
 
     def get_tuple(self):
         """
         Returns the values of the point inside a tuple: (x,y)
         """
-        return (self.x,self.y)
+        return (self.x, self.y)
 
     def get_x(self):
         return self.x
@@ -143,15 +144,15 @@ class Point2D:
     def set_x(self, x):
         self.x = x
 
-    def set_y(self,y ):
+    def set_y(self, y):
         self.y = y
 
     def copy(self):
-        return Point2D(self.x,self.y)
+        return Point2D(self.x, self.y)
 
 
 class Polygon2D:
-    def __init__(self,data=None):
+    def __init__(self, data=None):
         if data is not None:
             if isinstance(data, int):
                 self.vertexes = [Point2D() for i in range(data)]
@@ -164,16 +165,16 @@ class Polygon2D:
         """
         Returns the values of the point inside a tuple: (x,y)
         """
-        return [(v.x,v.y) for v in self.vertexes]
+        return [(v.x, v.y) for v in self.vertexes]
 
     def convert_boof(self):
-        jobj = gateway.jvm.georegression.struct.shapes.Polygon2D_F64( len(self.vertexes))
-        for idx,v in enumerate(self.vertexes):
-            jobj.set( idx, v.x, v.y)
+        jobj = gateway.jvm.georegression.struct.shapes.Polygon2D_F64(len(self.vertexes))
+        for idx, v in enumerate(self.vertexes):
+            jobj.set(idx, v.x, v.y)
         return jobj
 
-    def set(self, src ):
-        if isinstance(src,Polygon2D):
+    def set(self, src):
+        if isinstance(src, Polygon2D):
             self.vertexes = []
             for v in src.vertexes:
                 self.vertexes.append(v.copy())
@@ -188,15 +189,15 @@ class Polygon2D:
         else:
             self.vertexes = []
             for v in src:
-                self.vertexes.append(Point2D(v[0],v[1]))
+                self.vertexes.append(Point2D(v[0], v[1]))
 
-    def side_length(self, side ):
-        return self.vertexes[side].distance( self.vertexes[(side+1)%len(self.vertexes)])
+    def side_length(self, side):
+        return self.vertexes[side].distance(self.vertexes[(side + 1) % len(self.vertexes)])
 
     def __str__(self):
         ret = "Polygon2D( "
         for p in self.vertexes:
-            ret += "({},{}) ".format(p.x,p.y)
+            ret += "({},{}) ".format(p.x, p.y)
         ret += ")"
         return ret
 
@@ -206,6 +207,7 @@ class Quadrilateral2D:
     Four sided polygon specified by its vertexes.  The vertexes are ordered, but it's not specified if they are
     ordered in clockwise or counter clockwise direction
     """
+
     def __init__(self, a=Point2D(), b=Point2D(), c=Point2D(), d=Point2D()):
         """
 
@@ -229,7 +231,7 @@ class Quadrilateral2D:
         c = self.c.convert_to_boof()
         d = self.d.convert_to_boof()
 
-        return gateway.jvm.georegression.struct.shapes.Quadrilateral_F64(a,b,c,d)
+        return gateway.jvm.georegression.struct.shapes.Quadrilateral_F64(a, b, c, d)
 
     def set(self, o):
         if type(o) is Quadrilateral2D:
@@ -238,7 +240,7 @@ class Quadrilateral2D:
             self.c.set(o.c)
             self.d.set(o.d)
 
-        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.shapes.Quadrilateral_F64 ):
+        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.shapes.Quadrilateral_F64):
             self.a.set(o.getA())
             self.b.set(o.getB())
             self.c.set(o.getC())
@@ -251,10 +253,10 @@ class Quadrilateral2D:
         Returns a tuple with all the vertexes (a,b,c,d)
         :return: tuple of all vertexes
         """
-        return (self.a,self.b,self.c,self.d)
+        return (self.a, self.b, self.c, self.d)
 
     def get_tuple_tuple(self):
-        return (self.a.get_tuple(),self.b.get_tuple(),self.c.get_tuple(),self.d.get_tuple())
+        return (self.a.get_tuple(), self.b.get_tuple(), self.c.get_tuple(), self.d.get_tuple())
 
     def get_a(self):
         return self.a
@@ -297,19 +299,19 @@ class LineParametric2D:
             sx = float(self.slope.x)
             sy = float(self.slope.y)
 
-            return gateway.jvm.georegression.struct.line.LineParametric2D_F32(x,y,sx,sy)
+            return gateway.jvm.georegression.struct.line.LineParametric2D_F32(x, y, sx, sy)
         elif dtype == np.double:
             x = self.p.x
             y = self.p.y
             sx = self.slope.x
             sy = self.slope.y
 
-            return gateway.jvm.georegression.struct.line.LineParametric2D_F64(x,y,sx,sy)
+            return gateway.jvm.georegression.struct.line.LineParametric2D_F64(x, y, sx, sy)
         else:
             raise Exception("Unknown dtype")
 
 
-def p2b_list_AssociatedPair( pylist ):
+def p2b_list_AssociatedPair(pylist):
     java_list = gateway.jvm.java.util.ArrayList()
 
     if pyboof.mmap_file:
@@ -335,7 +337,7 @@ def b2p_list_AssociatedPair(boof_list):
     return pylist
 
 
-def p2b_list_point2D( pylist , dtype):
+def p2b_list_point2D(pylist, dtype):
     """
     Converts a python list of feature descriptors stored in 64bit floats into a BoofCV compatible format
     :param pylist: Python list of 2d points
@@ -345,7 +347,7 @@ def p2b_list_point2D( pylist , dtype):
     java_list = gateway.jvm.java.util.ArrayList()
 
     if pyboof.mmap_file:
-        mmap_list_python_to_Point2D(pylist,java_list, dtype)
+        mmap_list_python_to_Point2D(pylist, java_list, dtype)
     else:
         exception_use_mmap()
     return java_list
@@ -382,7 +384,7 @@ def p2b_list_LineParametric(pylist, dtype):
     return java_list
 
 
-def mmap_list_python_to_AssociatedPair( pylist, java_list):
+def mmap_list_python_to_AssociatedPair(pylist, java_list):
     """
     Converts a python list of ((x0,y0),(x1,y1)) a java list of AssociatedPair using memmap file
 
@@ -394,15 +396,15 @@ def mmap_list_python_to_AssociatedPair( pylist, java_list):
     mm = pyboof.mmap_file
 
     # max number of list elements it can write at once
-    max_elements = (pyboof.mmap_size-100)/(4*8)
+    max_elements = (pyboof.mmap_size - 100) / (4 * 8)
 
     curr = 0
     while curr < num_elements:
         # Write as much of the list as it can to the mmap file
-        num_write = min(max_elements,num_elements-curr)
+        num_write = min(max_elements, num_elements - curr)
         mm.seek(0)
         mm.write(struct.pack('>HI', pyboof.MmapType.LIST_ASSOCIATEDPAIR_F64, num_elements))
-        for i in range(curr, curr+num_write):
+        for i in range(curr, curr + num_write):
             p = pylist[i]
             mm.write(struct.pack('>4d', float(p[0][0]), float(p[0][1]), float(p[1][0]), float(p[1][1])))
 
@@ -427,37 +429,37 @@ def mmap_list_AssociatedPair_to_python(java_list, pylist):
     while num_read < num_elements:
         gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_AssociatedPair_F64(java_list, num_read)
         mm.seek(0)
-        data_type, num_found = struct.unpack(">HI", mm.read(2+4))
+        data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
         if data_type != pyboof.MmapType.LIST_ASSOCIATEDPAIR_F64:
             raise Exception("Unexpected data type in mmap file. %d" % data_type)
-        if num_found > num_elements-num_read:
-            raise Exception("Too many elements returned. "+str(num_found))
+        if num_found > num_elements - num_read:
+            raise Exception("Too many elements returned. " + str(num_found))
         for i in range(num_found):
-            desc = struct.unpack(">4d", mm.read(8*4))
-            pylist.append(((desc[0],desc[1]), (desc[2],desc[3])))
+            desc = struct.unpack(">4d", mm.read(8 * 4))
+            pylist.append(((desc[0], desc[1]), (desc[2], desc[3])))
         num_read += num_found
 
 
-def dtype_to_unpack( dtype ):
+def dtype_to_unpack(dtype):
     if dtype == np.uint8:
-        return (1,"B")
+        return (1, "B")
     elif dtype == np.int8:
-        return (1,"b")
+        return (1, "b")
     elif dtype == np.uint16:
-        return (2,"H")
+        return (2, "H")
     elif dtype == np.int16:
-        return (2,"h")
+        return (2, "h")
     elif dtype == np.int32:
-        return (4,"i")
+        return (4, "i")
     elif dtype == np.float:
-        return (4,"f")
+        return (4, "f")
     elif dtype == np.double:
-        return (8,"d")
+        return (8, "d")
     else:
         raise Exception("Unknown dtype")
 
 
-def dtype_to_mmaplistpoints( dtype ):
+def dtype_to_mmaplistpoints(dtype):
     if dtype == np.int16:
         return pyboof.MmapType.LIST_POINT2D_S16
     elif dtype == np.uint16:
@@ -484,31 +486,31 @@ def mmap_list_python_to_Point2D(pylist, java_list, dtype):
     mm = pyboof.mmap_file
 
     num_bytes, char_type = dtype_to_unpack(dtype)
-    num_bytes_per_point = num_bytes*2
+    num_bytes_per_point = num_bytes * 2
     format_string = ">2{}".format(char_type)
 
     mmap_type = dtype_to_mmaplistpoints(dtype)
 
     # max number of list elements it can write at once
-    max_elements = (pyboof.mmap_size-100)/num_bytes_per_point
+    max_elements = (pyboof.mmap_size - 100) / num_bytes_per_point
 
     curr = 0
     while curr < num_elements:
         # Write as much of the list as it can to the mmap file
-        num_write = min(max_elements,num_elements-curr)
+        num_write = min(max_elements, num_elements - curr)
         mm.seek(0)
         mm.write(struct.pack('>HI', mmap_type, num_elements))
-        for i in range(curr, curr+num_write):
+        for i in range(curr, curr + num_write):
             mm.write(struct.pack(format_string, *pylist[i]))
 
         # Now tell the java end to read what it just wrote
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Point2D(java_list,mmap_type)
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Point2D(java_list, mmap_type)
 
         # move on to the next block
         curr = curr + num_write
 
 
-def mmap_list_Point2D_to_python( java_list , pylist , dtype):
+def mmap_list_Point2D_to_python(java_list, pylist, dtype):
     """
     Converts a java list of Point2D_* into a python list of float 2D tuples using memmap file
     :param java_list: Input: java list
@@ -520,20 +522,20 @@ def mmap_list_Point2D_to_python( java_list , pylist , dtype):
     mm = pyboof.mmap_file
 
     num_bytes, char_type = dtype_to_unpack(dtype)
-    num_bytes_per_point = num_bytes*2
+    num_bytes_per_point = num_bytes * 2
     format_string = ">2{}".format(char_type)
 
     mmap_type = dtype_to_mmaplistpoints(dtype)
 
     num_read = 0
     while num_read < num_elements:
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point2D(java_list,mmap_type, num_read)
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point2D(java_list, mmap_type, num_read)
         mm.seek(0)
-        data_type, num_found = struct.unpack(">HI", mm.read(2+4))
+        data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
         if data_type != mmap_type:
             raise Exception("Unexpected data type in mmap file. %d" % data_type)
-        if num_found > num_elements-num_read:
-            raise Exception("Too many elements returned. "+str(num_found))
+        if num_found > num_elements - num_read:
+            raise Exception("Too many elements returned. " + str(num_found))
         for i in range(num_found):
             point = struct.unpack(format_string, mm.read(num_bytes_per_point))
             pylist.append(point)

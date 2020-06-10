@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import math
 
 # pip install matplotlib
 
@@ -49,10 +50,43 @@ disparity_image = pb.boof_to_ndarray(disparityAlg.get_disparity_image())
 disparity_image[:] += config.disparityMin
 disparity_image[disparity_image > 60] = float('nan')
 
-plt.imshow(disparity_image)
-plt.show()
+# plt.imshow(disparity_image)
+# plt.show()
 
-# TODO convert to a colorized point cloud
-# TODO show the colorized point coud
+# Apply the usual equation to convert disparity into a 3D cloud
+baseline = stereo_param.right_to_left.T.norm()
+K = model_rectifier.rectK  # rectified camera intrinsic calibration
+# TODO convert to python ndarray
+fx = K.get(0, 0)
+fy = K.get(1, 1)
+cx = K.get(0, 2)
+cy = K.get(1, 2)
+
+cloud_xyz = []
+cloud_rgb = []
+
+# Convert the BoofCV image into a Python image to speed things up a bit since data transfer is slow
+rect0 = pb.boof_to_ndarray(rect0)
+
+for row in range(0, disparity_image.shape[0]):
+    for col in range(0, disparity_image.shape[1]):
+        d = disparity_image[row, col]
+        if math.isnan(d) or d < 1.0:
+            continue
+
+        # Color at this pixel
+        gray_value = np.uint8(rect0[row, col])
+        rgb = gray_value << 24 | gray_value << 16 | gray_value
+
+        # Compute the 3D cloud
+        Z = baseline * fx / d
+        X = Z * (col - cx) / fx
+        Y = Z * (row - cy) / fy
+
+        # Add to output
+        cloud_xyz.append((X, Y, Z))
+        cloud_rgb.append(rgb)
+
+# TODO show the colorized point cloud
 
 print("Done!")

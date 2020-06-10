@@ -108,3 +108,7 @@ class JavaList(JavaWrapper):
 
 def JavaList_to_fastarray(java_list, java_class_type):
     return gateway.jvm.pyboof.PyBoofEntryPoint.listToFastArray(java_list, java_class_type)
+
+def create_java_file_writer( path : str ):
+    java_file = gateway.jvm.java.io.File(path)
+    return gateway.jvm.java.io.FileWriter(java_file)
