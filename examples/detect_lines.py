@@ -13,7 +13,7 @@ image = pb.load_single_band("../data/example/simple_objects.jpg", np.uint8)
 blurred = image.createSameShape()
 
 # Appying a little bit of blur tends to improve the results
-pb.blur_gaussian(image, blurred,radius=5)
+pb.blur_gaussian(image, blurred, radius=5)
 
 # There are a few variants of Hough in BoofCV. The variant we will use here uses the image gradient directly
 # This is useful you want to find the edges of objects. If you have an image with thin black lines and you want

@@ -2,9 +2,10 @@
 
 - Updated for latest BoofCV
 - New stereo API
-- TODO add random dot markers
-- TODO Detect black polygons and ellipses
+- Add random dot markers
 - TODO Add point cloud viewer for stereo
+- TODO Detect black polygons and ellipses
+- TODO Visualize detected markers inside the image
 
 ### Version 0.35
 

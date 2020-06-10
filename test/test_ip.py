@@ -38,5 +38,6 @@ class ChecksIP(unittest.TestCase):
         self.assertEqual(60, found.getWidth())
         self.assertEqual(50, found.getHeight())
 
+
 if __name__ == '__main__':
     unittest.main()
