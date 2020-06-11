@@ -66,7 +66,7 @@ public class FileIO {
 	public static void writeInt( int value , OutputStream out ) throws IOException {
 		out.write(value>>24);
 		out.write(value>>16);
-		out.write(value >> 8);
+		out.write(value>>8);
 		out.write(value);
 	}
 

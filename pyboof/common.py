@@ -1,7 +1,9 @@
 from py4j import java_gateway
 from pyboof import gateway
 from six import string_types
-
+import pyboof
+import struct
+import numpy as np
 
 def exception_use_mmap():
     raise Exception("Need to turn on mmap. Add pb.init_memmap() to your code before any other calls to PyBoof")
@@ -109,6 +111,63 @@ class JavaList(JavaWrapper):
 def JavaList_to_fastarray(java_list, java_class_type):
     return gateway.jvm.pyboof.PyBoofEntryPoint.listToFastArray(java_list, java_class_type)
 
+
 def create_java_file_writer( path : str ):
     java_file = gateway.jvm.java.io.File(path)
     return gateway.jvm.java.io.FileWriter(java_file)
+
+
+def mmap_array_python_to_java(pylist, mmap_type: pyboof.MmapType):
+    """
+    Converts a python primitive list into a java primitive array
+    """
+
+    # Ensure the data type is correct
+    pylist = pyboof.mmap_force_array_type(pylist, mmap_type)
+
+    num_elements = len(pylist)
+    mm = pyboof.mmap_file
+
+    num_element_bytes = pyboof.mmap_primitive_len(mmap_type)
+    format = pyboof.mmap_primitive_format(mmap_type)
+
+    # max number of list elements it can write at once
+    max_elements = (pyboof.mmap_size - 100) / num_element_bytes
+
+    # See if it can be writen in a single chunk
+    if max_elements < num_elements:
+        raise Exception("max_elements is too small")
+
+    # Write as much of the list as it can to the mmap file
+    mm.seek(0)
+    mm.write(struct.pack('>HI', mmap_type, num_elements))
+    for i in range(0, num_elements):
+        mm.write(struct.pack(format, pylist[i]))
+
+    # Now tell the java end to read what it just wrote
+    return gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_primitive_array(mmap_type)
+
+
+def mmap_array_java_to_python(java_array, mmap_type: pyboof.MmapType):
+    """
+    Converts a java primitive array into a python primitive list
+    """
+    num_elements = len(java_array)
+    mm = pyboof.mmap_file
+
+    num_element_bytes = pyboof.mmap_primitive_len(mmap_type)
+    format = pyboof.mmap_primitive_format(mmap_type)
+
+    python_list = []
+
+    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_primitive_array(java_array, mmap_type, 0)
+    mm.seek(0)
+    data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
+    if data_type != mmap_type:
+        raise Exception("Unexpected data type in mmap file. {%d}" % data_type)
+    if num_found != num_elements:
+        raise Exception("Unexpected number of elements returned. " + str(num_found))
+    for i in range(num_found):
+        element = struct.unpack(format, mm.read(num_element_bytes))
+        python_list.append(element)
+    return pyboof.mmap_force_array_type(python_list, mmap_type)

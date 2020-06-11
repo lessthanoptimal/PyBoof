@@ -11,6 +11,7 @@ import boofcv.struct.image.ImageDataType;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
@@ -341,6 +342,119 @@ public class BoofMemoryMapped {
 		return image;
 	}
 
+	/**
+	 * Reads elements from the memory map file and appends them to the current list
+	 */
+	public Object read_primitive_array(int type_ordinal ) {
+	    Type type = Type.values()[type_ordinal];
+	    mmf.position(0);
+		if( mmf.getShort() != type.ordinal() ) {
+			throw new RuntimeException("Memmap not of type "+type);
+		}
+		int numBytes = type.getDataType().getNumBits()/8;
+		int numElements = mmf.getInt();
+		byte data[] = new byte[numBytes];
+		ByteBuffer bb = ByteBuffer.wrap(data);
+
+		switch( type ) {
+			case ARRAY_S8:
+			case ARRAY_U8: {
+				byte[] output = new byte[numElements];
+				mmf.get(output,0,output.length);
+				return output;
+			}
+
+			case ARRAY_S16:
+			case ARRAY_U16: {
+				short[] output = new short[numElements];
+				for (int i = 0; i < numElements; i++) {
+					mmf.get(data,0,data.length);
+					output[i] = bb.getShort(0);
+				}
+				return output;
+			}
+
+			case ARRAY_S32: {
+				int[] output = new int[numElements];
+				for (int i = 0; i < numElements; i++) {
+					mmf.get(data,0,data.length);
+					output[i] = bb.getInt(0);
+				}
+				return output;
+			}
+
+			case ARRAY_F32: {
+				float[] output = new float[numElements];
+				for (int i = 0; i < numElements; i++) {
+					mmf.get(data,0,data.length);
+					output[i] = bb.getFloat(0);
+				}
+				return output;
+			}
+
+			case ARRAY_F64: {
+				double[] output = new double[numElements];
+				for (int i = 0; i < numElements; i++) {
+					mmf.get(data,0,data.length);
+					output[i] = bb.getFloat(0);
+				}
+				return output;
+			}
+		}
+		throw new RuntimeException("Unknown type "+type);
+	}
+
+	public void write_primitive_array(Object data , int type_ordinal , int startIndex ) {
+		Type type = Type.values()[type_ordinal];
+
+		int numBytes = type.getDataType().getNumBits()/8;
+
+		int maxElements = (mmf.limit()-100)/(numBytes*2);
+		int numElements = Math.min(Array.getLength(data),maxElements);
+
+		mmf.position(0);
+		mmf.putShort((short)type.ordinal());
+		mmf.putInt(numElements);
+
+		switch( type ) {
+			case ARRAY_S8:
+			case ARRAY_U8: {
+				byte[] array = (byte[])data;
+				for (int i = 0; i < numElements; i++) {
+					mmf.put(array[i+startIndex]);
+				}
+			} break;
+			case ARRAY_S16:
+			case ARRAY_U16: {
+				short[] array = (short[])data;
+				for (int i = 0; i < numElements; i++) {
+					mmf.putShort(array[i+startIndex]);
+				}
+			} break;
+
+			case ARRAY_S32: {
+				int[] array = (int[])data;
+				for (int i = 0; i < numElements; i++) {
+					mmf.putInt(array[i+startIndex]);
+				}
+			} break;
+
+			case ARRAY_F32: {
+				float[] array = (float[])data;
+				for (int i = 0; i < numElements; i++) {
+					mmf.putFloat(array[i+startIndex]);
+				}
+			} break;
+
+			case ARRAY_F64: {
+				double[] array = (double[])data;
+				for (int i = 0; i < numElements; i++) {
+					mmf.putDouble(array[i+startIndex]);
+				}
+			} break;
+		}
+	}
+
 	public enum Type
 	{
 		IMAGE_U8(ImageDataType.U8),
@@ -353,16 +467,23 @@ public class BoofMemoryMapped {
 		LIST_TUPLE_F32(ImageDataType.F32),
 		LIST_TUPLE_F64(ImageDataType.F64),
 		LIST_ASSOCIATED_PAIR_F32(ImageDataType.F32),
-		LIST_ASSOCIATED_PAIR_F64(ImageDataType.F64);
+		LIST_ASSOCIATED_PAIR_F64(ImageDataType.F64),
+		ARRAY_S8(ImageDataType.S8),
+		ARRAY_U8(ImageDataType.U8),
+		ARRAY_S16(ImageDataType.S16),
+		ARRAY_U16(ImageDataType.U16),
+		ARRAY_S32(ImageDataType.S32),
+		ARRAY_F32(ImageDataType.F32),
+		ARRAY_F64(ImageDataType.F64);
 
 		ImageDataType dataType;
 
 		Type(ImageDataType dataType) {
-		    this.dataType = dataType;
+			this.dataType = dataType;
 		}
 
 		public ImageDataType getDataType() {
-    		return dataType;
+			return dataType;
 		}
 	}
 }

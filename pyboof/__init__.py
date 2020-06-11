@@ -4,6 +4,7 @@ import os
 import signal
 import subprocess
 import time
+import numpy as np
 
 from py4j.java_gateway import JavaGateway
 from py4j.protocol import Py4JError
@@ -100,6 +101,7 @@ if not check_jvm(False):
         print("Failed to successfully launch the JVM after 5 seconds.  Aborting")
         pass
 
+
 class MmapType:
     """
     Type byte for different data structures
@@ -115,6 +117,13 @@ class MmapType:
     LIST_TUPLE_F64 = 8
     LIST_ASSOCIATEDPAIR_F32 = 9
     LIST_ASSOCIATEDPAIR_F64 = 10
+    ARRAY_S8 = 11
+    ARRAY_U8 = 12
+    ARRAY_S16 = 13
+    ARRAY_U16 = 14
+    ARRAY_S32 = 15
+    ARRAY_F32 = 16
+    ARRAY_F64 = 17
 
 
 def init_memmap(size_mb=2):
@@ -135,6 +144,64 @@ def init_memmap(size_mb=2):
     mmap_fid = open(mmap_path, "r+b")
     mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
                           prot=mmap.PROT_READ | mmap.PROT_WRITE)
+
+
+def mmap_primitive_len(mmap_type: MmapType):
+    if mmap_type == MmapType.ARRAY_S8:
+        return 1
+    elif mmap_type == MmapType.ARRAY_U8:
+        return 1
+    elif mmap_type == MmapType.ARRAY_S16:
+        return 2
+    elif mmap_type == MmapType.ARRAY_U16:
+        return 2
+    elif mmap_type == MmapType.ARRAY_S32:
+        return 4
+    elif mmap_type == MmapType.ARRAY_F32:
+        return 4
+    elif mmap_type == MmapType.ARRAY_F64:
+        return 8
+    else:
+        raise Exception("Not a primitive array type")
+
+
+def mmap_primitive_format(mmap_type: MmapType):
+    if mmap_type == MmapType.ARRAY_S8:
+        return ">b"
+    elif mmap_type == MmapType.ARRAY_U8:
+        return ">B"
+    elif mmap_type == MmapType.ARRAY_S16:
+        return ">h"
+    elif mmap_type == MmapType.ARRAY_U16:
+        return ">H"
+    elif mmap_type == MmapType.ARRAY_S32:
+        return ">i"
+    elif mmap_type == MmapType.ARRAY_F32:
+        return ">f"
+    elif mmap_type == MmapType.ARRAY_F64:
+        return ">d"
+    else:
+        raise Exception("Not a primitive array type")
+
+
+def mmap_force_array_type(data_array, mmap_type: MmapType):
+    if mmap_type == MmapType.ARRAY_S8:
+        return np.int8(data_array)
+    elif mmap_type == MmapType.ARRAY_U8:
+        return np.uint8(data_array)
+    elif mmap_type == MmapType.ARRAY_S16:
+        return np.int16(data_array)
+    elif mmap_type == MmapType.ARRAY_U16:
+        return np.uint16(data_array)
+    elif mmap_type == MmapType.ARRAY_S32:
+        return np.int32(data_array)
+    elif mmap_type == MmapType.ARRAY_F32:
+        return np.float32(data_array)
+    elif mmap_type == MmapType.ARRAY_F64:
+        return np.float64(data_array)
+    else:
+        raise Exception("Not a primitive array type")
+
 
 from pyboof.calib import *
 from pyboof.common import *
