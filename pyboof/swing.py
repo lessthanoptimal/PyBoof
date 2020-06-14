@@ -5,6 +5,46 @@ import pyboof
 import numpy as np
 
 
+class PointCloudViewer(pyboof.JavaWrapper):
+    """
+    Sprite based point cloud viewer
+    """
+    def __init__(self):
+        self.set_java_object(gateway.jvm.boofcv.visualize.VisualizeData.createPointCloudViewer())
+
+    def clear(self):
+        self.java_obj.clearPoints()
+
+    def add_points(self, cloud, color=None):
+        java_cloud = gateway.jvm.java.util.ArrayList()
+        pyboof.mmap_list_python_to_Point3D(cloud, java_cloud, np.double)
+
+        if color:
+            java_color = pyboof.mmap_array_python_to_java(color, pyboof.MmapType.ARRAY_S32)
+            self.java_obj.addCloud(java_cloud, java_color)
+        else:
+            self.java_obj.addCloud(java_cloud)
+
+    def show_in_window(self, width=400, height=400, title="Cloud"):
+        java_component = self.java_obj.getComponent()
+        java_dimension = gateway.jvm.java.awt.Dimension(int(width), int(height))
+        java_component.setPreferredSize(java_dimension)
+        show(java_component, title)
+        pass
+
+    def set_step(self, step):
+        self.java_obj.setTranslationStep(float(step))
+
+    def set_dot_size(self, size=1):
+        self.java_obj.setDotSize(int(size))
+
+    def set_camera_hfov(self, radians):
+        self.java_obj.setCameraHFov(float(radians))
+
+    def set_camera_to_world(self):
+        pass
+
+
 def show(boof_image, title="Image"):
     gateway.jvm.boofcv.gui.image.ShowImages.showWindow(boof_image, title)
 

@@ -1,6 +1,9 @@
 - visual odometry
 - polygon detector
 
+- TODO Detect black polygons and ellipses
+- TODO Visualize detected markers inside the image
+
 - TODO Estimate camera motion
 - TODO FDistort
 

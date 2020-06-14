@@ -112,5 +112,47 @@ class TestMemMapFunctions(unittest.TestCase):
             self.assertEqual(a[0], b[0])
             self.assertEqual(a[1], b[1])
 
+
+    def test_convert_list_Point3D_F32(self):
+        original = [(1, 2.34, 9.1), (-23.4, 934.123, -0.234)]
+
+        # python to java
+        java_list = gateway.jvm.java.util.ArrayList()
+        pb.mmap_list_python_to_Point3D(original, java_list, np.float)
+
+        # java to python
+        found = []
+        pb.mmap_list_Point3D_to_python(java_list, found, np.float)
+
+        self.assertEqual(len(original), len(found))
+
+        for i in range(len(original)):
+            a = np.float32(original[i])
+            b = found[i]
+            self.assertEqual(a[0], b[0])
+            self.assertEqual(a[1], b[1])
+            self.assertEqual(a[2], b[2])
+
+
+    def test_convert_list_Point3D_F64(self):
+        original = [(1, 2.34, 9.1), (-23.4, 934.123, -0.234)]
+
+        # python to java
+        java_list = gateway.jvm.java.util.ArrayList()
+        pb.mmap_list_python_to_Point3D(original, java_list, np.double)
+
+        # java to python
+        found = []
+        pb.mmap_list_Point3D_to_python(java_list, found, np.double)
+
+        self.assertEqual(len(original), len(found))
+
+        for i in range(len(original)):
+            a = np.float64(original[i])
+            b = found[i]
+            self.assertEqual(a[0], b[0])
+            self.assertEqual(a[1], b[1])
+            self.assertEqual(a[2], b[2])
+
 if __name__ == '__main__':
     unittest.main()

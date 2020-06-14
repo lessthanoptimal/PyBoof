@@ -42,13 +42,14 @@ factory = pb.FactoryStereoDisparity(np.uint8)
 
 disparityAlg = factory.block_match_best5(config)
 
+# First time you run this it will be slow, speeds up a lot after a few iterations
 disparityAlg.process(rect0, rect1)
 
 disparity_image = pb.boof_to_ndarray(disparityAlg.get_disparity_image())
 # disparity images is in a weird format.  disparity - min disparity and a value more than range if invalid
 # legacy from 8bit disparity images
 disparity_image[:] += config.disparityMin
-disparity_image[disparity_image > 60] = float('nan')
+disparity_image[disparity_image >= 60] = float('nan')
 
 # plt.imshow(disparity_image)
 # plt.show()
@@ -68,25 +69,35 @@ cloud_rgb = []
 # Convert the BoofCV image into a Python image to speed things up a bit since data transfer is slow
 rect0 = pb.boof_to_ndarray(rect0)
 
+max_z = baseline*100
+
 for row in range(0, disparity_image.shape[0]):
     for col in range(0, disparity_image.shape[1]):
         d = disparity_image[row, col]
-        if math.isnan(d) or d < 1.0:
+        if math.isnan(d) or d <= 0.0:
             continue
 
         # Color at this pixel
         gray_value = np.uint8(rect0[row, col])
-        rgb = gray_value << 24 | gray_value << 16 | gray_value
+        rgb = gray_value << 16 | gray_value << 8 | gray_value
 
         # Compute the 3D cloud
         Z = baseline * fx / d
         X = Z * (col - cx) / fx
         Y = Z * (row - cy) / fy
 
+        # skip points which are likely to be noise
+        if Z > max_z:
+            continue
+
         # Add to output
         cloud_xyz.append((X, Y, Z))
         cloud_rgb.append(rgb)
 
-# TODO show the colorized point cloud
+pcv = pb.swing.PointCloudViewer()
+pcv.add_points(cloud_xyz, cloud_rgb)
+pcv.set_camera_hfov(np.radians(70))
+pcv.set_step(baseline*0.5)
+pcv.show_in_window(width=800, height=800)
 
-print("Done!")
+input("Press any key to exit")

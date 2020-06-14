@@ -474,6 +474,15 @@ def dtype_to_mmaplistpoints(dtype):
         raise RuntimeError("No mmap type for dtype={}".format(dtype))
 
 
+def dtype_to_mmaplistpoints3d(dtype):
+    if dtype == np.float:
+        return pyboof.MmapType.LIST_POINT3D_F32
+    elif dtype == np.double:
+        return pyboof.MmapType.LIST_POINT3D_F64
+    else:
+        raise RuntimeError("No mmap type for dtype={}".format(dtype))
+
+
 def mmap_list_python_to_Point2D(pylist, java_list, dtype):
     """
     Converts a python list of 2d float tuples into a list of Point2D_64F in java using memmap file
@@ -492,7 +501,7 @@ def mmap_list_python_to_Point2D(pylist, java_list, dtype):
     mmap_type = dtype_to_mmaplistpoints(dtype)
 
     # max number of list elements it can write at once
-    max_elements = (pyboof.mmap_size - 100) / num_bytes_per_point
+    max_elements = int((pyboof.mmap_size - 100) / num_bytes_per_point)
 
     curr = 0
     while curr < num_elements:
@@ -530,6 +539,66 @@ def mmap_list_Point2D_to_python(java_list, pylist, dtype):
     num_read = 0
     while num_read < num_elements:
         gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point2D(java_list, mmap_type, num_read)
+        mm.seek(0)
+        data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
+        if data_type != mmap_type:
+            raise Exception("Unexpected data type in mmap file. %d" % data_type)
+        if num_found > num_elements - num_read:
+            raise Exception("Too many elements returned. " + str(num_found))
+        for i in range(num_found):
+            point = struct.unpack(format_string, mm.read(num_bytes_per_point))
+            pylist.append(point)
+        num_read += num_found
+
+
+def mmap_list_python_to_Point3D(pylist, java_list, dtype):
+    """
+    Converts a python list of 3d float tuples into a list of Point3D_64F in java using memmap file
+    """
+    num_elements = len(pylist)
+    mm = pyboof.mmap_file
+
+    num_bytes, char_type = dtype_to_unpack(dtype)
+    num_bytes_per_point = num_bytes * 3
+    format_string = ">3{}".format(char_type)
+
+    mmap_type = dtype_to_mmaplistpoints3d(dtype)
+
+    # max number of list elements it can write at once
+    max_elements = int((pyboof.mmap_size - 100) / num_bytes_per_point)
+
+    curr = 0
+    while curr < num_elements:
+        # Write as much of the list as it can to the mmap file
+        num_write = min(max_elements, num_elements - curr)
+        mm.seek(0)
+        mm.write(struct.pack('>HI', mmap_type, num_write))
+        for i in range(curr, curr + num_write):
+            mm.write(struct.pack(format_string, *pylist[i]))
+
+        # Now tell the java end to read what it just wrote
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Point3D(java_list, mmap_type)
+
+        # move on to the next block
+        curr = curr + num_write
+
+
+def mmap_list_Point3D_to_python(java_list, pylist, dtype):
+    """
+    Converts a java list of Point3D_* into a python list of float 3D tuples using memmap file
+    """
+    num_elements = java_list.size()
+    mm = pyboof.mmap_file
+
+    num_bytes, char_type = dtype_to_unpack(dtype)
+    num_bytes_per_point = num_bytes * 3
+    format_string = ">3{}".format(char_type)
+
+    mmap_type = dtype_to_mmaplistpoints3d(dtype)
+
+    num_read = 0
+    while num_read < num_elements:
+        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point3D(java_list, mmap_type, num_read)
         mm.seek(0)
         data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
         if data_type != mmap_type:

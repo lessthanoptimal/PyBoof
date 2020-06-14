@@ -137,7 +137,6 @@ public class BoofMemoryMapped {
                 }
             } break;
         }
-
 	}
 
     public void write_List_Point2D(List<?> list , int type_ordinal , int startIndex ) {
@@ -191,6 +190,78 @@ public class BoofMemoryMapped {
             } break;
         }
     }
+
+	public void read_List_Point3D(List list, int type_ordinal ) {
+		Type type = Type.values()[type_ordinal];
+		mmf.position(0);
+		if( mmf.getShort() != type.ordinal() ) {
+			throw new RuntimeException("Memmap not of type "+type);
+		}
+		int numBytes = type.getDataType().getNumBits()/8;
+		int numElements = mmf.getInt();
+		byte[] data = new byte[numBytes*3];
+		ByteBuffer bb = ByteBuffer.wrap(data);
+
+		switch( type ) {
+			case LIST_POINT3D_F32: {
+				for (int i = 0; i < numElements; i++) {
+					mmf.get(data,0,data.length);
+					Point3D_F32 p = new Point3D_F32();
+					p.x = bb.getFloat(0);
+					p.y = bb.getFloat(4);
+					p.z = bb.getFloat(8);
+					list.add( p );
+				}
+			} break;
+
+			case LIST_POINT3D_F64: {
+				for (int i = 0; i < numElements; i++) {
+					mmf.get(data,0,data.length);
+					Point3D_F64 p = new Point3D_F64();
+					p.x = bb.getDouble(0 );
+					p.y = bb.getDouble(8 );
+					p.z = bb.getDouble(16);
+					list.add( p );
+				}
+			} break;
+		}
+	}
+
+	public void write_List_Point3D(List<?> list , int type_ordinal , int startIndex ) {
+		Type type = Type.values()[type_ordinal];
+
+		int numBytes = type.getDataType().getNumBits()/8;
+
+		int maxElements = (mmf.limit()-100)/(numBytes*3);
+		int numElements = Math.min(list.size(),maxElements);
+
+		mmf.position(0);
+		mmf.putShort((short)type.ordinal());
+		mmf.putInt(numElements);
+
+		switch( type ) {
+			case LIST_POINT3D_F32: {
+				for (int i = 0; i < numElements; i++) {
+					Point3D_F32 p = (Point3D_F32)list.get(startIndex+i);
+
+					mmf.putFloat(p.x);
+					mmf.putFloat(p.y);
+					mmf.putFloat(p.z);
+				}
+			} break;
+
+			case LIST_POINT3D_F64: {
+				for (int i = 0; i < numElements; i++) {
+					Point3D_F64 p = (Point3D_F64)list.get(startIndex+i);
+
+					mmf.putDouble(p.x);
+					mmf.putDouble(p.y);
+					mmf.putDouble(p.z);
+				}
+			} break;
+		}
+	}
+
 
 	public void read_List_AssociatedPair_F64(List<AssociatedPair> list ) {
 		mmf.position(0);
@@ -464,6 +535,8 @@ public class BoofMemoryMapped {
 		LIST_POINT2D_S32(ImageDataType.S32),
 		LIST_POINT2D_F32(ImageDataType.F32),
 		LIST_POINT2D_F64(ImageDataType.F64),
+		LIST_POINT3D_F32(ImageDataType.F32),
+		LIST_POINT3D_F64(ImageDataType.F64),
 		LIST_TUPLE_F32(ImageDataType.F32),
 		LIST_TUPLE_F64(ImageDataType.F64),
 		LIST_ASSOCIATED_PAIR_F32(ImageDataType.F32),
