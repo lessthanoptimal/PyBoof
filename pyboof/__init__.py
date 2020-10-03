@@ -64,6 +64,8 @@ def shutdown_jvm():
     global java_pid, gateway
     if java_pid is None:
         pass
+    elif gateway is None:
+        pass
     else:
         # shutdown the gateway so that it doesn't spew out a billion error messages when it can't connect
         # to the JVM
