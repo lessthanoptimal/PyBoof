@@ -10,7 +10,7 @@ from py4j.java_gateway import JavaGateway
 from py4j.protocol import Py4JError
 from py4j.protocol import Py4JNetworkError
 
-__version__ = "0.36.0"
+__version__ = "0.36.1"
 
 gateway = JavaGateway()
 
@@ -144,8 +144,11 @@ def init_memmap(size_mb=2):
     gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_path, size_mb)
     # Open file in read,write,binary mode
     mmap_fid = open(mmap_path, "r+b")
-    mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
-                          prot=mmap.PROT_READ | mmap.PROT_WRITE)
+    if os.name == 'nt':
+        mmap_file = mmap.mmap(mmap_fid.fileno(), length=0)
+    else:
+        mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
+                              prot=mmap.PROT_READ | mmap.PROT_WRITE)
 
 
 def mmap_primitive_len(mmap_type: MmapType):

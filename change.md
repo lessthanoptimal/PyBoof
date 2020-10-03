@@ -1,3 +1,7 @@
+### Version 0.36.1
+
+- Works on windows now. Thanks GokulNC for pointing out the problem and how to fix it.
+
 ### Version 0.36
 
 - Updated for latest BoofCV
