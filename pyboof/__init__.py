@@ -76,7 +76,13 @@ def shutdown_jvm():
 # Catch control-c and kill the java process "gracefully" first.
 def signal_handler(signal, frame):
     shutdown_jvm()
-    sys.exit(0)
+    # Windows does not define this command
+    try:
+        sys.exit(0)
+    except ImportError:
+        pass
+
+
 signal.signal(signal.SIGINT, signal_handler)
 
 # kill java on a regular exit too
