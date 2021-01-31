@@ -301,7 +301,8 @@ class FiducialCalibrationDetector(JavaWrapper):
         jdetected = self.java_obj.getDetectedPoints()
         for i in range(jdetected.size()):
             jp = jdetected.get(i)
-            self.detected_points.append((jp.getIndex(), jp.getX(), jp.getY()))
+            pixel = jp.getP()
+            self.detected_points.append((jp.getIndex(), pixel.getX(), pixel.getY()))
 
 
 class FiducialDetector(JavaWrapper):

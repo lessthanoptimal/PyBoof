@@ -1,6 +1,5 @@
 package pyboof;
 
-import boofcv.struct.feature.BrightFeature;
 import boofcv.struct.feature.TupleDesc_F64;
 import georegression.struct.point.Point2D_F64;
 
@@ -18,8 +17,6 @@ public class FileIO {
 	public static void saveList( List list , Class type , String filePath ) throws IOException {
 		if( type == TupleDesc_F64.class ) {
 			saveRawTupleDescF64(list, filePath);
-		} else if( type == BrightFeature.class ) {
-			saveRawTupleDescF64(list,filePath);
 		} else if( type == Point2D_F64.class ){
 			saveRawPoint2DF64(list, filePath);
 		} else {

@@ -14,7 +14,8 @@ defs = pb.load_random_dot_yaml(os.path.join(data_path, "descriptions.yaml"))
 
 # Create the detector
 config = pb.ConfigUchiyaMarker()
-config.markerLength = defs.markerWidth
+config.markerWidth = defs.markerWidth
+config.markerHeight = defs.markerHeight
 detector = pb.FactoryFiducial(np.uint8).random_dots(config)
 
 # Load / learn all the markers. This can take a few seconds if there are a lot of markers

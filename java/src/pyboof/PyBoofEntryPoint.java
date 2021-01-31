@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, Peter Abeles. All Rights Reserved.
+ * Copyright (c) 2021, Peter Abeles. All Rights Reserved.
  *
  * This file is part of BoofCV (http://boofcv.org).
  *
@@ -18,25 +18,16 @@
 
 package pyboof;
 
-
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
+import boofcv.concurrency.BoofConcurrency;
 import boofcv.factory.filter.binary.ConfigThreshold;
 import boofcv.factory.filter.binary.ThresholdType;
-import boofcv.gui.image.ShowImages;
 import boofcv.struct.Configuration;
 import boofcv.struct.feature.TupleDesc;
-import boofcv.visualize.PointCloudViewer;
-import boofcv.visualize.VisualizeData;
 import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point3D_F32;
-import georegression.struct.point.Point3D_F64;
 import org.ddogleg.struct.FastArray;
 import py4j.GatewayServer;
-import boofcv.concurrency.BoofConcurrency;
 
-import javax.annotation.Nullable;
-import javax.swing.*;
-import java.awt.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;

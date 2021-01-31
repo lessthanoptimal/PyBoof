@@ -336,7 +336,7 @@ class NarrowToWideFovPtoP(JavaWrapper):
         java_interp = FactoryInterpolation(image_type).bilinear(border_type=border_type)
 
         java_alg = gateway.jvm.boofcv.factory.distort.FactoryDistort.distort(False, java_interp, java_image_type)
-        java_pixel_transform = gateway.jvm.boofcv.alg.distort.PointToPixelTransform_F32(self.java_obj)
+        java_pixel_transform = gateway.jvm.boofcv.struct.distort.PointToPixelTransform_F32(self.java_obj)
         java_alg.setModel(java_pixel_transform)
         return ImageDistort(java_alg)
 

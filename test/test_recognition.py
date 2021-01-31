@@ -81,7 +81,8 @@ class ChecksFactoryFiducial(unittest.TestCase):
 
     def test_random_dots(self):
         config_detector = pb.ConfigUchiyaMarker()
-        config_detector.markerLength = 5.0
+        config_detector.markerWidth = 5.0
+        config_detector.markerHeight = 5.0
         pb.FactoryFiducial(np.uint8).random_dots(config_detector)
 
 
