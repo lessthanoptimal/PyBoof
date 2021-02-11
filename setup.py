@@ -57,7 +57,7 @@ class MyBuild(build_py):
 
 setup(name='PyBoof',
       cmdclass={'build_py': MyBuild},
-      version='0.37.0',  # Change in in __init__ too
+      version='0.37.1',  # Change in in __init__ too
       description='Py4J Python wrapper for BoofCV',
       long_description=open('README.md', 'r').read(),
       long_description_content_type="text/markdown",

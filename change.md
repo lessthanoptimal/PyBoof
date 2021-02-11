@@ -1,3 +1,11 @@
+### Version 0.37.1
+
+- Fixed LinkageError by ensuring it is built to be compatible with JRE 1.8
+
+### Version 0.37
+
+- Updated BoofCV version
+
 ### Version 0.36.1
 
 - Works on windows now. Thanks GokulNC for pointing out the problem and how to fix it.
