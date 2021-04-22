@@ -153,7 +153,7 @@ def create_ImageType(family, dtype, num_bands=1):
     if family == Family.SINGLE_BAND:
         j_image_type = gateway.jvm.boofcv.struct.image.ImageType.single(j_image_class)
     elif family == Family.PLANAR:
-        j_image_type = gateway.jvm.boofcv.struct.image.ImageType.ms(num_bands, j_image_class)
+        j_image_type = gateway.jvm.boofcv.struct.image.ImageType.pl(num_bands, j_image_class)
     elif family == Family.INTERLEAVED:
         j_image_type = gateway.jvm.boofcv.struct.image.ImageType.interleaved(num_bands, j_image_class)
     else:

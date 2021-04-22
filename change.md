@@ -1,3 +1,8 @@
+### Version 0.37.2
+
+- Added PointTracker
+- Added Video Mosaic
+
 ### Version 0.37.1
 
 - Fixed LinkageError by ensuring it is built to be compatible with JRE 1.8

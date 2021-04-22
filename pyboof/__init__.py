@@ -7,12 +7,13 @@ import time
 import numpy as np
 
 from py4j.java_gateway import JavaGateway
+from py4j.java_gateway import GatewayParameters
 from py4j.protocol import Py4JError
 from py4j.protocol import Py4JNetworkError
 
 __version__ = "0.36.1"
 
-gateway = JavaGateway()
+gateway = JavaGateway(gateway_parameters=GatewayParameters(auto_field=True))
 
 mmap_size = 0
 mmap_file = None

@@ -4,10 +4,12 @@ import pyboof
 from pyboof import JavaConfig
 from pyboof import JavaWrapper
 from pyboof import dtype_to_Class_SingleBand
+from pyboof import dtype_to_ImageType
 from pyboof import gateway
 from pyboof.common import JavaList
 from pyboof.common import JavaList_to_fastarray
 from pyboof.common import is_java_class
+import pyboof.image
 import numpy as np
 
 
@@ -348,6 +350,83 @@ class DenseDescribePointFeatures(JavaWrapper):
         self.descriptions = b2p_list_descF64(self.java_obj.getDescriptions())
 
 
+class ConfigPointTracker(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.tracker.ConfigPointTracker")
+
+
+class PointTrack:
+    def __init__(self):
+        self.pixel = (0.0, 0.0)
+        self.feature_id = -1
+        self.spawn_frame_id = -1
+        self.last_seen_frame_id = -1
+
+
+class PointTracker(JavaWrapper):
+    def __init__(self, java_object, java_image_type):
+        self.set_java_object(java_object)
+        self.java_image_type = java_image_type
+
+    def process(self, image):
+        """
+        Updates existing tracks
+        """
+        self.java_obj.process(image)
+
+    def reset(self):
+        self.java_obj.reset()
+
+    def get_frame_id(self):
+        return self.java_obj.getFrameID()
+
+    def get_total_active(self):
+        return self.java_obj.getTotalActive()
+
+    def get_total_inactive(self):
+        return self.java_obj.getTotalInactive()
+
+    def drop_all_tracks(self):
+        self.java_obj.dropAllTracks()
+
+    def get_all_tracks(self):
+        return b2p_list_PointTrack(self.java_obj.getAllTracks(None))
+
+    def get_active_tracks(self):
+        return b2p_list_PointTrack(self.java_obj.getActiveTracks(None))
+
+    def get_inactive_tracks(self):
+        return b2p_list_PointTrack(self.java_obj.getInactiveTracks(None))
+
+    def get_dropped_tracks(self):
+        return b2p_list_PointTrack(self.java_obj.getDroppedTracks(None))
+
+    def get_new_tracks(self):
+        return b2p_list_PointTrack(self.java_obj.getNewTracks(None))
+
+    def spawn_tracks(self):
+        self.java_obj.spawnTracks()
+
+    def get_image_type(self):
+        return pyboof.ImageType(self.java_image_type)
+
+
+def b2p_list_PointTrack(java_list):
+    size = java_list.size()
+    py_list = []
+
+    for i in range(size):
+        java_track = JavaWrapper(java_list.get(i))
+        py_track = PointTrack()
+        py_track.pixel = (float(java_track.pixel.x), float(java_track.pixel.y))
+        py_track.feature_id = int(java_track.featureId)
+        py_track.spawn_frame_id = int(java_track.spawnFrameID)
+        py_track.last_seen_frame_id = int(java_track.lastSeenFrameID)
+        py_list.append(py_track)
+
+    return py_list
+
+
 class FactoryDetectDescribe:
     def __init__(self, dtype):
         self.boof_image_class = dtype_to_Class_SingleBand(dtype)
@@ -501,6 +580,17 @@ class FactoryDetectLine:
         java_object = gateway.jvm.boofcv.factory.feature.detect.line. \
             FactoryDetectLine.houghLineFoot(config_hough.java_obj, config_foot.java_obj, self.boof_image_class)
         return DetectLine(java_object)
+
+
+class FactoryPointTracker:
+    def __init__(self, dtype):
+        self.boof_image_class = dtype_to_Class_SingleBand(dtype)
+        self.boof_image_type = dtype_to_ImageType(dtype) # TODO remove after getImageType() is added to PointTracker
+
+    def generic(self, config_tracker:ConfigPointTracker):
+        java_object = gateway.jvm.boofcv.factory.tracker. \
+            FactoryPointTracker.tracker(config_tracker.java_obj, self.boof_image_class, None)
+        return PointTracker(java_object, self.boof_image_type)
 
 
 def mmap_list_python_to_TupleF64(pylist, java_list):
