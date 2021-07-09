@@ -25,10 +25,12 @@ import boofcv.factory.filter.binary.ThresholdType;
 import boofcv.struct.Configuration;
 import boofcv.struct.feature.TupleDesc;
 import georegression.struct.point.Point2D_F64;
+import org.ddogleg.struct.DogArray;
 import org.ddogleg.struct.FastArray;
 import py4j.GatewayServer;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,129 +41,140 @@ import java.util.List;
 /**
  * Must launch this application to use PyBoof
  *
- *
  * @author Peter abeles
  */
 public class PyBoofEntryPoint {
 
-	public static BoofMemoryMapped mmap;
-	public static String buildDate;
+    public static BoofMemoryMapped mmap;
+    public static String buildDate;
 
-	/**
-	 * Called in python to see if the JVM is set up correctly
-	 */
-	public static void nothing(){}
+    /**
+     * Called in python to see if the JVM is set up correctly
+     */
+    public static void nothing() {
+    }
 
-	public static void main(String[] args) {
-		GatewayServer gatewayServer = new GatewayServer(new PyBoofEntryPoint());
-		gatewayServer.start();
-		System.out.println("Gateway Server Started");
-	}
+    public static void main(String[] args) {
+        GatewayServer gatewayServer = new GatewayServer(new PyBoofEntryPoint());
+        gatewayServer.start();
+        System.out.println("Gateway Server Started");
+    }
 
-	public static void setMaxThreads( int maxThreads ) {
-		BoofConcurrency.USE_CONCURRENT = maxThreads > 1;
-		if( BoofConcurrency.USE_CONCURRENT ) {
-			BoofConcurrency.setMaxThreads(maxThreads);
-		}
-	}
+    public static void setMaxThreads(int maxThreads) {
+        BoofConcurrency.USE_CONCURRENT = maxThreads > 1;
+        if (BoofConcurrency.USE_CONCURRENT) {
+            BoofConcurrency.setMaxThreads(maxThreads);
+        }
+    }
 
-	public static String getBuildDate() {
-		return buildDate;
-	}
+    public static String getBuildDate() {
+        return buildDate;
+    }
 
-	public static void setBuildDate(String buildDate) {
-		PyBoofEntryPoint.buildDate = buildDate;
-	}
+    public static void setBuildDate(String buildDate) {
+        PyBoofEntryPoint.buildDate = buildDate;
+    }
 
-	public static void initializeMmap(String filePath , int sizeMB ) {
-		// no need to do special cleanup if mmap already exists.  It will be cleaned up by GC
-		mmap = new BoofMemoryMapped(filePath,sizeMB);
-	}
+    public static void initializeMmap(String filePath, int sizeMB) {
+        // no need to do special cleanup if mmap already exists.  It will be cleaned up by GC
+        mmap = new BoofMemoryMapped(filePath, sizeMB);
+    }
 
-	/**
-	 * Hack around 'global' being a keyword in Python
-	 */
-	public static ConfigThreshold createGlobalThreshold( ThresholdType type ) {
-		return ConfigThreshold.global(type);
-	}
+    /**
+     * Hack around 'global' being a keyword in Python
+     */
+    public static ConfigThreshold createGlobalThreshold(ThresholdType type) {
+        return ConfigThreshold.global(type);
+    }
 
-	public static FastArray listToFastArray( List list , Class type ) {
-		FastArray ret = new FastArray(type,list.size());
+    public static FastArray listToFastArray(List list, Class type) {
+        FastArray ret = new FastArray(type, list.size());
 
-		for (int i = 0; i < list.size(); i++) {
-			ret.add(list.get(i));
-		}
+        for (int i = 0; i < list.size(); i++) {
+            ret.add(list.get(i));
+        }
 
-		return ret;
-	}
+        return ret;
+    }
 
-	public static List<TupleDesc> extractFeatures( DetectDescribePoint alg , boolean copy ) {
-		int N = alg.getNumberOfFeatures();
+    public static <T> DogArray<T> createDogArray(Class<T> type) {
+        return new DogArray<T>(type, () -> {
+            try {
+                return type.getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException |
+                    InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 
-		List<TupleDesc> array = new ArrayList<TupleDesc>();
-		for (int i = 0; i < N; i++) {
-			if( copy)
-				array.add(alg.getDescription(i).copy());
-			else
-				array.add(alg.getDescription(i));
-		}
+    public static List<TupleDesc> extractFeatures(DetectDescribePoint alg, boolean copy) {
+        int N = alg.getNumberOfFeatures();
 
-		return array;
-	}
+        List<TupleDesc> array = new ArrayList<TupleDesc>();
+        for (int i = 0; i < N; i++) {
+            if (copy)
+                array.add(alg.getDescription(i).copy());
+            else
+                array.add(alg.getDescription(i));
+        }
 
-	public static List<Point2D_F64> extractPoints( DetectDescribePoint alg , boolean copy ) {
-		int N = alg.getNumberOfFeatures();
+        return array;
+    }
 
-		List<Point2D_F64> array = new ArrayList<Point2D_F64>();
-		for (int i = 0; i < N; i++) {
-			if( copy )
-				array.add(alg.getLocation(i).copy());
-			else
-				array.add(alg.getLocation(i));
-		}
+    public static List<Point2D_F64> extractPoints(DetectDescribePoint alg, boolean copy) {
+        int N = alg.getNumberOfFeatures();
 
-		return array;
-	}
+        List<Point2D_F64> array = new ArrayList<Point2D_F64>();
+        for (int i = 0; i < N; i++) {
+            if (copy)
+                array.add(alg.getLocation(i).copy());
+            else
+                array.add(alg.getLocation(i));
+        }
 
-	public static List<String> getPublicFields( String classPath ) {
-		List<String> list = new ArrayList<String>();
+        return array;
+    }
 
-		try {
-			Field[] fields = Class.forName(classPath).getFields();
-			for( Field f : fields ) {
-				list.add(f.getName());
-			}
-		} catch (ClassNotFoundException e) {
-			System.err.println("Can't find class "+classPath);
-			System.exit(1);
-		}
+    public static List<String> getPublicFields(String classPath) {
+        List<String> list = new ArrayList<String>();
 
-		return list;
-	}
+        try {
+            Field[] fields = Class.forName(classPath).getFields();
+            for (Field f : fields) {
+                list.add(f.getName());
+            }
+        } catch (ClassNotFoundException e) {
+            System.err.println("Can't find class " + classPath);
+            System.exit(1);
+        }
 
-	public static List<String> getPublicFields( Class typeClass ) {
-		List<String> list = new ArrayList<String>();
+        return list;
+    }
 
-		Field[] fields = typeClass.getFields();
-		for( Field f : fields ) {
-			list.add(f.getName());
-		}
+    public static List<String> getPublicFields(Class typeClass) {
+        List<String> list = new ArrayList<String>();
 
-		return list;
-	}
+        Field[] fields = typeClass.getFields();
+        for (Field f : fields) {
+            list.add(f.getName());
+        }
 
-	public static boolean isConfigClass( Object o ) {
-		return o instanceof Configuration;
-	}
+        return list;
+    }
 
-	public static boolean isClass( Class c , String path ) {
+    public static boolean isConfigClass(Object o) {
+        return o instanceof Configuration;
+    }
 
-		try {
-			//System.out.println("Class = "+c+"  forname = "+Class.forName(path));
-			Class found = Class.forName(path);
-			return c.isAssignableFrom(found) || found.isAssignableFrom(c);
-		} catch (ClassNotFoundException e) {
-			return false;
-		}
-	}
+    public static boolean isClass(Class c, String path) {
+
+        try {
+            //System.out.println("Class = "+c+"  forname = "+Class.forName(path));
+            Class found = Class.forName(path);
+            return c.isAssignableFrom(found) || found.isAssignableFrom(c);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }

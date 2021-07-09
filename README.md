@@ -1,4 +1,4 @@
-PyBoof is [Python](http://www.python.org) wrapper for the computer vision library [BoofCV](http://boofcv.org). Since this is a Java library you will need to have java and javac installed.  The former is the Java compiler.  In the future the requirement for javac will be removed since a pre-compiled version of the Java code will be made available and automatically downloaded.  Installing the Java JDK is platform specific, so a quick search online should tell you how to do it.
+PyBoof is [Python](http://www.python.org) wrapper for the computer vision library [BoofCV](http://boofcv.org). Since this is a Java library you will need to have java and javac installed. The former is the Java compiler. In the future the requirement for javac will be removed since a pre-compiled version of the Java code will be made available and automatically downloaded. Installing the Java JDK is platform specific, so a quick search online should tell you how to do it.
 
 To start using the library simply install the latest stable version using pip
 ```bash
@@ -20,19 +20,23 @@ git submodule update --init --recursive
 After you have the source code on your local machine you can install it and its dependencies with the following commands:
 
 1. cd PyBoof
-2. ./setup.py build
-3. sudo ./setup.py install
+2. python3 -m venv venv
+3. source venv/bin/activate
+4. pip3 install -r requirements.txt
+5. ./setup.py build
+6. ./setup.py install
 
-Yes you do need to do the build first.  This will automatically build the Java jar and put it into the correct place.
+Yes you do need to do the build first. This will automatically build the Java jar and put it into the correct place.
+Creating a virtual environment isn't required but recommended as you can only do so much damage with it.
 
 # Supported Platforms
 
-The code has been developed and tested on Ubuntu Linux 16.04.  Should work on any other Linux variant.  Might work on Mac OS and a slim chance of working on Windows.
+The code has been developed and tested on Ubuntu Linux 20.04. Should work on any other Linux variant. Might work on Mac OS and a slim chance of working on Windows.
 
 # Examples
 
-Examples are included with the source code.  You can obtain them by either checkout the source code, as described above, or browsing 
-[github here](https://github.com/lessthanoptimal/PyBoof/tree/master/examples).  If you don't check out the source code you won't have example data and not
+Examples are included with the source code. You can obtain them by either checkout the source code, as described above, or browsing 
+[github here](https://github.com/lessthanoptimal/PyBoof/tree/master/examples). If you don't check out the source code you won't have example data and not
 all of the examples will work.
 
 To run any of the examples simply invoke python on the script
@@ -66,7 +70,7 @@ input("Press any key to exit")
 
 # Dependencies
 
-PyBoof depends on the following python packages.  They should be automatically installed
+PyBoof depends on the following python packages. They should be automatically installed
 
 * py4j
 * numpy

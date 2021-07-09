@@ -18,6 +18,7 @@ class Border:
 class GradientType:
     SOBEL="sobel"
     PREWITT="prewitt"
+    SCHARR="scharr"
     THREE="three"
     TWO0="two0"
     TWO1="two1"
@@ -167,6 +168,8 @@ def gradient(input, derivX, derivY, gradient_type=GradientType.SOBEL, border_typ
         java_DerivativeOps.gradient(java_DerivativeType.SOBEL,input,derivX,derivY,java_border)
     elif gradient_type is GradientType.PREWITT:
         java_DerivativeOps.gradient(java_DerivativeType.PREWITT,input,derivX,derivY,java_border)
+    elif gradient_type is GradientType.SCHARR:
+        java_DerivativeOps.gradient(java_DerivativeType.SCHARR,input,derivX,derivY,java_border)
     elif gradient_type is GradientType.THREE:
         java_DerivativeOps.gradient(java_DerivativeType.THREE,input,derivX,derivY,java_border)
     elif gradient_type is GradientType.TWO0:

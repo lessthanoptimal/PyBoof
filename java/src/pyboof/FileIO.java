@@ -37,7 +37,7 @@ public class FileIO {
 			writeInt(t.size(), out);
 
 			for (int j = 0; j < t.size(); j++) {
-				writeLong(Double.doubleToRawLongBits(t.value[j]), out);
+				writeLong(Double.doubleToRawLongBits(t.data[j]), out);
 			}
 		}
 
