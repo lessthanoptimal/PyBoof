@@ -57,7 +57,7 @@ class MyBuild(build_py):
 
 setup(name='PyBoof',
       cmdclass={'build_py': MyBuild},
-      version='0.37.2',  # Change in in __init__ too
+      version='0.38.0',  # Change in in __init__ too
       description='Py4J Python wrapper for BoofCV',
       long_description=open('README.md', 'r').read(),
       long_description_content_type="text/markdown",
@@ -71,5 +71,5 @@ setup(name='PyBoof',
       eager_resources=['java'],
       packages=['pyboof'],
       package_data={'pyboof': ['PyBoof-all.jar', 'build_date.txt']},
-      install_requires=['py4j==0.10.8.1', 'numpy>=1.14.0', 'six>=1.11.0', 'transforms3d>=0.3.1'],
+      install_requires=['py4j>=0.10.9.2', 'numpy>=1.14.0', 'six>=1.11.0', 'transforms3d>=0.3.1'],
       )

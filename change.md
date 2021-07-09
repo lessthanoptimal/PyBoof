@@ -1,3 +1,12 @@
+### Version 0.38.0
+
+- Updated for latest BoofCV
+- Added SceneRecognition
+- Added Scharr gradient
+- TODO Add Wolf and Niback binarization
+- TODO Add scene reconstruction high level API
+- TODO Add template matching
+
 ### Version 0.37.2
 
 - Added PointTracker

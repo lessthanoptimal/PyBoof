@@ -27,10 +27,11 @@ After you have the source code on your local machine you can install it and its 
 6. ./setup.py install
 
 Yes you do need to do the build first. This will automatically build the Java jar and put it into the correct place.
+Creating a virtual environment isn't required but recommended as you can only do so much damage with it.
 
 # Supported Platforms
 
-The code has been developed and tested on Ubuntu Linux 16 to 20. Should work on any other Linux variant. Might work on OS X and a slim chance of working on Windows.
+The code has been developed and tested on Ubuntu Linux 20.04. Should work on any other Linux variant. Might work on Mac OS and a slim chance of working on Windows.
 
 # Examples
 

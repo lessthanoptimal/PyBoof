@@ -20,6 +20,9 @@ buffered_sobel = pb.swing.colorize_gradient(derivX, derivY)
 pb.gradient(original, derivX, derivY, pb.GradientType.PREWITT)
 buffered_prewitt = pb.swing.colorize_gradient(derivX, derivY)
 
+pb.gradient(original, derivX, derivY, pb.GradientType.SCHARR)
+buffered_pscharr = pb.swing.colorize_gradient(derivX, derivY)
+
 pb.gradient(original, derivX, derivY, pb.GradientType.THREE)
 buffered_three = pb.swing.colorize_gradient(derivX, derivY)
 
@@ -33,6 +36,7 @@ buffered_two1 = pb.swing.colorize_gradient(derivX, derivY)
 image_list = [(original,"original"),
               (buffered_sobel,"sobel"),
               (buffered_prewitt,"prewitt"),
+              (buffered_pscharr,"scharr"),
               (buffered_three,"three"),
               (buffered_two0,"two0"),
               (buffered_two1,"two1")]

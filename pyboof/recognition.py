@@ -654,3 +654,80 @@ def load_random_dot_yaml(path: str):
     java_file = gateway.jvm.java.io.File(path)
     java_obj = gateway.jvm.boofcv.io.fiducial.FiducialIO.loadRandomDotYaml(java_file)
     return RandomDotDefinition(java_obj)
+
+
+class SceneRecognition(JavaWrapper):
+    def __init__(self, java_object=None):
+        JavaWrapper.__init__(self, java_object)
+
+    def learn_model(self, imageFiles):
+        java_imageType = self.java_obj.getImageType()
+        java_iterator = gateway.jvm.boofcv.io.image.ImageFileListIterator(imageFiles, java_imageType)
+        self.java_obj.learnModel(java_iterator)
+
+    def add_image(self, id, image):
+        self.java_obj.addImage(id, image)
+
+    def clear_database(self):
+        """
+        Removes all images from the database. The model is not modified
+        """
+        self.java_obj.clearDatabase()
+
+    def query(self, query_image, limit):
+        """
+        Looks up the images which are the best match for the query image
+        """
+        match_type = gateway.jvm.boofcv.abst.scene.SceneRecognition.Match
+        java_matches = gateway.jvm.pyboof.PyBoofEntryPoint.createDogArray(match_type)
+        self.java_obj.query(query_image, None, java_matches)
+
+        # Convert the java results into a python list of dict
+        results = []
+        for java_match in java_matches.toList():
+            results.append({"id":java_match.id, "error":java_match.error})
+        return results
+
+    def get_image_ids(self):
+        # py4j should auto convert this into a python list
+        return self.java_obj.getImageIds(None)
+
+    def get_image_type(self):
+        return ImageType(self.java_obj.getImageType())
+
+
+class ConfigFeatureToSceneRecognition(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.abst.scene.ConfigFeatureToSceneRecognition")
+
+
+class FactorySceneRecognition:
+    def __init__(self, image_type):
+        """
+        Creates a factory for a specific image type.
+        :param image_type: Specifies the type of image it processes.  Can be a dtype or ImageType
+        :type image_type: int | ImageType
+        """
+        if isinstance(image_type, ImageType):
+            self.image_type = image_type
+        else:
+            self.image_type = ImageType(dtype_to_ImageType(image_type))
+
+    @staticmethod
+    def createFeatureToScene(config=None):
+        """
+        Scene recognition based off of image features
+
+        :param config: Configuration for scene detector
+        :type config: ConfigFeatureToSceneRecognition
+        :return: Calibration target detector
+        :rtype: SceneRecognition
+        """
+        cdj = None
+        if config:
+            cdj = config.java_obj
+
+        boof_image_class = self.image_type.java_obj.getImageClass()
+
+        java_obj = gateway.jvm.boofcv.factory.scene.FactorySceneRecognition.createFeatureToScene(cdj, boof_image_classe)
+        return SceneRecognition(java_obj)

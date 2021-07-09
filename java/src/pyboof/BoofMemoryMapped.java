@@ -54,7 +54,7 @@ public class BoofMemoryMapped {
 			mmf.get(data,0,data.length);
 			TupleDesc_F64 desc = new TupleDesc_F64(dof);
 			for (int j = 0; j < dof; j++) {
-				desc.value[j] = bb.getDouble(j*8);
+				desc.data[j] = bb.getDouble(j*8);
 			}
 			list.add( desc );
 		}
@@ -75,7 +75,7 @@ public class BoofMemoryMapped {
 			TupleDesc_F64 desc = list.get(startIndex+i);
 
 			for (int j = 0; j < DOF; j++) {
-				mmf.putDouble(desc.value[j]);
+				mmf.putDouble(desc.data[j]);
 			}
 		}
 	}
