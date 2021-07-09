@@ -4,21 +4,19 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 group = 'org.pyboof'
-version = '0.37'
+version = '0.38-SNAPSHOT'
 
 repositories {
     mavenCentral()
     mavenLocal()
 
-    maven {
-       url = "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
+    maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
     compile group: 'org.boofcv', name: 'boofcv-core', version: project.version
     compile group: 'org.boofcv', name: 'boofcv-swing', version: project.version
-    compile 'net.sf.py4j:py4j:0.10.3'
+    compile 'net.sf.py4j:py4j:0.10.9.2'
 
     // needed to use Java 11+ syntax with Java 1.8 byte code
     annotationProcessor('com.github.bsideup.jabel:jabel-javac-plugin:0.3.0')
@@ -60,20 +58,11 @@ javadoc {
 }
 
 sourceSets {
-    main {
-        java {
-            srcDir 'java/src'
-        }
-    }
-
-    test {
-        java {
-            srcDir 'java/test'
-        }
-    }
+    main { java { srcDir 'java/src' } }
+    test { java { srcDir 'java/test' }  }
 }
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = '6.4.1'
+    gradleVersion = '6.8.3'
 }
