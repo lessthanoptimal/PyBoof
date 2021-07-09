@@ -86,5 +86,14 @@ class ChecksFactoryFiducial(unittest.TestCase):
         pb.FactoryFiducial(np.uint8).random_dots(config_detector)
 
 
+class ChecksFactorySceneRecognition(unittest.TestCase):
+    """
+    Test factory function calls to see if they crash.
+    """
+
+    def test_scene_recognition(self):
+        config = pb.ConfigFeatureToSceneRecognition()
+        pb.FactorySceneRecognition(np.uint8).scene_recognition(config)
+
 if __name__ == '__main__':
     unittest.main()
