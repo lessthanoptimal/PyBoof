@@ -14,6 +14,8 @@ factory = pb.FactoryThresholdBinary(np.uint8)
 
 algorithms.append(("localGaussian",factory.localGaussian(region_width=11)))
 algorithms.append(("localSauvola" ,factory.localSauvola(region_width=11)))
+algorithms.append(("localWolf"    ,factory.localWolf(region_width=11)))
+algorithms.append(("localNiblack" ,factory.localNiblack(region_width=11)))
 algorithms.append(("localMean"    ,factory.localMean(region_width=11)))
 algorithms.append(("localNick"    ,factory.localNick(region_width=11)))
 # algorithms.append(("localOtsu"  ,factory.localOtsu(region_width=11))) # This can be slow
