@@ -5,6 +5,7 @@ import pyboof
 import struct
 import numpy as np
 
+
 def exception_use_mmap():
     raise Exception("Need to turn on mmap. Add pb.init_memmap() to your code before any other calls to PyBoof")
 
@@ -112,9 +113,13 @@ def JavaList_to_fastarray(java_list, java_class_type):
     return gateway.jvm.pyboof.PyBoofEntryPoint.listToFastArray(java_list, java_class_type)
 
 
-def create_java_file_writer( path : str ):
+def create_java_file_writer(path: str):
     java_file = gateway.jvm.java.io.File(path)
     return gateway.jvm.java.io.FileWriter(java_file)
+
+
+def create_java_file(path: str):
+    return gateway.jvm.java.io.File(path)
 
 
 def mmap_array_python_to_java(pylist, mmap_type: pyboof.MmapType):

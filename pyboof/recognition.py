@@ -1,7 +1,8 @@
 from pyboof.geo import *
 from pyboof.calib import *
 from pyboof import gateway
-
+from py4j.java_collections import ListConverter
+import tempfile
 
 class ConfigPolygonDetector(JavaConfig):
     def __init__(self):
@@ -660,9 +661,19 @@ class SceneRecognition(JavaWrapper):
     def __init__(self, java_object=None):
         JavaWrapper.__init__(self, java_object)
 
-    def learn_model(self, imageFiles):
+    def learn_model(self, image_files):
+        """
+        Learns a model from a set of images saved to disk. Does not have to be the images which you will query, but
+        in some applications that's a good idea.
+        """
+        # Convert the python list of strings into a java list of strings
+        java_list = ListConverter().convert(image_files, gateway._gateway_client)
+
+        # Create a Java iterator that will load the images from disk
         java_imageType = self.java_obj.getImageType()
-        java_iterator = gateway.jvm.boofcv.io.image.ImageFileListIterator(imageFiles, java_imageType)
+        java_iterator = gateway.jvm.boofcv.io.image.ImageFileListIterator(java_list, java_imageType)
+
+        # Learn the model from the images
         self.java_obj.learnModel(java_iterator)
 
     def add_image(self, id, image):
@@ -678,14 +689,16 @@ class SceneRecognition(JavaWrapper):
         """
         Looks up the images which are the best match for the query image
         """
-        match_type = gateway.jvm.boofcv.abst.scene.SceneRecognition.Match
-        java_matches = gateway.jvm.pyboof.PyBoofEntryPoint.createDogArray(match_type)
-        self.java_obj.query(query_image, None, java_matches)
+        java_class = gateway.jvm.boofcv.abst.scene.SceneRecognition.Match().getClass()
+        java_matches = gateway.jvm.pyboof.PyBoofEntryPoint.createDogArray(java_class)
+        self.java_obj.query(query_image, None, limit, java_matches)
 
         # Convert the java results into a python list of dict
         results = []
-        for java_match in java_matches.toList():
-            results.append({"id":java_match.id, "error":java_match.error})
+        for i in range(java_matches.size()):
+            java_match = java_matches.get(i)
+            match = JavaWrapper(java_match)
+            results.append({"id": match.id, "error": match.error})
         return results
 
     def get_image_ids(self):
@@ -713,8 +726,7 @@ class FactorySceneRecognition:
         else:
             self.image_type = ImageType(dtype_to_ImageType(image_type))
 
-    @staticmethod
-    def createFeatureToScene(config=None):
+    def scene_recognition(self, config=None):
         """
         Scene recognition based off of image features
 
@@ -727,7 +739,29 @@ class FactorySceneRecognition:
         if config:
             cdj = config.java_obj
 
-        boof_image_class = self.image_type.java_obj.getImageClass()
-
-        java_obj = gateway.jvm.boofcv.factory.scene.FactorySceneRecognition.createFeatureToScene(cdj, boof_image_classe)
+        java_obj = gateway.jvm.boofcv.factory.scene.FactorySceneRecognition. \
+            createFeatureToScene(cdj, self.image_type.java_obj)
         return SceneRecognition(java_obj)
+
+
+def download_default_scene_recognition(image_type, path=None):
+    """
+    Downloads then loads the default scene recognition model provided by BoofCV. If the model has already been
+    saved at the specified location it will not be downloaded again.
+
+    :param image_type: Image format that it will use
+    :param path: Path to directory where it should store the model
+    :return:
+    """
+    if not isinstance(image_type, ImageType):
+        image_type = ImageType(dtype_to_ImageType(image_type))
+
+    if not path:
+        path = tempfile.TemporaryDirectory()
+    path = os.path.abspath(path)
+
+    java_file = pyboof.create_java_file(path)
+    java_recognizer = gateway.jvm.boofcv.io.recognition.RecognitionIO.\
+        downloadDefaultSceneRecognition(java_file, image_type.java_obj)
+    return SceneRecognition(java_recognizer)
+
