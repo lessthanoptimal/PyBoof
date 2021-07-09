@@ -32,6 +32,8 @@ class ThresholdType:
     LOCAL_MEAN     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_MEAN
     LOCAL_OTSU     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_OTSU
     LOCAL_SAVOLA   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SAVOLA
+    LOCAL_WOLF     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_WOLF
+    LOCAL_NICK     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_NICK
     BLOCK_MIN_MAX  = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MIN_MAX
     BLOCK_MEAN     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MEAN
     BLOCK_OTSU     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_OTSU
@@ -297,6 +299,44 @@ class FactoryThresholdBinary:
 
         java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             localSauvola(region_width,down,float(k),self.boof_image_type)
+        return InputToBinary(java_object)
+
+    def localWolf(self, region_width, k=0.3, down=True):
+        """
+        Create an instance of local gaussian threshold
+
+        :param region_width: Width of local region
+        :type region_width: int
+        :param k: User specified threshold adjustment factor.  Must be positive. Try 0.3
+        :type k: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        region_width = boof_fixed_length(region_width)
+
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+            localWolf(region_width,down,float(k),self.boof_image_type)
+        return InputToBinary(java_object)
+
+    def localNiblack(self, region_width, k=0.3, down=True):
+        """
+        Create an instance of local gaussian threshold
+
+        :param region_width: Width of local region
+        :type region_width: int
+        :param k: User specified threshold adjustment factor.  Must be positive. Try 0.3
+        :type k: float
+        :param down: True for thresholding down and false for up
+        :type down: bool
+        :return: New instance of InputToBinary
+        :rtype: InputToBinary
+        """
+        region_width = boof_fixed_length(region_width)
+
+        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+            localNiblack(region_width,down,float(k),self.boof_image_type)
         return InputToBinary(java_object)
 
     def localMean(self, region_width, scale=0.95, down=True):

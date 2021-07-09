@@ -3,7 +3,7 @@
 - Updated for latest BoofCV
 - Added SceneRecognition
 - Added Scharr gradient
-- TODO Add Wolf and Niback binarization
+- Add Wolf and Niback binarization
 - TODO Add scene reconstruction high level API
 - TODO Add template matching
 
