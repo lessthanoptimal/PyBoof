@@ -5,7 +5,6 @@
 - Added Scharr gradient
 - Added Wolf and Niback binarization
 - Added scene reconstruction high level API
-- TODO Added template matching
 
 ### Version 0.37.2
 
