@@ -103,7 +103,7 @@ class BImage(JavaWrapper):
             raise RuntimeError("Unexpected argument type")
 
     def __getattr__(self, item):
-        if item is 'shape':
+        if item == 'shape':
             if self.family == Family.SINGLE_BAND:
                 return self.java_obj.getHeight(), self.java_obj.getWidth()
             elif self.family == Family.PLANAR or self.family == Family.INTERLEAVED:

@@ -6,7 +6,9 @@ from setuptools import setup
 from setuptools.command.build_py import build_py
 from subprocess import call
 import re
-import pyboof
+
+with open("pyboof/version.txt", "r") as myfile:
+    pyboof_version = myfile.read()
 
 
 def check_for_command(command):
@@ -58,7 +60,7 @@ class MyBuild(build_py):
 
 setup(name='PyBoof',
       cmdclass={'build_py': MyBuild},
-      version=pyboof.__version__,  # Change in in __init__ too
+      version=pyboof_version,
       description='Py4J Python wrapper for BoofCV',
       long_description=open('README.md', 'r').read(),
       long_description_content_type="text/markdown",
@@ -71,6 +73,6 @@ setup(name='PyBoof',
       python_requires='>=3',
       eager_resources=['java'],
       packages=['pyboof'],
-      package_data={'pyboof': ['PyBoof-all.jar', 'build_date.txt']},
+      package_data={'pyboof': ['PyBoof-all.jar', 'build_date.txt', 'version.txt']},
       install_requires=['py4j>=0.10.9.2', 'numpy>=1.14.0', 'six>=1.11.0', 'transforms3d>=0.3.1'],
       )

@@ -4,6 +4,7 @@ from pyboof.geo import real_nparray_to_ejml32
 from abc import ABCMeta, abstractmethod
 from typing import Mapping, List
 
+
 class CameraModel:
     __metaclass__ = ABCMeta
 
@@ -29,6 +30,7 @@ class CameraPinhole(CameraModel):
     """
     BoofCV Intrinsic Camera parameters
     """
+
     def __init__(self, java_object=None):
         if java_object is None:
             # Intrinsic calibration matrix
@@ -40,11 +42,6 @@ class CameraPinhole(CameraModel):
             # image shape
             self.width = 0
             self.height = 0
-            # radial distortion
-            self.radial = None
-            # tangential terms
-            self.t1 = 0
-            self.t2 = 0
         else:
             self.set_from_boof(java_object)
 
@@ -82,6 +79,57 @@ class CameraPinhole(CameraModel):
         self.width = width
         self.height = height
 
+    def set(self, orig):
+        self.fx = orig.fx
+        self.fy = orig.fy
+        self.skew = orig.skew
+        self.cx = orig.cx
+        self.cy = orig.cy
+        self.width = orig.width
+        self.height = orig.height
+
+    def set_from_boof(self, boof_intrinsic):
+        self.fx = boof_intrinsic.getFx()
+        self.fy = boof_intrinsic.getFy()
+        self.cx = boof_intrinsic.getCx()
+        self.cy = boof_intrinsic.getCy()
+        self.skew = boof_intrinsic.getSkew()
+        self.width = boof_intrinsic.getWidth()
+        self.height = boof_intrinsic.getHeight()
+
+    def convert_to_boof(self, storage=None):
+        if storage is None:
+            boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
+        else:
+            boof_intrinsic = storage
+        boof_intrinsic.setFx(float(self.fx))
+        boof_intrinsic.setFy(float(self.fy))
+        boof_intrinsic.setCx(float(self.cx))
+        boof_intrinsic.setCy(float(self.cy))
+        boof_intrinsic.setSkew(float(self.skew))
+        boof_intrinsic.setWidth(int(self.width))
+        boof_intrinsic.setHeight(int(self.height))
+        return boof_intrinsic
+
+    def __str__(self):
+        return "Pinhole{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d}}}"
+
+class CameraBrown(CameraPinhole):
+    """
+    BoofCV Intrinsic Camera parameters
+    """
+
+    def __init__(self, java_object=None):
+        CameraPinhole.__init__(self, java_object)
+        if java_object is None:
+            # radial distortion
+            self.radial = None
+            # tangential terms
+            self.t1 = 0
+            self.t2 = 0
+        else:
+            self.set_from_boof(java_object)
+
     def set_distortion(self, radial=None, t1=0, t2=0):
         """
         Sets distortion values
@@ -110,13 +158,7 @@ class CameraPinhole(CameraModel):
         self.t2 = orig.t2
 
     def set_from_boof(self, boof_intrinsic):
-        self.fx = boof_intrinsic.getFx()
-        self.fy = boof_intrinsic.getFy()
-        self.cx = boof_intrinsic.getCx()
-        self.cy = boof_intrinsic.getCy()
-        self.skew = boof_intrinsic.getSkew()
-        self.width = boof_intrinsic.getWidth()
-        self.height = boof_intrinsic.getHeight()
+        CameraPinhole.set_from_boof(self, boof_intrinsic)
         jarray = boof_intrinsic.getRadial()
         if jarray is None:
             self.radial = None
@@ -130,13 +172,8 @@ class CameraPinhole(CameraModel):
             boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
         else:
             boof_intrinsic = storage
-        boof_intrinsic.setFx(float(self.fx))
-        boof_intrinsic.setFy(float(self.fy))
-        boof_intrinsic.setCx(float(self.cx))
-        boof_intrinsic.setCy(float(self.cy))
-        boof_intrinsic.setSkew(float(self.skew))
-        boof_intrinsic.setWidth(int(self.width))
-        boof_intrinsic.setHeight(int(self.height))
+
+        CameraPinhole.convert_to_boof(self, boof_intrinsic)
         if self.radial is not None:
             jarray = gateway.new_array(gateway.jvm.double, len(self.radial))
             for i in range(len(self.radial)):
@@ -150,25 +187,25 @@ class CameraPinhole(CameraModel):
         return (self.radial is not None) or self.t1 != 0 or self.t2 != 0
 
     def __str__(self):
-        out = "Pinhole{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d} ".\
-            format(self.fx,self.fy,self.skew,self.cx,self.cy,self.width,self.height)
+        out = "Brown{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d} ". \
+            format(self.fx, self.fy, self.skew, self.cx, self.cy, self.width, self.height)
         if self.is_distorted():
-            out += " | radial="+str(self.radial)+" t1="+str(self.t1)+" t1="+str(self.t2)+" }"
+            out += " | radial=" + str(self.radial) + " t1=" + str(self.t1) + " t1=" + str(self.t2) + " }"
         else:
             out += "}}"
         return out
 
 
-class CameraUniversalOmni(CameraPinhole):
+class CameraUniversalOmni(CameraBrown):
     def __init__(self, java_object=None):
-        CameraPinhole.__init__(self,java_object)
+        CameraBrown.__init__(self, java_object)
         if java_object is None:
             self.mirror_offset = 0
         else:
             self.mirror_offset = java_object.getMirrorOffset()
 
     def set_from_boof(self, boof_intrinsic):
-        CameraPinhole.set_from_boof(self, boof_intrinsic)
+        CameraBrown.set_from_boof(self, boof_intrinsic)
         self.mirror_offset = boof_intrinsic.getMirrorOffset()
 
     def convert_to_boof(self, storage=None):
@@ -176,17 +213,64 @@ class CameraUniversalOmni(CameraPinhole):
             boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraUniversalOmni(0)
         else:
             boof_intrinsic = storage
-        CameraPinhole.convert_to_boof(self, boof_intrinsic)
+        CameraBrown.convert_to_boof(self, boof_intrinsic)
         boof_intrinsic.setMirrorOffset(float(self.mirror_offset))
         return boof_intrinsic
 
     def __str__(self):
-        out = "UniversalOmni{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d} | mirror={:f}".\
-            format(self.fx,self.fy,self.skew,self.cx,self.cy,self.width,self.height,self.mirror_offset)
+        out = "UniversalOmni{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d} | mirror={:f}". \
+            format(self.fx, self.fy, self.skew, self.cx, self.cy, self.width, self.height, self.mirror_offset)
         if self.is_distorted():
-            out += " | radial="+str(self.radial)+" t1="+str(self.t1)+" t1="+str(self.t2)+" }"
+            out += " | radial=" + str(self.radial) + " t1=" + str(self.t1) + " t1=" + str(self.t2) + " }"
         else:
             out += "}}"
+        return out
+
+
+class CameraKannalaBrandt(CameraPinhole):
+    def __init__(self, java_object=None):
+        CameraPinhole.__init__(self, java_object)
+        if java_object is None:
+            self.symmetric = []
+            self.radial = []
+            self.radialTrig = []
+            self.tangent = []
+            self.tangentTrig = []
+        else:
+            self.set_from_boof(java_object)
+
+    def set_from_boof(self, boof_intrinsic):
+        CameraPinhole.set_from_boof(self, boof_intrinsic)
+        jsymmetric = boof_intrinsic.getSymmetric()
+        jradial = boof_intrinsic.getRadial()
+        jradialTrig = boof_intrinsic.getRadialTrig()
+        jtangent = boof_intrinsic.getTangent()
+        jtangentTrig = boof_intrinsic.getTangentTrig()
+
+        self.symmetric = [float(x) for x in jsymmetric]
+        self.radial = [float(x) for x in jradial]
+        self.radialTrig = [float(x) for x in jradialTrig]
+        self.tangent = [float(x) for x in jtangent]
+        self.tangentTrig = [float(x) for x in jtangentTrig]
+
+    def convert_to_boof(self, storage=None):
+        if storage is None:
+            boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraKannalaBrandt(len(self.symmetric), len(self.radial))
+        else:
+            boof_intrinsic = storage
+        CameraPinhole.convert_to_boof(self, boof_intrinsic)
+        boof_intrinsic.setSymmetric(python_to_java_double_array(self.symmetric))
+        boof_intrinsic.setRadial(python_to_java_double_array(self.radial))
+        boof_intrinsic.setRadialTrig(python_to_java_double_array(self.radialTrig))
+        boof_intrinsic.setTangent(python_to_java_double_array(self.tangent))
+        boof_intrinsic.setTangentTrig(python_to_java_double_array(self.tangentTrig))
+        return boof_intrinsic
+
+    def __str__(self):
+        out = "CameraKannalaBrandt{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d}". \
+            format(self.fx, self.fy, self.skew, self.cx, self.cy, self.width, self.height)
+        out += " | symmetric=" + str(self.symmetric) + " radial=" + str(self.radial) + " radialTrig=" + \
+               str(self.radialTrig) + " tangent=" + str(self.tangent) + " tangentTrig=" + str(self.tangentTrig) + " }}"
         return out
 
 
@@ -225,6 +309,7 @@ class LensNarrowDistortionFactory(JavaWrapper):
             java_out = self.java_obj.undistort_F64(pixel_in, pixel_out)
         return Transform2to2(java_out)
 
+
 class LensWideDistortionFactory(JavaWrapper):
     def __init__(self, java_object, use_32=True):
         JavaWrapper.__init__(self, java_object)
@@ -255,7 +340,7 @@ class LensWideDistortionFactory(JavaWrapper):
         return Transform2to3(java_out)
 
 
-def create_narrow_lens_distorter( camera_model ):
+def create_narrow_lens_distorter(camera_model):
     """
 
     :param camera_model:
@@ -266,6 +351,9 @@ def create_narrow_lens_distorter( camera_model ):
         raise RuntimeError("CameraUniversalOmni is not a narrow FOV camera model")
     elif isinstance(camera_model, CameraPinhole):
         boof_model = camera_model.convert_to_boof()
+        java_obj = gateway.jvm.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
+    elif isinstance(camera_model, CameraBrown):
+        boof_model = camera_model.convert_to_boof()
         if camera_model.is_distorted():
             java_obj = gateway.jvm.boofcv.alg.distort.brown.LensDistortionBrown(boof_model)
         else:
@@ -275,7 +363,8 @@ def create_narrow_lens_distorter( camera_model ):
 
     return LensNarrowDistortionFactory(java_obj)
 
-def create_wide_lens_distorter( camera_model ):
+
+def create_wide_lens_distorter(camera_model):
     """
 
     :param camera_model:
@@ -285,6 +374,9 @@ def create_wide_lens_distorter( camera_model ):
     if isinstance(camera_model, CameraUniversalOmni):
         boof_model = camera_model.convert_to_boof()
         java_obj = gateway.jvm.boofcv.alg.distort.universal.LensDistortionUniversalOmni(boof_model)
+    elif isinstance(camera_model, CameraKannalaBrandt):
+        boof_model = camera_model.convert_to_boof()
+        java_obj = gateway.jvm.boofcv.alg.distort.kanbra.LensDistortionKannalaBrandt(boof_model)
     else:
         raise RuntimeError("Unknown camera model {}".format(type(camera_model)))
 
@@ -298,6 +390,7 @@ class NarrowToWideFovPtoP(JavaWrapper):
     focus for the narrow camera can be changed by rotating the view by invoking set_rotation_wide_to_narrow().
 
     """
+
     def __init__(self, narrow_model, wide_model):
         """
         Constructor where camera models are specified
@@ -309,7 +402,8 @@ class NarrowToWideFovPtoP(JavaWrapper):
         """
         narrow_distort = create_narrow_lens_distorter(narrow_model)
         wide_distort = create_wide_lens_distorter(wide_model)
-        java_object = gateway.jvm.boofcv.alg.distort.NarrowToWidePtoP_F32(narrow_distort.java_obj, wide_distort.java_obj)
+        java_object = gateway.jvm.boofcv.alg.distort.NarrowToWidePtoP_F32(narrow_distort.java_obj,
+                                                                          wide_distort.java_obj)
         JavaWrapper.__init__(self, java_object)
 
     def set_rotation_wide_to_narrow(self, rotation_matrix):
@@ -319,7 +413,7 @@ class NarrowToWideFovPtoP(JavaWrapper):
         :param rotation_matrix: 3D rotation matrix
         :return:
         """
-        self.java_obj.setRotationWideToNarrow( real_nparray_to_ejml32(rotation_matrix) )
+        self.java_obj.setRotationWideToNarrow(real_nparray_to_ejml32(rotation_matrix))
         pass
 
     def create_image_distort(self, image_type, border_type=Border.ZERO):
@@ -342,9 +436,9 @@ class NarrowToWideFovPtoP(JavaWrapper):
 
 
 class AdjustmentType:
-    NONE=0
-    FULL_VIEW=1
-    EXPAND=2
+    NONE = 0
+    FULL_VIEW = 1
+    EXPAND = 2
 
 
 def adjustment_to_java(value):
@@ -380,15 +474,15 @@ def remove_distortion(input, output, intrinsic, adjustment=AdjustmentType.FULL_V
     image_type = ImageType(input.getImageType())
     desired = CameraPinhole()
     desired.set(intrinsic)
-    desired.radial = [0,0]
+    desired.radial = [0, 0]
     desired.t1 = desired.t2 = 0
 
-    distorter, intrinsic_out = create_change_camera_model(intrinsic,desired,image_type,adjustment,border)
-    distorter.apply(input,output)
+    distorter, intrinsic_out = create_change_camera_model(intrinsic, desired, image_type, adjustment, border)
+    distorter.apply(input, output)
     return intrinsic_out
 
 
-def create_change_camera_model(intrinsic_orig,intrinsic_desired, image_type,
+def create_change_camera_model(intrinsic_orig, intrinsic_desired, image_type,
                                adjustment=AdjustmentType.FULL_VIEW, border=Border.ZERO):
     """
     Creates an ImageDistort that converts an image from the original camera model to the desired camera model
@@ -415,34 +509,34 @@ def create_change_camera_model(intrinsic_orig,intrinsic_desired, image_type,
     java_desired = intrinsic_desired.convert_to_boof()
     java_intrinsic_out = gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
     id = gateway.jvm.boofcv.alg.distort.LensDistortionOps.changeCameraModel(
-        java_adjustment,java_border,java_original,java_desired,java_intrinsic_out,java_image_type)
+        java_adjustment, java_border, java_original, java_desired, java_intrinsic_out, java_image_type)
     return (ImageDistort(id), CameraPinhole(java_intrinsic_out))
 
 
-def convert_from_boof_calibration_observations( jobservations ):
+def convert_from_boof_calibration_observations(jobservations):
     # TODO For Boof 0.29 and beyond use accessors instead
     jlist = JavaWrapper(jobservations).points
     output = []
     for o in jlist:
-        output.append((o.getIndex(),o.getX(),o.getY()))
+        output.append((o.getIndex(), o.getX(), o.getY()))
     return output
 
 
-def convert_into_boof_calibration_observations( observations ):
+def convert_into_boof_calibration_observations(observations):
     width = int(observations["width"])
     height = int(observations["height"])
     pixels = observations["pixels"]
-    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation(width,height)
+    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation(width, height)
     for o in pixels:
-        p = gateway.jvm.georegression.struct.point.Point2D_F64(float(o[1]),float(o[2]))
-        jobs.add(p,int(o[0]))
+        p = gateway.jvm.georegression.struct.point.Point2D_F64(float(o[1]), float(o[2]))
+        jobs.add(p, int(o[0]))
         # TODO use this other accessor after 0.30
-        #jobs.add(float(o[1]),float(o[2]),int(o[0]))
+        # jobs.add(float(o[1]),float(o[2]),int(o[0]))
 
     return jobs
 
 
-def calibrate_pinhole( observations:List, detector, num_radial=2, tangential=True, zero_skew=True):
+def calibrate_brown(observations: List, detector, num_radial=2, tangential=True, zero_skew=True):
     """
     Calibrates a pinhole camera
 
@@ -455,24 +549,24 @@ def calibrate_pinhole( observations:List, detector, num_radial=2, tangential=Tru
     """
     jlayout = detector.java_obj.getLayout()
     jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(jlayout)
-    jcalib_planar.configurePinhole(zero_skew,int(num_radial),tangential)
+    jcalib_planar.configurePinhole(zero_skew, int(num_radial), tangential)
     for o in observations:
-        jcalib_planar.addImage( convert_into_boof_calibration_observations(o) )
+        jcalib_planar.addImage(convert_into_boof_calibration_observations(o))
 
     intrinsic = CameraPinhole(jcalib_planar.process())
 
     errors = []
     for jerror in jcalib_planar.getErrors():
-        errors.append({"mean":jerror.getMeanError(),
-                       "max_error":jerror.getMaxError(),
-                       "bias_x":jerror.getBiasX(),"bias_y":jerror.getBiasY()})
+        errors.append({"mean": jerror.getMeanError(),
+                       "max_error": jerror.getMaxError(),
+                       "bias_x": jerror.getBiasX(), "bias_y": jerror.getBiasY()})
 
     return (intrinsic, errors)
 
 
-def calibrate_fisheye( observations:List, detector, num_radial=2, tangential=True, zero_skew=True, mirror_offset=None):
+def calibrate_universal(observations: List, detector, num_radial=2, tangential=True, zero_skew=True, mirror_offset=None):
     """
-    Calibrate a fisheye camera.
+    Calibrate a fisheye camera using Universal Omni model.
 
     :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
     :param detector:
@@ -485,7 +579,7 @@ def calibrate_fisheye( observations:List, detector, num_radial=2, tangential=Tru
     jlayout = detector.java_obj.getLayout()
     jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(jlayout)
     if mirror_offset is None:
-        jcalib_planar.configureUniversalOmni(zero_skew,int(num_radial),tangential)
+        jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential)
     else:
         jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential, float(mirror_offset))
     for o in observations:
@@ -495,8 +589,38 @@ def calibrate_fisheye( observations:List, detector, num_radial=2, tangential=Tru
 
     errors = []
     for jerror in jcalib_planar.getErrors():
-        errors.append({"mean":jerror.getMeanError(),
-                       "max_error":jerror.getMaxError(),
-                       "bias_x":jerror.getBiasX(),"bias_y":jerror.getBiasY()})
+        errors.append({"mean": jerror.getMeanError(),
+                       "max_error": jerror.getMaxError(),
+                       "bias_x": jerror.getBiasX(), "bias_y": jerror.getBiasY()})
 
-    return (intrinsic,errors)
+    return (intrinsic, errors)
+
+
+def calibrate_kannala_brandt(observations: List, detector, num_symmetric=5, num_asymmetric=0, zero_skew=True):
+    """
+    Calibrate a fisheye camera using Kannala-Brandt model.
+
+    :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
+    :param detector:
+    :param num_symmetric:
+    :param num_asymmetric:
+    :param zero_skew:
+    :param mirror_offset: If None it will be estimated. 0.0 = pinhole camera. 1.0 = fisheye
+    :return: (intrinsic, errors)
+    """
+    jlayout = detector.java_obj.getLayout()
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(jlayout)
+    jcalib_planar.configureKannalaBrandt(zero_skew, num_symmetric, num_asymmetric)
+
+    for o in observations:
+        jcalib_planar.addImage(convert_into_boof_calibration_observations(o))
+
+    intrinsic = CameraKannalaBrandt(jcalib_planar.process())
+
+    errors = []
+    for jerror in jcalib_planar.getErrors():
+        errors.append({"mean": jerror.getMeanError(),
+                       "max_error": jerror.getMaxError(),
+                       "bias_x": jerror.getBiasX(), "bias_y": jerror.getBiasY()})
+
+    return (intrinsic, errors)

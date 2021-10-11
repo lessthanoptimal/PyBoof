@@ -1,6 +1,7 @@
-### Version 0.38.1
+### Version 0.39.0r1
 
 - Fixing version strings
+- Added CameraKannalaBrandt
 
 ### Version 0.38.0
 

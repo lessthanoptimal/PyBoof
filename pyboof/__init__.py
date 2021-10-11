@@ -11,7 +11,9 @@ from py4j.java_gateway import GatewayParameters
 from py4j.protocol import Py4JError
 from py4j.protocol import Py4JNetworkError
 
-__version__ = "0.39.0r1"
+# Read the version from a file so that the build script can get the version without importing this file
+with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "version.txt"), "r") as myfile:
+    __version__ = myfile.read()
 
 gateway = JavaGateway(gateway_parameters=GatewayParameters(auto_field=True))
 
@@ -27,7 +29,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "build_date.
     build_date = f.readline()
 
 if build_date is None:
-    print("Can't find build_data.txt at "+os.path.dirname(os.path.realpath(__file__)))
+    print("Can't find build_data.txt at " + os.path.dirname(os.path.realpath(__file__)))
     exit(1)
 
 
@@ -46,7 +48,7 @@ def check_jvm(set_date):
             java_build_date = gateway.jvm.pyboof.PyBoofEntryPoint.getBuildDate()
             if build_date != java_build_date:
                 print("Python and Java build dates do not match.  Killing Java process.")
-                print("  build dates = {:s} {:s}".format(build_date,java_build_date))
+                print("  build dates = {:s} {:s}".format(build_date, java_build_date))
                 gateway.close()
                 time.sleep(1)
                 return False
@@ -54,7 +56,7 @@ def check_jvm(set_date):
     except Py4JNetworkError:
         return False
     except Py4JError as e:
-        print( e )
+        print(e)
         print("Py4J appears to have attached itself to a process that doesn't have the expected jars.  " \
               "Try killing py4j processes")
         exit(1)
@@ -94,8 +96,8 @@ atexit.register(shutdown_jvm)
 if not check_jvm(False):
     print("Launching Java process")
     jar_path = os.path.realpath(__file__)
-    jar_path = os.path.join(os.path.dirname(jar_path),"PyBoof-all.jar")
-    proc = subprocess.Popen(["java","-jar",jar_path])
+    jar_path = os.path.join(os.path.dirname(jar_path), "PyBoof-all.jar")
+    proc = subprocess.Popen(["java", "-jar", jar_path])
     java_pid = proc.pid
     time.sleep(0.1)
     # closed loop initialization.  If it fails for 5 seconds give up
@@ -148,7 +150,7 @@ def init_memmap(size_mb=2):
     """
     global mmap_size, mmap_file
     import tempfile
-    mmap_path = os.path.join(tempfile.gettempdir(),"pyboof_mmap")
+    mmap_path = os.path.join(tempfile.gettempdir(), "pyboof_mmap")
     mmap_size = size_mb * 1024 * 1024
     gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_path, size_mb)
     # Open file in read,write,binary mode

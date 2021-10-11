@@ -6,7 +6,7 @@ sudo pip3 install pyboof
 ```
 
 # Installing From Source
-One advantage to checkout the source code and installing from source is that you also get all the example code and the example datasets.
+One advantage for checking out the source code and installing from source is that you also get all the example code and the example datasets.
 ```bash
 git clone --recursive https://github.com/lessthanoptimal/PyBoof.git
 ```

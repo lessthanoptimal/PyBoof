@@ -31,8 +31,9 @@ for file in glob.glob(os.path.join(data_path,"*.jpg")):
 
 print("Solving for intrinsic parameters")
 
-intrinsic,errors = pb.calibrate_fisheye(observations,detector,
-                                        num_radial=2,tangential=True)
+# Switch camera model by commenting / uncommenting the two lines below
+intrinsic,errors = pb.calibrate_kannala_brandt(observations, detector, num_symmetric=5, num_asymmetric=2)
+# intrinsic,errors = pb.calibrate_universal(observations, detector, num_radial=2, tangential=True)
 
 print()
 print("Average Error {:.3f} pixels".format(sum([x["mean"] for x in errors])/len(errors)))

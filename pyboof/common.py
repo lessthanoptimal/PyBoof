@@ -25,6 +25,13 @@ def boof_fixed_length(length):
     return gateway.jvm.boofcv.struct.ConfigLength(float(length), float(-1))
 
 
+def python_to_java_double_array(array):
+    jarray = gateway.new_array(gateway.jvm.double, len(array))
+    for i in range(len(array)):
+        jarray[i] = array[i]
+    return jarray
+
+
 class JavaWrapper:
     def __init__(self, java_object=None):
         self.java_obj = java_object

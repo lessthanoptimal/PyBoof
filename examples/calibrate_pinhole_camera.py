@@ -31,8 +31,8 @@ for file in glob.glob(os.path.join(data_path,"left*.jpg")):
 
 print("Solving for intrinsic parameters")
 
-intrinsic,errors = pb.calibrate_pinhole(observations,detector,
-                                        num_radial=2,tangential=True)
+intrinsic,errors = pb.calibrate_brown(observations, detector,
+                                      num_radial=2, tangential=True)
 
 print()
 print("Average Error {:.3f} pixels".format(sum([x["mean"] for x in errors])/len(errors)))
