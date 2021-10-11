@@ -1,3 +1,7 @@
+### Version 0.38.1
+
+- Fixing version strings
+
 ### Version 0.38.0
 
 - Updated for latest BoofCV

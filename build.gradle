@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 group = 'org.pyboof'
-version = '0.38'
+version = '0.39'
 
 repositories {
     mavenCentral()

@@ -11,7 +11,7 @@ from py4j.java_gateway import GatewayParameters
 from py4j.protocol import Py4JError
 from py4j.protocol import Py4JNetworkError
 
-__version__ = "0.36.1"
+__version__ = "0.39.0r1"
 
 gateway = JavaGateway(gateway_parameters=GatewayParameters(auto_field=True))
 

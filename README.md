@@ -65,7 +65,6 @@ image_list = [(original, "original"), (gaussian, "gaussian"), (mean, "mean")]
 pb.swing.show_list(image_list, title="Outputs")
 
 input("Press any key to exit")
-
 ```
 
 # Dependencies
