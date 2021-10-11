@@ -2,6 +2,8 @@
 
 - Fixing version strings
 - Added CameraKannalaBrandt
+- TODO add ECoCheck
+- TODO add Hamming Markers
 
 ### Version 0.38.0
 
