@@ -104,6 +104,32 @@ class ConfigUchiyaMarker(JavaConfig):
         JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigUchiyaMarker")
 
 
+class ConfigECoCheckMarkers(JavaConfig):
+    def __init__(self, java_config=None):
+        if java_config:
+            JavaConfig.__init__(self, java_config)
+        else:
+            JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigECoCheckMarkers")
+
+
+class ConfigECoCheckDetector(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigECoCheckDetector")
+
+
+def ecocheck_parse(description, square_size):
+    """
+    Parses string summary of an ECoCheck marker.
+    Example 9x7n1e3c6, 9x7 grid, 1 marker, ecc=3, checksum=6bits.
+    Example 9x7n2, 9x7 grid, 2 markers, default ecc and checksum.
+
+    :param description: String summary of ECoCheck configuration
+    :param square_size: How big a square in the chessboard pattern is
+    """
+    return ConfigECoCheckMarkers(gateway.jvm.boofcv.abst.fiducial.calib.ConfigECoCheckMarkers.
+                                 parse(description, square_size))
+
+
 def load_hamming_marker(dictionary):
     """
     Loads the specified prebuilt dictionary
@@ -161,6 +187,26 @@ class FactoryFiducialCalibration:
         java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboardB(cdj,
                                                                                                    config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def ecocheck(config_marker, config_detector=None):
+        """
+        Create an ECoCheck detector.
+
+        :param config_marker:  Configuration for marker
+        :type config_marker: ConfigECoCheckMarkers
+        :param config_detector: Specifies how to detect the marker
+        :type config_detector: ConfigECoCheckDetector
+        :return: Calibration target detector
+        :rtype: FiducialCalibrationDetector
+        """
+        jdetector = None
+        if config_detector:
+            jdetector = config_detector.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.\
+            ecocheck(jdetector, config_marker.java_obj)
+        return FiducialCalibrationDetectorMulti(java_detector)
 
     @staticmethod
     def square_grid(config_grid, config_detector=None):
@@ -374,6 +420,33 @@ class FiducialCalibrationDetector(JavaWrapper):
             jp = jdetected.get(i)
             pixel = jp.getP()
             self.detected_points.append((jp.getIndex(), pixel.getX(), pixel.getY()))
+
+
+class FiducialCalibrationDetectorMulti(JavaWrapper):
+    """
+    Calibration fiducial detector which can handle multiple unique markers
+    """
+    def __init__(self, java_object):
+        JavaWrapper.__init__(self, java_object)
+        self.detected_markers = []
+        self.layout = b2p_list_point2D(java_object.getLayout(), np.double)
+
+    def detect(self, image):
+        self.java_obj.process(image)
+
+        self.detected_markers = []
+        num_detections = self.java_obj.getDetectionCount()
+
+        for detection_idx in range(num_detections):
+            jobs = self.java_obj.getDetectedPoints(detection_idx)
+            marker_id = self.java_obj.getMarkerID(detection_idx)
+            landmarks = []
+            jdetected = self.java_obj.getDetectedPoints()
+            for i in range(jdetected.size()):
+                jp = jdetected.get(i)
+                pixel = jp.getP()
+                landmarks.append((jp.getIndex(), pixel.getX(), pixel.getY()))
+            self.detected_markers.append({"marker":marker_id, "landmarks":landmarks})
 
 
 class FiducialDetector(JavaWrapper):

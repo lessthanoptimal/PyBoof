@@ -19,12 +19,21 @@ class ChecksFactoryFiducialCalibration(unittest.TestCase):
         config_target = pb.ConfigGridDimen(5, 6, 0.30)
 
         pb.FactoryFiducialCalibration.chessboardX(config_target, config_detector)
+        pb.FactoryFiducialCalibration.chessboardX(config_target)
 
     def test_chessboardB(self):
         config_detector = pb.ConfigChessboardBinary()
         config_target = pb.ConfigGridDimen(5, 6, 0.30)
 
         pb.FactoryFiducialCalibration.chessboardB(config_target, config_detector)
+        pb.FactoryFiducialCalibration.chessboardB(config_target)
+
+    def test_ecocheck(self):
+        config_detector = pb.ConfigECoCheckDetector()
+        config_target = pb.ecocheck_parse("5x4n2", 2.0)
+
+        pb.FactoryFiducialCalibration.ecocheck(config_target, config_detector)
+        pb.FactoryFiducialCalibration.ecocheck(config_target)
 
     def test_square_grid(self):
         config_detector = pb.ConfigSquareGrid()

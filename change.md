@@ -2,8 +2,9 @@
 
 - Fixing version strings
 - Added CameraKannalaBrandt
-- TODO add ECoCheck
+- Added ECoCheck marker for calibration
 - Added Hamming Markers (e.g. ArUco and AprilTag)
+- TODO Added stereo calibration example
 
 ### Version 0.38.0
 

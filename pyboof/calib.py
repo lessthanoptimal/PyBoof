@@ -112,7 +112,8 @@ class CameraPinhole(CameraModel):
         return boof_intrinsic
 
     def __str__(self):
-        return "Pinhole{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d}}}"
+        return "Pinhole{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d}}}".format(
+            self.fx, self.fy, self.skew, self.cx, self.cy, self.width, self.height)
 
 class CameraBrown(CameraPinhole):
     """
@@ -553,7 +554,7 @@ def calibrate_brown(observations: List, detector, num_radial=2, tangential=True,
     for o in observations:
         jcalib_planar.addImage(convert_into_boof_calibration_observations(o))
 
-    intrinsic = CameraPinhole(jcalib_planar.process())
+    intrinsic = CameraBrown(jcalib_planar.process())
 
     errors = []
     for jerror in jcalib_planar.getErrors():
