@@ -28,12 +28,15 @@ class ThresholdType:
     FIXED          = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.FIXED
     GLOBAL_ENTROPY = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_ENTROPY
     GLOBAL_OTSU    = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_OTSU
+    GLOBAL_LI      = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_LI
+    GLOBAL_HUANG   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_HUANG
     LOCAL_GAUSSIAN = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_GAUSSIAN
     LOCAL_MEAN     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_MEAN
     LOCAL_OTSU     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_OTSU
     LOCAL_SAVOLA   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SAVOLA
     LOCAL_WOLF     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_WOLF
     LOCAL_NICK     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_NICK
+    LOCAL_NIBLACK  = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_NIBLACK
     BLOCK_MIN_MAX  = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MIN_MAX
     BLOCK_MEAN     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MEAN
     BLOCK_OTSU     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_OTSU
