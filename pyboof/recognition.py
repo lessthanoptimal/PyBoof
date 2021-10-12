@@ -41,20 +41,20 @@ class HammingDictionary:
     """
     List of prebuilt hamming dictionaries
     """
-    CUSTOM              = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.CUSTOM
-    ARUCO_ORIGINAL      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_ORIGINAL
-    ARUCO_MIP_16h3      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_16h3
-    ARUCO_MIP_25h7      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_25h7
-    ARUCO_MIP_36h12     = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_36h12
-    ARUCO_OCV_4x4_1000  = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_4x4_1000
-    ARUCO_OCV_5x5_1000  = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_5x5_1000
-    ARUCO_OCV_6x6_1000  = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_6x6_1000
-    ARUCO_OCV_7x7_1000  = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_7x7_1000
-    APRILTAG_16h5       = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_16h5
-    APRILTAG_25h7       = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h7
-    APRILTAG_25h9       = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h9
-    APRILTAG_36h10      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h10
-    APRILTAG_36h11      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h11
+    CUSTOM = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.CUSTOM
+    ARUCO_ORIGINAL = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_ORIGINAL
+    ARUCO_MIP_16h3 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_16h3
+    ARUCO_MIP_25h7 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_25h7
+    ARUCO_MIP_36h12 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_36h12
+    ARUCO_OCV_4x4_1000 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_4x4_1000
+    ARUCO_OCV_5x5_1000 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_5x5_1000
+    ARUCO_OCV_6x6_1000 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_6x6_1000
+    ARUCO_OCV_7x7_1000 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_7x7_1000
+    APRILTAG_16h5 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_16h5
+    APRILTAG_25h7 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h7
+    APRILTAG_25h9 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h9
+    APRILTAG_36h10 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h10
+    APRILTAG_36h11 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h11
 
 
 class ConfigGridDimen(JavaConfig):
@@ -117,7 +117,7 @@ class ConfigECoCheckDetector(JavaConfig):
         JavaConfig.__init__(self, "boofcv.abst.fiducial.calib.ConfigECoCheckDetector")
 
 
-def ecocheck_parse(description, square_size):
+def ecocheck_parse(description: str, square_size: float) -> ConfigECoCheckMarkers:
     """
     Parses string summary of an ECoCheck marker.
     Example 9x7n1e3c6, 9x7 grid, 1 marker, ecc=3, checksum=6bits.
@@ -144,258 +144,6 @@ def load_hamming_marker(dictionary):
 
     return ConfigFiducialHammingDetector(
         gateway.jvm.boofcv.factory.fiducial.ConfigHammingMarker.loadDictionary(dictionary))
-
-
-class FactoryFiducialCalibration:
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def chessboardX(config_grid, config_detector=None):
-        """
-        Creates a chessboard detector based on x-corners. Slower but very robust.
-
-        :param config_detector:  Configuration for the detector
-        :param config_grid: Specifies the Grid's shape
-        :type config_grid: ConfigGridDimen
-        :return: Calibration target detector
-        :rtype: FiducialCalibrationDetector
-        """
-        cdj = None
-        if config_detector:
-            cdj = config_detector.java_obj
-
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboardX(cdj,
-                                                                                                   config_grid.java_obj)
-        return FiducialCalibrationDetector(java_detector)
-
-    @staticmethod
-    def chessboardB(config_grid, config_detector=None):
-        """
-        Creates a chessboard detector based on binary images. Fast but not as robust.
-
-        :param config_detector:  Configuration for the detector
-        :param config_grid: Specifies the Grid's shape
-        :type config_grid: ConfigGridDimen
-        :return: Calibration target detector
-        :rtype: FiducialCalibrationDetector
-        """
-        cdj = None
-        if config_detector:
-            cdj = config_detector.java_obj
-
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.chessboardB(cdj,
-                                                                                                   config_grid.java_obj)
-        return FiducialCalibrationDetector(java_detector)
-
-    @staticmethod
-    def ecocheck(config_marker, config_detector=None):
-        """
-        Create an ECoCheck detector.
-
-        :param config_marker:  Configuration for marker
-        :type config_marker: ConfigECoCheckMarkers
-        :param config_detector: Specifies how to detect the marker
-        :type config_detector: ConfigECoCheckDetector
-        :return: Calibration target detector
-        :rtype: FiducialCalibrationDetector
-        """
-        jdetector = None
-        if config_detector:
-            jdetector = config_detector.java_obj
-
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.\
-            ecocheck(jdetector, config_marker.java_obj)
-        return FiducialCalibrationDetectorMulti(java_detector)
-
-    @staticmethod
-    def square_grid(config_grid, config_detector=None):
-        """
-        Creates a square grid detector
-
-        :param config_detector:  Configuration for the detector
-        :param config_grid: Specifies the Grid's shape
-        :type config_grid: ConfigGridDimen
-        :return: Calibration target detector
-        :rtype: FiducialCalibrationDetector
-        """
-        cdj = None
-        if config_detector:
-            cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.squareGrid(cdj,
-                                                                                                  config_grid.java_obj)
-        return FiducialCalibrationDetector(java_detector)
-
-    @staticmethod
-    def circle_hexagonal_grid(config_grid, config_detector=None):
-        """
-        Detector for hexagonal grid of circles.  All circles must be entirely inside of the image.
-
-        :param config_detector:  Configuration for the detector
-        :param config_grid: Specifies the Grid's shape
-        :type config_grid: ConfigGridDimen
-        :return: Calibration target detector
-        :rtype: FiducialCalibrationDetector
-        """
-        cdj = None
-        if config_detector:
-            cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
-            circleHexagonalGrid(cdj, config_grid.java_obj)
-        return FiducialCalibrationDetector(java_detector)
-
-    @staticmethod
-    def circle_regular_grid(config_grid, config_detector=None):
-        """
-        Detector for regular grid of circles.  All circles must be entirely inside of the image.
-
-        :param config_detector:  Configuration for the detector
-        :param config_grid: Specifies the Grid's shape
-        :return: Calibration target detector
-        :rtype: FiducialCalibrationDetector
-        """
-        cdj = None
-        if config_detector:
-            cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
-            circleRegularGrid(cdj, config_grid.java_obj)
-        return FiducialCalibrationDetector(java_detector)
-
-
-class FactoryFiducial:
-    def __init__(self, dtype):
-        """
-        Configures factory for the specific image type
-        :param dtype: Type of single band image
-        """
-        self.boof_image_type = dtype_to_Class_SingleBand(dtype)
-
-    def square_image(self, config_fiducial, config_threshold):
-        """
-        Creates a square image fiducial detector
-
-        :param config_fiducial: configuration for the fiducial
-        :type config_fiducial: ConfigFiducialImage
-        :param config_threshold: Configuration for image thresholding step
-        :type config_threshold: ConfigThreshold
-        :return: The detector
-        :rtype: FiducialImageDetector
-        """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
-            squareImage(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
-        return FiducialImageDetector(java_detector)
-
-    def square_binary(self, config_fiducial, config_threshold):
-        """
-        Creates a binary image fiducial detector
-
-        :param config_fiducial: configuration for the fiducial
-        :type config_fiducial: ConfigFiducialBinary
-        :param config_threshold: Configuration for image thresholding step
-        :type config_threshold: ThresholdType
-        :return: The detector
-        :rtype: FiducialImageDetector
-        """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
-            squareBinary(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
-        return FiducialDetector(java_detector)
-
-    def square_hamming(self, config_fiducial, config_detector=None):
-        """
-        Creates a binary image fiducial detector
-
-        :param config_fiducial: configuration for the fiducial
-        :type config_fiducial: ConfigHammingMarker
-        :param config_threshold: Configuration for image thresholding step
-        :type config_detector: ConfigFiducialHammingDetector
-        :return: The detector
-        :rtype: FiducialImageDetector
-        """
-        jconfig_detector = None
-        if config_detector:
-            jconfig_detector = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
-            squareHamming(config_fiducial.java_obj, jconfig_detector, self.boof_image_type)
-        return FiducialDetector(java_detector)
-
-    def chessboardB(self, config_grid, config_detector=None):
-        """
-        Chessboard detector binary image
-
-        :param config_detector: Fiducial configuration
-        :type config_detector: ConfigChessboardBinary
-        :param config_grid: Specifies the Grid's shape
-        :type config_grid: ConfigGridDimen
-        :return: FiducialDetector
-        :rtype: FiducialDetector
-        """
-        cdj = None
-        if config_detector:
-            cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
-            calibChessboardB(cdj, config_grid.java_obj, self.boof_image_type)
-        return FiducialDetector(java_detector)
-
-    def chessboardX(self, config_grid, config_detector=None):
-        """
-        Chessboard detector X-corner
-
-        :param config_detector: Fiducial configuration
-        :type config_detector: ConfigChessboardX
-        :param config_grid: Specifies the Grid's shape
-        :type config_grid: ConfigGridDimen
-        :return: FiducialDetector
-        :rtype: FiducialDetector
-        """
-        cdj = None
-        if config_detector:
-            cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
-            calibChessboardX(cdj, config_grid.java_obj, self.boof_image_type)
-        return FiducialDetector(java_detector)
-
-    def square_grid(self, config_grid, config_detector=None):
-        """
-        Square grid detector
-
-        :param config_detector: Fiducial configuration
-        :type config_detector: ConfigFiducialSquareGrid
-        :param config_grid: Specifies the Grid's shape
-        :type config_grid: ConfigGridDimen
-        :return: FiducialDetector
-        :rtype: FiducialDetector
-        """
-        cdj = None
-        if config_detector:
-            cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
-            calibSquareGrid(cdj, config_grid.java_obj, self.boof_image_type)
-        return FiducialDetector(java_detector)
-
-    def qrcode(self, config=None):
-        """ Creates a detector for QR Codes
-
-        :param config: ConfigQrCode or None
-        :return: QrCodeDetector
-        """
-        if config is None:
-            jconf = None
-        else:
-            jconf = config.java_obj
-
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
-            qrcode(jconf, self.boof_image_type)
-        return QrCodeDetector(java_detector)
-
-    def random_dots(self, config):
-        """ Creates a detector random dot / Uchiya markers
-
-        :param config: ConfigUchiyaMarker or None
-        :return: ConfigUchiyaMarker
-        """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
-            randomDots(config.java_obj, self.boof_image_type)
-        return UchiyaRandomDotDetector(java_detector)
 
 
 class FiducialCalibrationDetector(JavaWrapper):
@@ -426,10 +174,12 @@ class FiducialCalibrationDetectorMulti(JavaWrapper):
     """
     Calibration fiducial detector which can handle multiple unique markers
     """
+
     def __init__(self, java_object):
         JavaWrapper.__init__(self, java_object)
         self.detected_markers = []
-        self.layout = b2p_list_point2D(java_object.getLayout(), np.double)
+        # This is hard coded for a single target right now
+        self.layout = b2p_list_point2D(java_object.getLayout(0), np.double)
 
     def detect(self, image):
         self.java_obj.process(image)
@@ -441,12 +191,12 @@ class FiducialCalibrationDetectorMulti(JavaWrapper):
             jobs = self.java_obj.getDetectedPoints(detection_idx)
             marker_id = self.java_obj.getMarkerID(detection_idx)
             landmarks = []
-            jdetected = self.java_obj.getDetectedPoints()
+            jdetected = self.java_obj.getDetectedPoints(detection_idx)
             for i in range(jdetected.size()):
                 jp = jdetected.get(i)
                 pixel = jp.getP()
                 landmarks.append((jp.getIndex(), pixel.getX(), pixel.getY()))
-            self.detected_markers.append({"marker":marker_id, "landmarks":landmarks})
+            self.detected_markers.append({"marker": marker_id, "landmarks": landmarks})
 
 
 class FiducialDetector(JavaWrapper):
@@ -461,7 +211,7 @@ class FiducialDetector(JavaWrapper):
     def detect(self, image):
         self.java_obj.detect(image)
 
-    def set_intrinsic(self, intrinsic: CameraPinhole):
+    def set_intrinsic(self, intrinsic):
         if intrinsic is None:
             self.java_obj.setLensDistortion(None, -1, -1)
         else:
@@ -469,26 +219,24 @@ class FiducialDetector(JavaWrapper):
             self.java_obj.setLensDistortion(distortion.java_obj,
                                             intrinsic.width, intrinsic.height)
 
-    def get_total(self):
+    def get_total(self) -> int:
         return self.java_obj.totalFound()
 
-    def is_3d(self):
+    def is_3d(self) -> bool:
         return self.java_obj.is3D()
 
-    def get_fiducial_to_camera(self, which):
+    def get_fiducial_to_camera(self, which: int) -> Se3_F64:
         """
         Returns the rigid body transform from the fiducial to the camera
 
         :param which: Index of detected fiducial.
-        :type which: int
         :return: Rigid Body Transform
-        :rtype: Se3_F64
         """
         fid_to_cam = Se3_F64()
         self.java_obj.getFiducialToCamera(which, fid_to_cam.get_java_object())
         return fid_to_cam
 
-    def get_bounds(self, which):
+    def get_bounds(self, which) -> Polygon2D:
         return Polygon2D(self.java_obj.getBounds(which, None))
 
     def get_center(self, which):
@@ -499,10 +247,10 @@ class FiducialDetector(JavaWrapper):
     def get_id(self, which):
         return self.java_obj.getId(which)
 
-    def get_width(self, which):
+    def get_width(self, which) -> int:
         return self.java_obj.getWidth(which)
 
-    def get_input_type(self):
+    def get_input_type(self) -> ImageType:
         return ImageType(self.java_obj.get_input_type())
 
 
@@ -578,6 +326,239 @@ class UchiyaRandomDotDetector(FiducialDetector):
 
     def add_marker(self, marker):
         self.java_obj.addMarker(marker)
+
+
+class FactoryFiducialCalibration:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def chessboardX(config_grid: ConfigGridDimen,
+                    config_detector: ConfigChessboardX = None) -> FiducialCalibrationDetector:
+        """
+        Creates a chessboard detector based on x-corners. Slower but very robust.
+
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
+        :return: Calibration target detector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+            chessboardX(cdj, config_grid.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def chessboardB(config_grid: ConfigGridDimen,
+                    config_detector: ConfigChessboardBinary = None) -> FiducialCalibrationDetector:
+        """
+        Creates a chessboard detector based on binary images. Fast but not as robust.
+
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
+        :return: Calibration target detector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial. \
+            FactoryFiducialCalibration.chessboardB(cdj, config_grid.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def ecocheck(config_marker: ConfigECoCheckMarkers, config_detector: ConfigECoCheckDetector = None) \
+            -> FiducialCalibrationDetectorMulti:
+        """
+        Create an ECoCheck detector.
+
+        :param config_marker:  Configuration for marker
+        :param config_detector: Specifies how to detect the marker
+        :return: Calibration target detector
+        """
+        jdetector = None
+        if config_detector:
+            jdetector = config_detector.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+            ecocheck(jdetector, config_marker.java_obj)
+        return FiducialCalibrationDetectorMulti(java_detector)
+
+    @staticmethod
+    def square_grid(config_grid: ConfigGridDimen,
+                    config_detector: ConfigSquareGrid = None) -> FiducialCalibrationDetector:
+        """
+        Creates a square grid detector
+
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
+        :return: Calibration target detector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.squareGrid(cdj,
+                                                                                                  config_grid.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def circle_hexagonal_grid(config_grid: ConfigGridDimen,
+                              config_detector: ConfigCircleHexagonalGrid = None) -> FiducialCalibrationDetector:
+        """
+        Detector for hexagonal grid of circles.  All circles must be entirely inside of the image.
+
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
+        :return: Calibration target detector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+            circleHexagonalGrid(cdj, config_grid.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+    @staticmethod
+    def circle_regular_grid(config_grid: ConfigGridDimen,
+                            config_detector: ConfigCircleRegularGrid = None) -> FiducialCalibrationDetector:
+        """
+        Detector for regular grid of circles.  All circles must be entirely inside of the image.
+
+        :param config_detector:  Configuration for the detector
+        :param config_grid: Specifies the Grid's shape
+        :return: Calibration target detector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+            circleRegularGrid(cdj, config_grid.java_obj)
+        return FiducialCalibrationDetector(java_detector)
+
+
+class FactoryFiducial:
+    def __init__(self, dtype):
+        """
+        Configures factory for the specific image type
+        :param dtype: Type of single band image
+        """
+        self.boof_image_type = dtype_to_Class_SingleBand(dtype)
+
+    def square_image(self, config_fiducial: ConfigFiducialImage,
+                     config_threshold: ConfigThreshold) -> FiducialImageDetector:
+        """
+        Creates a square image fiducial detector
+
+        :param config_fiducial: configuration for the fiducial
+        :param config_threshold: Configuration for image thresholding step
+        :return: The detector
+        """
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            squareImage(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
+        return FiducialImageDetector(java_detector)
+
+    def square_binary(self, config_fiducial: ConfigFiducialBinary, config_threshold: ThresholdType) -> FiducialDetector:
+        """
+        Creates a binary image fiducial detector
+
+        :param config_fiducial: configuration for the fiducial
+        :param config_threshold: Configuration for image thresholding step
+        :return: The detector
+        """
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            squareBinary(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
+        return FiducialDetector(java_detector)
+
+    def square_hamming(self, config_fiducial: ConfigHammingMarker,
+                       config_detector: ConfigFiducialHammingDetector = None):
+        """
+        Creates a binary image fiducial detector
+
+        :param config_fiducial: configuration for the fiducial
+        :param config_threshold: Configuration for image thresholding step
+        :return: The detector
+        """
+        jconfig_detector = None
+        if config_detector:
+            jconfig_detector = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            squareHamming(config_fiducial.java_obj, jconfig_detector, self.boof_image_type)
+        return FiducialDetector(java_detector)
+
+    def chessboardB(self, config_grid: ConfigGridDimen,
+                    config_detector: ConfigChessboardBinary = None) -> FiducialDetector:
+        """
+        Chessboard detector binary image
+
+        :param config_grid: Specifies the Grid's shape
+        :param config_detector: Fiducial configuration
+        :return: FiducialDetector
+        :rtype: FiducialDetector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            calibChessboardB(cdj, config_grid.java_obj, self.boof_image_type)
+        return FiducialDetector(java_detector)
+
+    def chessboardX(self, config_grid: ConfigGridDimen, config_detector: ConfigChessboardX = None) -> FiducialDetector:
+        """
+        Chessboard detector X-corner
+
+        :param config_grid: Specifies the Grid's shape
+        :param config_detector: Fiducial configuration
+        :return: FiducialDetector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            calibChessboardX(cdj, config_grid.java_obj, self.boof_image_type)
+        return FiducialDetector(java_detector)
+
+    def square_grid(self, config_grid: ConfigGridDimen,
+                    config_detector: ConfigSquareGrid = None) -> FiducialDetector:
+        """
+        Square grid detector
+
+        :param config_detector: Fiducial configuration
+        :param config_grid: Specifies the Grid's shape
+        :return: FiducialDetector
+        """
+        cdj = None
+        if config_detector:
+            cdj = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            calibSquareGrid(cdj, config_grid.java_obj, self.boof_image_type)
+        return FiducialDetector(java_detector)
+
+    def qrcode(self, config: ConfigQrCode = None) -> QrCodeDetector:
+        """ Creates a detector for QR Codes
+
+        :param config: ConfigQrCode or None
+        :return: QrCodeDetector
+        """
+        if config is None:
+            jconf = None
+        else:
+            jconf = config.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            qrcode(jconf, self.boof_image_type)
+        return QrCodeDetector(java_detector)
+
+    def random_dots(self, config: ConfigUchiyaMarker) -> UchiyaRandomDotDetector:
+        """ Creates a detector random dot / Uchiya markers
+
+        :param config: ConfigUchiyaMarker or None
+        :return: ConfigUchiyaMarker
+        """
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            randomDots(config.java_obj, self.boof_image_type)
+        return UchiyaRandomDotDetector(java_detector)
 
 
 def string_to_qrcode_error(error):
@@ -903,14 +884,12 @@ class FactorySceneRecognition:
         else:
             self.image_type = ImageType(dtype_to_ImageType(image_type))
 
-    def scene_recognition(self, config=None):
+    def scene_recognition(self, config: ConfigFeatureToSceneRecognition = None) -> SceneRecognition:
         """
         Scene recognition based off of image features
 
         :param config: Configuration for scene detector
-        :type config: ConfigFeatureToSceneRecognition
         :return: Calibration target detector
-        :rtype: SceneRecognition
         """
         cdj = None
         if config:
@@ -921,7 +900,7 @@ class FactorySceneRecognition:
         return SceneRecognition(java_obj)
 
 
-def download_default_scene_recognition(image_type, path=None):
+def download_default_scene_recognition(image_type, path=None) -> SceneRecognition:
     """
     Downloads then loads the default scene recognition model provided by BoofCV. If the model has already been
     saved at the specified location it will not be downloaded again.

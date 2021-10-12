@@ -1,5 +1,6 @@
 from pyboof.image import *
 from pyboof.ip import *
+from pyboof.recognition import *
 from pyboof.geo import real_nparray_to_ejml32
 from abc import ABCMeta, abstractmethod
 from typing import Mapping, List
@@ -9,11 +10,11 @@ class CameraModel:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def load(self, file_name):
+    def load(self, file_name: str):
         pass
 
     @abstractmethod
-    def save(self, file_name):
+    def save(self, file_name: str):
         pass
 
     @abstractmethod
@@ -45,14 +46,12 @@ class CameraPinhole(CameraModel):
         else:
             self.set_from_boof(java_object)
 
-    def load(self, file_name):
+    def load(self, file_name: str):
         """
         Loads BoofCV formatted intrinsic parameters with radial distortion from a yaml file
 
         :param file_name: Path to yaml file
-        :type file_name: str
         :return: this class
-        :rtype: CameraPinhole
         """
         file_path = os.path.abspath(file_name)
         boof_intrinsic = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
@@ -68,14 +67,14 @@ class CameraPinhole(CameraModel):
         java_obj = self.convert_to_boof()
         gateway.jvm.boofcv.io.calibration.CalibrationIO.save(java_obj, file_path)
 
-    def set_matrix(self, fx, fy, skew, cx, cy):
+    def set_matrix(self, fx: float, fy: float, skew: float, cx: float, cy: float):
         self.fx = fx
         self.fy = fy
         self.skew = skew
         self.cx = cx
         self.cy = cy
 
-    def set_image_shape(self, width, height):
+    def set_image_shape(self, width: int, height: int):
         self.width = width
         self.height = height
 
@@ -114,6 +113,7 @@ class CameraPinhole(CameraModel):
     def __str__(self):
         return "Pinhole{{ fx={:f} fy={:f} skew={:f} cx={:f} cy={:f} | width={:d} height={:d}}}".format(
             self.fx, self.fy, self.skew, self.cx, self.cy, self.width, self.height)
+
 
 class CameraBrown(CameraPinhole):
     """
@@ -273,6 +273,55 @@ class CameraKannalaBrandt(CameraPinhole):
         out += " | symmetric=" + str(self.symmetric) + " radial=" + str(self.radial) + " radialTrig=" + \
                str(self.radialTrig) + " tangent=" + str(self.tangent) + " tangentTrig=" + str(self.tangentTrig) + " }}"
         return out
+
+
+class StereoParameters(CameraModel):
+    """
+    Stereo intrinsic and extrinsic parameters
+    """
+
+    def __init__(self, java_object=None):
+        if java_object is None:
+            self.left = CameraBrown()
+            self.right = CameraBrown()
+            self.right_to_left = Se3_F64()
+        else:
+            self.set_from_boof(java_object)
+
+    def load(self, file_name: str):
+        file_path = os.path.abspath(file_name)
+        boof_parameters = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
+
+        if boof_parameters is None:
+            raise RuntimeError("Can't load stereo parameters")
+        self.set_from_boof(boof_parameters)
+
+    def save(self, file_name: str):
+        file_path = os.path.abspath(file_name)
+        java_obj = self.convert_to_boof()
+        gateway.jvm.boofcv.io.calibration.CalibrationIO.save(java_obj, file_path)
+
+    def set_from_boof(self, boof_parameters):
+        self.left = CameraBrown(boof_parameters.left)
+        self.right = CameraBrown(boof_parameters.right)
+        self.right_to_left = Se3_F64(boof_parameters.right_to_left)
+
+    def convert_to_boof(self, storage=None):
+        if storage is None:
+            boof_parameters = gateway.jvm.boofcv.struct.calib.StereoParameters()
+            # In BoofCV 0.40 StereoParameters will not be initialized with null and this will not be needed
+            boof_parameters.setLeft(CameraBrown().convert_to_boof())
+            boof_parameters.setRight(CameraBrown().convert_to_boof())
+            boof_parameters.setRightToLeft(Se3_F64().java_obj)
+        else:
+            boof_parameters = storage
+        self.left.convert_to_boof(boof_parameters.left)
+        self.right.convert_to_boof(boof_parameters.right)
+        boof_parameters.right_to_left.setTo(self.right_to_left.java_obj)
+        return boof_parameters
+
+    def __str__(self):
+        return "StereoParameters(left={} right={} right_to_left={})".format(self.left, self.right, self.right_to_left)
 
 
 class LensNarrowDistortionFactory(JavaWrapper):
@@ -539,7 +588,7 @@ def convert_into_boof_calibration_observations(observations):
 
 def calibrate_brown(observations: List, detector, num_radial=2, tangential=True, zero_skew=True):
     """
-    Calibrates a pinhole camera
+    Calibrates a Brown camera
 
     :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
     :param detector:
@@ -565,7 +614,8 @@ def calibrate_brown(observations: List, detector, num_radial=2, tangential=True,
     return (intrinsic, errors)
 
 
-def calibrate_universal(observations: List, detector, num_radial=2, tangential=True, zero_skew=True, mirror_offset=None):
+def calibrate_universal(observations: List, detector, num_radial=2, tangential=True, zero_skew=True,
+                        mirror_offset=None):
     """
     Calibrate a fisheye camera using Universal Omni model.
 
@@ -597,7 +647,8 @@ def calibrate_universal(observations: List, detector, num_radial=2, tangential=T
     return (intrinsic, errors)
 
 
-def calibrate_kannala_brandt(observations: List, detector, num_symmetric=5, num_asymmetric=0, zero_skew=True):
+def calibrate_kannala_brandt(observations: List, detector: FiducialCalibrationDetector, num_symmetric: int = 5,
+                             num_asymmetric: int = 0, zero_skew: bool = True):
     """
     Calibrate a fisheye camera using Kannala-Brandt model.
 
@@ -625,3 +676,35 @@ def calibrate_kannala_brandt(observations: List, detector, num_symmetric=5, num_
                        "bias_x": jerror.getBiasX(), "bias_y": jerror.getBiasY()})
 
     return (intrinsic, errors)
+
+
+def calibrate_stereo(observations_left: List, observations_right: List, detector: FiducialCalibrationDetector,
+                     num_radial: int = 4, tangential: bool = False, zero_skew: bool = True) -> (StereoParameters, List):
+    """
+    Calibrates a stereo camera using a Brown camera model
+
+    :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
+    :param detector:
+    :param num_radial:
+    :param tangential:
+    :param zero_skew:
+    :return:
+    """
+    jlayout = detector.java_obj.getLayout(0) # Hard coded for a single target
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateStereoPlanar(jlayout)
+    jcalib_planar.configure(zero_skew, int(num_radial), tangential)
+
+    for idx in range(len(observations_left)):
+        jobs_left = convert_into_boof_calibration_observations(observations_left[idx])
+        jobs_right = convert_into_boof_calibration_observations(observations_right[idx])
+        jcalib_planar.addPair(jobs_left, jobs_right)
+
+    stereo_parameters = StereoParameters(jcalib_planar.process())
+
+    errors = []
+    for jerror in jcalib_planar.computeErrors():
+        errors.append({"mean": jerror.getMeanError(),
+                       "max_error": jerror.getMaxError(),
+                       "bias_x": jerror.getBiasX(), "bias_y": jerror.getBiasY()})
+
+    return (stereo_parameters, errors)

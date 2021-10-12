@@ -74,18 +74,18 @@ class ChecksFactoryFiducial(unittest.TestCase):
         pb.FactoryFiducial(np.uint8).square_hamming(config_marker)
 
     def test_chessboardB(self):
-        config_detector = pb.ConfigChessboardBinary()
         config_target = pb.ConfigGridDimen(5, 6, 0.30)
+        config_detector = pb.ConfigChessboardBinary()
         pb.FactoryFiducial(np.uint8).chessboardB(config_target, config_detector)
 
     def test_chessboardX(self):
-        config_detector = pb.ConfigChessboardX()
         config_target = pb.ConfigGridDimen(5, 6, 0.30)
+        config_detector = pb.ConfigChessboardX()
         pb.FactoryFiducial(np.uint8).chessboardX(config_target, config_detector)
 
     def test_square_grid(self):
-        config_detector = pb.ConfigSquareGrid()
         config_target = pb.ConfigGridDimen(5, 6, 0.30)
+        config_detector = pb.ConfigSquareGrid()
         pb.FactoryFiducial(np.uint8).square_grid(config_target, config_detector)
 
     def test_qrcode(self):
