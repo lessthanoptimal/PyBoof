@@ -3,7 +3,7 @@
 - Fixing version strings
 - Added CameraKannalaBrandt
 - TODO add ECoCheck
-- TODO add Hamming Markers
+- Added Hamming Markers (e.g. ArUco and AprilTag)
 
 ### Version 0.38.0
 

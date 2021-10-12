@@ -60,6 +60,10 @@ class ChecksFactoryFiducial(unittest.TestCase):
         config_threshold = pb.ConfigThreshold.create_fixed(50.0)
         pb.FactoryFiducial(np.uint8).square_binary(config_detector, config_threshold)
 
+    def test_square_hamming(self):
+        config_marker = pb.load_hamming_marker(pb.HammingDictionary.ARUCO_ORIGINAL)
+        pb.FactoryFiducial(np.uint8).square_hamming(config_marker)
+
     def test_chessboardB(self):
         config_detector = pb.ConfigChessboardBinary()
         config_target = pb.ConfigGridDimen(5, 6, 0.30)

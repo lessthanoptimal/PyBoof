@@ -4,6 +4,7 @@ from pyboof import gateway
 from py4j.java_collections import ListConverter
 import tempfile
 
+
 class ConfigPolygonDetector(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self, "boofcv.struct.Configuration.ConfigPolygonDetector")
@@ -19,6 +20,41 @@ class ConfigFiducialBinary(JavaConfig):
         JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigFiducialBinary")
         if target_width is not None:
             self.targetWidth = float(target_width)
+
+
+class ConfigHammingMarker(JavaConfig):
+    def __init__(self, target_width=None):
+        JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigHammingMarker")
+        if target_width is not None:
+            self.targetWidth = float(target_width)
+
+
+class ConfigFiducialHammingDetector(JavaConfig):
+    def __init__(self, config=None):
+        if config:
+            JavaConfig.__init__(self, config)
+        else:
+            JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigFiducialHammingDetector")
+
+
+class HammingDictionary:
+    """
+    List of prebuilt hamming dictionaries
+    """
+    CUSTOM              = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.CUSTOM
+    ARUCO_ORIGINAL      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_ORIGINAL
+    ARUCO_MIP_16h3      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_16h3
+    ARUCO_MIP_25h7      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_25h7
+    ARUCO_MIP_36h12     = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_36h12
+    ARUCO_OCV_4x4_1000  = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_4x4_1000
+    ARUCO_OCV_5x5_1000  = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_5x5_1000
+    ARUCO_OCV_6x6_1000  = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_6x6_1000
+    ARUCO_OCV_7x7_1000  = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_7x7_1000
+    APRILTAG_16h5       = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_16h5
+    APRILTAG_25h7       = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h7
+    APRILTAG_25h9       = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h9
+    APRILTAG_36h10      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h10
+    APRILTAG_36h11      = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h11
 
 
 class ConfigGridDimen(JavaConfig):
@@ -66,6 +102,22 @@ class ConfigQrCode(JavaConfig):
 class ConfigUchiyaMarker(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigUchiyaMarker")
+
+
+def load_hamming_marker(dictionary):
+    """
+    Loads the specified prebuilt dictionary
+
+    :param dictionary: Which dictionary
+    :type dictionary: HammingDictionary
+    :return: Marker configuration
+    :rtype: ConfigFiducialHammingDetector
+    """
+    if dictionary == HammingDictionary.CUSTOM:
+        raise RuntimeError("Custom dictionary")
+
+    return ConfigFiducialHammingDetector(
+        gateway.jvm.boofcv.factory.fiducial.ConfigHammingMarker.loadDictionary(dictionary))
 
 
 class FactoryFiducialCalibration:
@@ -200,6 +252,24 @@ class FactoryFiducial:
         """
         java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             squareBinary(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
+        return FiducialDetector(java_detector)
+
+    def square_hamming(self, config_fiducial, config_detector=None):
+        """
+        Creates a binary image fiducial detector
+
+        :param config_fiducial: configuration for the fiducial
+        :type config_fiducial: ConfigHammingMarker
+        :param config_threshold: Configuration for image thresholding step
+        :type config_detector: ConfigFiducialHammingDetector
+        :return: The detector
+        :rtype: FiducialImageDetector
+        """
+        jconfig_detector = None
+        if config_detector:
+            jconfig_detector = config_detector.java_obj
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            squareHamming(config_fiducial.java_obj, jconfig_detector, self.boof_image_type)
         return FiducialDetector(java_detector)
 
     def chessboardB(self, config_grid, config_detector=None):
@@ -510,6 +580,40 @@ class QrCodeGenerator:
         return self.java_generator.getGray()
 
 
+class SquareHammingGenerator:
+    """
+    Renders hamming type square markers
+    """
+
+    def __init__(self, config, pixels_per_square=4):
+        """
+        Renders hamming type markers
+
+        :param config: Configuration for the marker
+        :type config: ConfigHammingMarker
+        :param pixels_per_square: Number of pixels wide each square is
+        :type pixels_per_square: int
+        """
+        self.border_pixels = 0
+        self.pixels_per_square = pixels_per_square
+        self.java_generator = gateway.jvm.boofcv.alg.fiducial.square.FiducialSquareHammingGenerator(config.java_obj)
+        self.java_engine = gateway.jvm.boofcv.alg.drawing.FiducialImageEngine()
+        self.java_generator.setRenderer(self.java_engine)
+
+    def generate(self, marker_idx):
+        """
+        Renders the specified marker into a gray scale image
+        :param marker_idx: index of the marker to render. An exception is thrown if out of bounds
+        :return: Rendered marker
+        :rtype: BoofCV image type
+        """
+
+        marker_width = self.java_generator.getMarkerWidth()
+        render.configure(whiteBorderPixels, int(marker_width))
+        self.java_generator.generate(marker_idx)
+        return elf.java_engine.getGray()
+
+
 class ConfigCirculant(JavaConfig):
     def __init__(self, java_object=None):
         JavaConfig.__init__(self, java_object)
@@ -761,7 +865,6 @@ def download_default_scene_recognition(image_type, path=None):
     path = os.path.abspath(path)
 
     java_file = pyboof.create_java_file(path)
-    java_recognizer = gateway.jvm.boofcv.io.recognition.RecognitionIO.\
+    java_recognizer = gateway.jvm.boofcv.io.recognition.RecognitionIO. \
         downloadDefaultSceneRecognition(java_file, image_type.java_obj)
     return SceneRecognition(java_recognizer)
-
