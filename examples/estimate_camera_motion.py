@@ -46,15 +46,15 @@ associated_pairs_pixels = pb.match_idx_to_point_pairs(matches, locs0, locs1)
 p2n = pb.create_narrow_lens_distorter(intrinsic).undistort(pixel_in=True, pixel_out=False)
 associated_pairs_norm = []
 for a in associated_pairs_pixels:
-    n0=p2n.apply(a[0])
-    n1=p2n.apply(a[1])
+    n0 = p2n.apply(a[0])
+    n1 = p2n.apply(a[1])
     associated_pairs_norm.append((n0, n1))
 
 # Robustly estimate the essential matrix using RANSAC
 confE = pb.ConfigEssentialMatrix()
 confRansac = pb.ConfigRansac()
 confRansac.iterations = 200
-confRansac.inlierThreshold = 0.5 # Units = pixels
+confRansac.inlierThreshold = 0.5  # Units = pixels
 
 model_matcher = pb.FactoryMultiViewRobust.baselineRansac(confE, confRansac)
 
@@ -70,4 +70,4 @@ camera_motion = model_matcher.model_parameters
 
 print("Inlier Size ", len(model_matcher.match_set))
 print("Motion")
-print( camera_motion)
+print(camera_motion)

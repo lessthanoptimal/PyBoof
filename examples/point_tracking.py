@@ -41,7 +41,7 @@ while True:
     for track in active_tracks:
         x = int(track.pixel[0])
         y = int(track.pixel[1])
-        cv2.rectangle(frame, (x-2, y-2), (x+2, y+2), (100, 100, 255), 4)
+        cv2.rectangle(frame, (x - 2, y - 2), (x + 2, y + 2), (100, 100, 255), 4)
 
     cv2.imshow(window_name, frame)
 

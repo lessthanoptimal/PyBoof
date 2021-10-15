@@ -4,7 +4,7 @@ import numpy as np
 
 import pyboof as pb
 
-original = pb.load_single_band('../data/example/outdoors01.jpg',np.uint8)
+original = pb.load_single_band('../data/example/outdoors01.jpg', np.uint8)
 
 # Let BoofCV decide on the type of image to store the gradient as
 deriv_dtype = pb.gradient_dtype(pb.get_dtype(original))
@@ -33,13 +33,13 @@ pb.gradient(original, derivX, derivY, pb.GradientType.TWO1)
 buffered_two1 = pb.swing.colorize_gradient(derivX, derivY)
 
 # display the results in a single window as a list
-image_list = [(original,"original"),
-              (buffered_sobel,"sobel"),
-              (buffered_prewitt,"prewitt"),
-              (buffered_pscharr,"scharr"),
-              (buffered_three,"three"),
-              (buffered_two0,"two0"),
-              (buffered_two1,"two1")]
-pb.swing.show_list(image_list,title="Gradients")
+image_list = [(original, "original"),
+              (buffered_sobel, "sobel"),
+              (buffered_prewitt, "prewitt"),
+              (buffered_pscharr, "scharr"),
+              (buffered_three, "three"),
+              (buffered_two0, "two0"),
+              (buffered_two1, "two1")]
+pb.swing.show_list(image_list, title="Gradients")
 
 input("Press any key to exit")

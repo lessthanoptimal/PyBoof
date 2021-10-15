@@ -9,5 +9,5 @@ generator.set_message("This is my message. I'll let all other settings be "
 
 boof_gray_image = generator.generate()
 
-pb.swing.show(boof_gray_image,"QR Code")
+pb.swing.show(boof_gray_image, "QR Code")
 input("Press any key to exit")

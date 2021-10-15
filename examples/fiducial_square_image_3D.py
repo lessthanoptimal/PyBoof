@@ -20,17 +20,17 @@ detector.add_pattern(pb.load_single_band(data_path + "../patterns/pentarose.png"
 detector.add_pattern(pb.load_single_band(data_path + "../patterns/yu.png", np.uint8), side_length=4.0)
 
 print("Detecting image")
-detector.detect(pb.load_single_band(os.path.join( data_path, "image00.jpg"), np.uint8))
+detector.detect(pb.load_single_band(os.path.join(data_path, "image00.jpg"), np.uint8))
 
-print("Number Found = "+str(detector.get_total()))
+print("Number Found = " + str(detector.get_total()))
 
 for i in range(detector.get_total()):
-    print("=========== Found #"+str(i))
+    print("=========== Found #" + str(i))
     fid_to_cam = detector.get_fiducial_to_camera(i)
-    print("Pattern ID = "+str(detector.get_id(i)))
+    print("Pattern ID = " + str(detector.get_id(i)))
     print("Image Location " + str(detector.get_center(i)))
     if detector.is_3d():
         print("Rotation")
-        print("  "+str(fid_to_cam.get_rotation()))
+        print("  " + str(fid_to_cam.get_rotation()))
         print("Translation")
-        print("  "+str(fid_to_cam.get_translation()))
+        print("  " + str(fid_to_cam.get_translation()))

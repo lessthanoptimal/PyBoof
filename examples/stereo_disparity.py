@@ -66,7 +66,7 @@ cloud_rgb = []
 # Convert the BoofCV image into a Python image to speed things up a bit since data transfer is slow
 rect0 = pb.boof_to_ndarray(rect0)
 
-max_z = baseline*100
+max_z = baseline * 100
 
 for row in range(0, disparity_image.shape[0]):
     for col in range(0, disparity_image.shape[1]):
@@ -94,7 +94,7 @@ for row in range(0, disparity_image.shape[0]):
 pcv = pb.swing.PointCloudViewer()
 pcv.add_points(cloud_xyz, cloud_rgb)
 pcv.set_camera_hfov(np.radians(70))
-pcv.set_step(baseline*0.5)
+pcv.set_step(baseline * 0.5)
 pcv.show_in_window(width=800, height=800)
 
 input("Press any key to exit")

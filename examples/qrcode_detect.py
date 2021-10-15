@@ -15,5 +15,5 @@ detector.detect(image)
 print("Detected a total of {} QR Codes".format(len(detector.detections)))
 
 for qr in detector.detections:
-    print("Message: "+qr.message)
-    print("     at: "+str(qr.bounds))
+    print("Message: " + qr.message)
+    print("     at: " + str(qr.bounds))

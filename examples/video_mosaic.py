@@ -46,7 +46,7 @@ while True:
 
     cv2.imshow("Video Mosaic", ndarray_mosaic)
 
-    print("mosaic: {:6.2f} ms".format(time1-time0))
+    print("mosaic: {:6.2f} ms".format(time1 - time0))
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

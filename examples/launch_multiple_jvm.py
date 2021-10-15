@@ -4,8 +4,9 @@
 # to a JVM process, even there are multiple Python processes it will crash because each JVM can only have one
 # connection at a time to avoid conflicts.
 
-# Each process must have its own set of TCP ports that are unique. This will cause a unique JVM to spawn for
-# each process
+# To cause PyBoof to launch a new JVM for each you need to manually change two ports as shown below. This could
+# also be done externally in your shell environment. Every process must have set of points and none of the port
+# numbers can be the same or conflict with something else on your system.
 import os
 
 os.environ['PYBOOF_JAVA_PORT'] = "24000"

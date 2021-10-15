@@ -12,9 +12,9 @@ gaussian = original.createSameShape()
 # Let's warm up the JVM.
 for i in range(5):
     time0 = time.time()
-    pb.blur_gaussian(original, gaussian,radius=12)
+    pb.blur_gaussian(original, gaussian, radius=12)
     time1 = time.time()
-    print("Warm up iteration {:.1f} ms".format(1000*(time1-time0)))
+    print("Warm up iteration {:.1f} ms".format(1000 * (time1 - time0)))
 
 print()
 print()
@@ -23,23 +23,23 @@ N = 30
 
 time0 = time.time()
 for i in range(N):
-    pb.blur_gaussian(original, gaussian,radius=12)
+    pb.blur_gaussian(original, gaussian, radius=12)
 time1 = time.time()
 
-print("Time with default threads {:.1f} ms".format(1000*(time1-time0)))
+print("Time with default threads {:.1f} ms".format(1000 * (time1 - time0)))
 
 pb.set_max_threads(1)
 time0 = time.time()
 for i in range(N):
-    pb.blur_gaussian(original, gaussian,radius=12)
+    pb.blur_gaussian(original, gaussian, radius=12)
 time1 = time.time()
 
-print("Time with one threads {:.1f} ms".format(1000*(time1-time0)))
+print("Time with one threads {:.1f} ms".format(1000 * (time1 - time0)))
 
 pb.set_max_threads(2)
 time0 = time.time()
 for i in range(N):
-    pb.blur_gaussian(original, gaussian,radius=12)
+    pb.blur_gaussian(original, gaussian, radius=12)
 time1 = time.time()
 
-print("Time with 2 threads {:.1f} ms".format(1000*(time1-time0)))
+print("Time with 2 threads {:.1f} ms".format(1000 * (time1 - time0)))
