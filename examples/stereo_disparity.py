@@ -8,9 +8,6 @@ import math
 import matplotlib.pyplot as plt
 import pyboof as pb
 
-# Enable use of memory mapped files for MUCH faster conversion between some python and boofcv data types
-pb.init_memmap(5)
-
 # Load two images
 image0 = pb.load_single_band("../data/example/stereo/chair01_left.jpg", np.uint8)
 image1 = pb.load_single_band("../data/example/stereo/chair01_right.jpg", np.uint8)

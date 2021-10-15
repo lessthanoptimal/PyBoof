@@ -5,9 +5,6 @@ import numpy as np
 import pyboof as pb
 from pyboof.swing import visualize_matches
 
-# Enable use of memory mapped files for MUCH faster conversion between some python and boofcv data types
-pb.init_memmap()
-
 # Load two images
 image0 = pb.load_single_band("../data/example/stitch/cave_01.jpg", np.uint8)
 image1 = pb.load_single_band("../data/example/stitch/cave_02.jpg", np.uint8)

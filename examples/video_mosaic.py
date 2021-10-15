@@ -6,9 +6,6 @@ import cv2
 
 import pyboof as pb
 
-# Enable use of memory mapped files for MUCH faster conversion between some python and boofcv data types
-pb.init_memmap()
-
 # Use OpenCV to capture images
 cap = cv2.VideoCapture('../data/example/mosaic/airplane01.mjpeg')
 window_name = "Video Mosaic"

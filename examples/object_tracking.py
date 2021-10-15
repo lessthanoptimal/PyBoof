@@ -5,9 +5,6 @@ import pyboof as pb
 import numpy as np
 import time
 
-# Enable use of memory mapped files for MUCH faster conversion of images between java and python
-pb.init_memmap(5)
-
 # Use OpenCV to capture images
 cap = cv2.VideoCapture(0)
 

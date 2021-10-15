@@ -5,9 +5,6 @@ import numpy as np
 import cv2
 import pyboof as pb
 
-# Enable use of memory mapped files for MUCH faster conversion of images between java and python
-pb.init_memmap()
-
 image_path = '../data/example/outdoors01.jpg'
 
 # Can load an image using OpenCV then convert it into BoofCV

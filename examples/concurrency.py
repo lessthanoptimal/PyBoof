@@ -5,7 +5,6 @@ import pyboof as pb
 import time
 
 # This example shows how you can adjust the number of threads that BoofCV will use in the JVM
-
 original = pb.load_single_band('../data/example/outdoors01.jpg', np.uint8)
 
 gaussian = original.createSameShape()

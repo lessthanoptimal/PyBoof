@@ -5,9 +5,6 @@ import numpy as np
 import pyboof as pb
 from pyboof.swing import visualize_lines
 
-# Enable use of memory mapped files for MUCH faster conversion between some python and boofcv data types
-pb.init_memmap()
-
 # Load an image with strong lines in it
 image = pb.load_single_band("../data/example/simple_objects.jpg", np.uint8)
 blurred = image.createSameShape()

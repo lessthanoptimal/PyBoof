@@ -6,9 +6,6 @@ import os
 
 data_path = "../data/example/fiducial/random_dots/"
 
-# Enable use of memory mapped files for MUCH faster conversion between some python and boofcv data types
-pb.init_memmap()
-
 # Load marker descriptions
 defs = pb.load_random_dot_yaml(os.path.join(data_path, "descriptions.yaml"))
 

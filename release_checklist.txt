@@ -1,6 +1,6 @@
 * Update version
 ** build.gradle
-** pyboof/__init__.py
+** pyboof/version.txt
 ** readme.md
 * Make sure you're on venv
 ** rm -rf build dist/ pyboof/PyBoof-all.jar

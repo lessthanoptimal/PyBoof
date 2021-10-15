@@ -6,8 +6,6 @@ import os
 import glob
 
 # Demonstration of how to calibrate a stereo camera
-pb.init_memmap()
-
 data_path = "../data/example/calibration/stereo/Zed_ecocheck/"
 
 print("Configuring and creating a chessboard detector")

@@ -2,8 +2,6 @@
 
 import pyboof as pb
 
-pb.init_memmap()
-
 generator = pb.QrCodeGenerator(pixels_per_module=5)
 
 generator.set_message("This is my message. I'll let all other settings be "

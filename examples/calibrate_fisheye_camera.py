@@ -5,9 +5,6 @@ import numpy as np
 import os
 import glob
 
-# Demonstration of how to calibrate a camera using a fisheye model
-pb.init_memmap()
-
 data_path = "../data/example/calibration/fisheye/chessboard/"
 
 print("Configuring and creating a chessboard detector")

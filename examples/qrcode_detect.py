@@ -3,8 +3,6 @@
 import numpy as np
 import pyboof as pb
 
-pb.init_memmap()
-
 # Detects all the QR Codes in the image and prints their message and location
 data_path = "../data/example/fiducial/qrcode/image03.jpg"
 

@@ -4,8 +4,6 @@ import glob
 import numpy as np
 import pyboof as pb
 
-pb.init_memmap()
-
 # Scene recognition is defined here as the problem where you wish to find multiple views of the same scene
 # In this example we will load a set of images that has sets of 3 related images. We will tell it to find the 5
 # most similar images so that you can see what it does when it fails to find a good match

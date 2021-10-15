@@ -8,21 +8,13 @@ import numpy as np
 
 from py4j.java_gateway import JavaGateway
 from py4j.java_gateway import GatewayParameters
+from py4j.java_gateway import CallbackServerParameters
 from py4j.protocol import Py4JError
 from py4j.protocol import Py4JNetworkError
 
 # Read the version from a file so that the build script can get the version without importing this file
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "version.txt"), "r") as myfile:
     __version__ = myfile.read()
-
-gateway = JavaGateway(gateway_parameters=GatewayParameters(auto_field=True))
-
-mmap_size = 0
-mmap_file = None
-
-build_date = None
-
-java_pid = None
 
 # Read the date everything was build
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "build_date.txt"), 'r') as f:
@@ -31,6 +23,61 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "build_date.
 if build_date is None:
     print("Can't find build_data.txt at " + os.path.dirname(os.path.realpath(__file__)))
     exit(1)
+
+gateway = None
+
+mmap_size = 0
+mmap_file = None
+
+java_pid = None
+
+def init_pyboof(java_port:int=25333, python_port:int=25334, size_mb:int=2):
+    """
+    Initializes PyBoof by connecting a Java Virtual Machine (JVM) using Py4J and if requested, will create a
+    memory mapped file to enabled much faster file transfers of larger objects.
+
+    If you wish to run multiple independent processes, then you launch each process with a unique port.
+    :param size_mb: Size of the memory mapped file in megabytes. If <= 0 then memory mapped files will not be used
+    :param size_mb: Size of the memory mapped file in megabytes. If <= 0 then memory mapped files will not be used
+    :param size_mb: Size of the memory mapped file in megabytes. If <= 0 then memory mapped files will not be used
+    """
+    global gateway, java_pid
+
+    # The user is re-initializing for some reason. Let's close the gateway if already open
+    if gateway != None:
+        print("Closing previously open gateway")
+        shutdown_jvm()
+
+    gateway = JavaGateway(gateway_parameters=GatewayParameters(port=java_port, auto_field=True),
+                          callback_server_parameters=CallbackServerParameters(port=python_port,
+                                                                              daemonize=True))
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # kill java on a regular exit too
+    atexit.register(shutdown_jvm)
+
+    if not check_jvm(False):
+        print("Launching Java process: java_port={} python_port={}".format(java_port, python_port))
+        jar_path = os.path.realpath(__file__)
+        jar_path = os.path.join(os.path.dirname(jar_path), "PyBoof-all.jar")
+        proc = subprocess.Popen(["java", "-jar", jar_path, str(java_port)])
+        java_pid = proc.pid
+        time.sleep(0.1)
+        # closed loop initialization.  If it fails for 5 seconds give up
+        start_time = time.time()
+        success = False
+        while time.time() - start_time < 5.0:
+            if check_jvm(True):
+                success = True
+                break
+
+        if not success:
+            print("Failed to successfully launch the JVM after 5 seconds.  Aborting")
+            pass
+
+    if size_mb > 0:
+        __init_memmap(size_mb)
 
 
 # Used to change the number of threads the Java code can run inside of
@@ -87,31 +134,28 @@ def signal_handler(signal, frame):
     except ImportError:
         pass
 
+def __init_memmap(size_mb=2):
+    """
+    Call to enable use of memory mapped files for quick communication between Python and Java.  This
+    faster communication method requires specialized code so is only used when large amounts of memory
+    is being transferred.
 
-signal.signal(signal.SIGINT, signal_handler)
-
-# kill java on a regular exit too
-atexit.register(shutdown_jvm)
-
-if not check_jvm(False):
-    print("Launching Java process")
-    jar_path = os.path.realpath(__file__)
-    jar_path = os.path.join(os.path.dirname(jar_path), "PyBoof-all.jar")
-    proc = subprocess.Popen(["java", "-jar", jar_path])
-    java_pid = proc.pid
-    time.sleep(0.1)
-    # closed loop initialization.  If it fails for 5 seconds give up
-    start_time = time.time()
-    success = False
-    while time.time() - start_time < 5.0:
-        if check_jvm(True):
-            success = True
-            break
-
-    if not success:
-        print("Failed to successfully launch the JVM after 5 seconds.  Aborting")
-        pass
-
+    :param size_mb: Size of the memory mapped file in megabytes
+    :type size_mb: int
+    """
+    global mmap_size, mmap_file, java_pid
+    import tempfile
+    mmap_path = os.path.join(tempfile.gettempdir(), "pyboof_mmap_{}".format(java_pid))
+    # print("mmap_path=", mmap_path)
+    mmap_size = size_mb * 1024 * 1024
+    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_path, size_mb)
+    # Open file in read,write,binary mode
+    mmap_fid = open(mmap_path, "r+b")
+    if os.name == 'nt':
+        mmap_file = mmap.mmap(mmap_fid.fileno(), length=0)
+    else:
+        mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
+                              prot=mmap.PROT_READ | mmap.PROT_WRITE)
 
 class MmapType:
     """
@@ -137,30 +181,6 @@ class MmapType:
     ARRAY_S32 = 17
     ARRAY_F32 = 18
     ARRAY_F64 = 19
-
-
-def init_memmap(size_mb=2):
-    """
-    Call to enable use of memory mapped files for quick communication between Python and Java.  This
-    faster communication method requires specialized code so is only used when large amounts of memory
-    is being transferred.
-
-    :param size_mb: Size of the memory mapped file in megabytes
-    :type size_mb: int
-    """
-    global mmap_size, mmap_file
-    import tempfile
-    mmap_path = os.path.join(tempfile.gettempdir(), "pyboof_mmap")
-    mmap_size = size_mb * 1024 * 1024
-    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_path, size_mb)
-    # Open file in read,write,binary mode
-    mmap_fid = open(mmap_path, "r+b")
-    if os.name == 'nt':
-        mmap_file = mmap.mmap(mmap_fid.fileno(), length=0)
-    else:
-        mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
-                              prot=mmap.PROT_READ | mmap.PROT_WRITE)
-
 
 def mmap_primitive_len(mmap_type: MmapType):
     if mmap_type == MmapType.ARRAY_S8:
@@ -218,6 +238,9 @@ def mmap_force_array_type(data_array, mmap_type: MmapType):
     else:
         raise Exception("Not a primitive array type")
 
+
+init_pyboof(java_port=int(os.environ.get('PYBOOF_JAVA_PORT',25333)),
+            python_port=int(os.environ.get('PYBOOF_PYTHON_PORT',25334)))
 
 from pyboof.calib import *
 from pyboof.common import *

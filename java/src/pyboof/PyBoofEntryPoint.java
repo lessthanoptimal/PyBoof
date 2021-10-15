@@ -55,7 +55,10 @@ public class PyBoofEntryPoint {
     }
 
     public static void main(String[] args) {
-        GatewayServer gatewayServer = new GatewayServer(new PyBoofEntryPoint());
+        int port = 25333;
+        if (args.length > 0)
+           port = Integer.parseInt(args[0]);
+        GatewayServer gatewayServer = new GatewayServer(new PyBoofEntryPoint(), port);
         gatewayServer.start();
         System.out.println("Gateway Server Started");
     }

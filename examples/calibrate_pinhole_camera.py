@@ -6,8 +6,6 @@ import os
 import glob
 
 # Demonstration of how to calibrate a camera using a pinhole model
-pb.init_memmap()
-
 data_path = "../data/example/calibration/stereo/Bumblebee2_Chess/"
 
 print("Configuring and creating a chessboard detector")

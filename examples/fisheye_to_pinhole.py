@@ -6,8 +6,6 @@ import os
 import cv2
 import transforms3d.euler # pip install transforms3d
 
-pb.init_memmap(5)
-
 data_path = "../data/example/fisheye/theta/"
 
 model_pinhole = pb.CameraPinhole()

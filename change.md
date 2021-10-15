@@ -1,5 +1,7 @@
-### Version 0.39.0r1
+### Version 0.39.1r1
 
+- Support for more than one instance of PyBoof has been added
+- mmap is used by default now
 - Fixing version strings
 - Added CameraKannalaBrandt
 - Added ECoCheck marker for calibration

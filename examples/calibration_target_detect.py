@@ -6,10 +6,6 @@ import os
 import cv2
 
 # Demonstration of how to detect points in a calibration target
-
-
-pb.init_memmap()
-
 data_path = "../data/example/calibration/stereo/Bumblebee2_Chess/"
 
 print("Configuring and creating a chessboard detector")
