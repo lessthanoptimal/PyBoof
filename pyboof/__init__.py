@@ -31,14 +31,13 @@ mmap_file = None
 
 java_pid = None
 
-def init_pyboof(java_port:int=25333, python_port:int=25334, size_mb:int=2):
+
+def init_pyboof(java_port: int = 25333, python_port: int = 25334, size_mb: int = 20):
     """
     Initializes PyBoof by connecting a Java Virtual Machine (JVM) using Py4J and if requested, will create a
     memory mapped file to enabled much faster file transfers of larger objects.
 
     If you wish to run multiple independent processes, then you launch each process with a unique port.
-    :param size_mb: Size of the memory mapped file in megabytes. If <= 0 then memory mapped files will not be used
-    :param size_mb: Size of the memory mapped file in megabytes. If <= 0 then memory mapped files will not be used
     :param size_mb: Size of the memory mapped file in megabytes. If <= 0 then memory mapped files will not be used
     """
     global gateway, java_pid
@@ -104,7 +103,7 @@ def check_jvm(set_date):
         return False
     except Py4JError as e:
         print(e)
-        print("Py4J appears to have attached itself to a process that doesn't have the expected jars.  " \
+        print("Py4J appears to have attached itself to a process that doesn't have the expected jars. "
               "Try killing py4j processes")
         exit(1)
     return True
@@ -134,7 +133,8 @@ def signal_handler(signal, frame):
     except ImportError:
         pass
 
-def __init_memmap(size_mb=2):
+
+def __init_memmap(size_mb=20):
     """
     Call to enable use of memory mapped files for quick communication between Python and Java.  This
     faster communication method requires specialized code so is only used when large amounts of memory
@@ -156,6 +156,7 @@ def __init_memmap(size_mb=2):
     else:
         mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
                               prot=mmap.PROT_READ | mmap.PROT_WRITE)
+
 
 class MmapType:
     """
@@ -181,6 +182,7 @@ class MmapType:
     ARRAY_S32 = 17
     ARRAY_F32 = 18
     ARRAY_F64 = 19
+
 
 def mmap_primitive_len(mmap_type: MmapType):
     if mmap_type == MmapType.ARRAY_S8:
@@ -239,8 +241,8 @@ def mmap_force_array_type(data_array, mmap_type: MmapType):
         raise Exception("Not a primitive array type")
 
 
-init_pyboof(java_port=int(os.environ.get('PYBOOF_JAVA_PORT',25333)),
-            python_port=int(os.environ.get('PYBOOF_PYTHON_PORT',25334)))
+init_pyboof(java_port=int(os.environ.get('PYBOOF_JAVA_PORT', 25333)),
+            python_port=int(os.environ.get('PYBOOF_PYTHON_PORT', 25334)))
 
 from pyboof.calib import *
 from pyboof.common import *
