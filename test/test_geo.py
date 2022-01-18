@@ -202,11 +202,11 @@ class TestMemMapFunctions(unittest.TestCase):
 
         # python to java
         java_list = gateway.jvm.java.util.ArrayList()
-        pb.mmap_list_python_to_Point2D(original, java_list, np.float)
+        pb.mmap_list_python_to_Point2D(original, java_list, float)
 
         # java to python
         found = []
-        pb.mmap_list_Point2D_to_python(java_list, found, np.float)
+        pb.mmap_list_Point2D_to_python(java_list, found, float)
 
         self.assertEqual(len(original), len(found))
 
@@ -262,11 +262,11 @@ class TestMemMapFunctions(unittest.TestCase):
 
         # python to java
         java_list = gateway.jvm.java.util.ArrayList()
-        pb.mmap_list_python_to_Point3D(original, java_list, np.float)
+        pb.mmap_list_python_to_Point3D(original, java_list, float)
 
         # java to python
         found = []
-        pb.mmap_list_Point3D_to_python(java_list, found, np.float)
+        pb.mmap_list_Point3D_to_python(java_list, found, float)
 
         self.assertEqual(len(original), len(found))
 

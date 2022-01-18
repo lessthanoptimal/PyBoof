@@ -130,14 +130,14 @@ def visualize_lines(image, lines, title="Lines"):
             for o in lines:
                 panel_lines = gateway.jvm.boofcv.gui.feature.ImageLinePanel()
                 panel_lines.setImage(image)
-                panel_lines.setLines(pyboof.p2b_list_LineParametric(o[1], np.float))
+                panel_lines.setLines(pyboof.p2b_list_LineParametric(o[1], float))
                 panel_lines.setPreferredSize(d)
                 panel.addItem(panel_lines, o[0])
 
             gateway.jvm.boofcv.gui.image.ShowImages.showWindow(panel, title)
             return
         else:
-            lines = pyboof.p2b_list_LineParametric(lines, np.float)
+            lines = pyboof.p2b_list_LineParametric(lines, float)
 
     print("lines {}".format(len(lines)))
     print("foo {}".format(lines[0]))

@@ -295,7 +295,7 @@ class LineParametric2D:
             raise Exception("Unknown object type")
 
     def convert_to_boof(self, dtype=np.double):
-        if dtype == np.float:
+        if dtype == float:
             x = float(self.p.x)
             y = float(self.p.y)
             sx = float(self.slope.x)
@@ -1009,7 +1009,7 @@ def dtype_to_unpack(dtype):
         return (2, "h")
     elif dtype == np.int32:
         return (4, "i")
-    elif dtype == np.float:
+    elif dtype == float:
         return (4, "f")
     elif dtype == np.double:
         return (8, "d")
@@ -1024,7 +1024,7 @@ def dtype_to_mmaplistpoints(dtype):
         return pyboof.MmapType.LIST_POINT2D_U16
     elif dtype == np.int32:
         return pyboof.MmapType.LIST_POINT2D_S32
-    elif dtype == np.float:
+    elif dtype == float:
         return pyboof.MmapType.LIST_POINT2D_F32
     elif dtype == np.double:
         return pyboof.MmapType.LIST_POINT2D_F64
@@ -1033,7 +1033,7 @@ def dtype_to_mmaplistpoints(dtype):
 
 
 def dtype_to_mmaplistpoints3d(dtype):
-    if dtype == np.float:
+    if dtype == float:
         return pyboof.MmapType.LIST_POINT3D_F32
     elif dtype == np.double:
         return pyboof.MmapType.LIST_POINT3D_F64
