@@ -1,3 +1,6 @@
+- TODO Calibration unit tests
+- TODO https://github.com/lessthanoptimal/PyBoof/issues/12
+
 - visual odometry
 - polygon detector
 

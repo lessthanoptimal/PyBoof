@@ -4,8 +4,6 @@
 - Added Micro QR Code detector and generator
 - Shuffled around functions to avoid cyclical dependencies, which Python now cares about
 - Updated to Py4J 0.10.9.3
-- TODO Calibration unit tests
-- TODO https://github.com/lessthanoptimal/PyBoof/issues/12
 
 ### Version 0.39.1r1
 
