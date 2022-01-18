@@ -4,7 +4,6 @@ from pyboof import gateway
 from py4j.java_collections import ListConverter
 import tempfile
 
-
 class ConfigPolygonDetector(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self, "boofcv.struct.Configuration.ConfigPolygonDetector")
@@ -736,8 +735,8 @@ class MicroQrCodeGenerator:
     """
 
     def __init__(self, pixels_per_module=4):
-        self.pixels_per_module = pixels_per_module
-        self.java_encoder = gateway.jvm.boofcv.alg.fiducial.microqr.QrCodeEncoder()
+        self.pixels_per_module = int(pixels_per_module)
+        self.java_encoder = gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeEncoder()
         self.java_generator = gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeGenerator()
         self.java_engine = gateway.jvm.boofcv.alg.drawing.FiducialImageEngine()
         self.java_generator.setRender(self.java_engine)
@@ -770,9 +769,9 @@ class MicroQrCodeGenerator:
         qr = self.java_encoder.fixate()
         pixel_width = qr.getNumberOfModules() * self.pixels_per_module
         self.java_engine.configure(0, pixel_width)
-        self.java_generator.setMarkerWidth(pixel_width)
+        self.java_generator.setMarkerWidth(float(pixel_width))
         self.java_generator.render(qr)
-        return self.java_generator.getGray()
+        return self.java_engine.getGray()
 
 
 class SquareHammingGenerator:
@@ -994,7 +993,7 @@ class SceneRecognition(JavaWrapper):
 
         # Convert the java results into a python list of dict
         results = []
-        for i in range(java_matches.size()):
+        for i in range(java_matches.size):
             java_match = java_matches.get(i)
             match = JavaWrapper(java_match)
             results.append({"id": match.id, "error": match.error})

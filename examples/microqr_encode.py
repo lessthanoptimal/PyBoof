@@ -2,7 +2,7 @@
 
 import pyboof as pb
 
-generator = pb.MicroQrCodeGenerator(pixels_per_module=5)
+generator = pb.MicroQrCodeGenerator(pixels_per_module=20)
 
 generator.set_message("BOOFCV")
 

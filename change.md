@@ -2,6 +2,7 @@
 
 - Updated to BoofCV 0.40
 - Added Micro QR Code detector and generator
+- Shuffled around functions to avoid cyclical dependencies, which Python now cares about
 
 ### Version 0.39.1r1
 

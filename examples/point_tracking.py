@@ -21,7 +21,7 @@ boof_color = None
 while True:
     # Capture sequence frame-by-frame
     ret, frame = cap.read()
-    if not frame:
+    if not frame.any():
         break
 
     # Convert it into a boofcv image

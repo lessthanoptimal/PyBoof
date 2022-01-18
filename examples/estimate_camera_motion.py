@@ -56,7 +56,7 @@ confRansac = pb.ConfigRansac()
 confRansac.iterations = 200
 confRansac.inlierThreshold = 0.5  # Units = pixels
 
-model_matcher = pb.FactoryMultiViewRobust.baselineRansac(confE, confRansac)
+model_matcher = pb.FactoryMultiViewRobust.baseline_ransac(confE, confRansac)
 
 # Same camera took both images. Specifies camera parameters for each view
 model_matcher.set_intrinsic(0, intrinsic)

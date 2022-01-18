@@ -26,6 +26,8 @@ boof_color = None
 while True:
     # Capture sequence frame-by-frame
     ret, frame = cap.read()
+    if not ret:
+        break
 
     # Convert it into a boofcv image
     boof_color = pb.ndarray_to_boof(frame, boof_color)
