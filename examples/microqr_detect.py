@@ -12,7 +12,7 @@ image = pb.load_single_band(data_path, np.uint8)
 
 detector.detect(image)
 
-print("Detected a total of {} QR Codes".format(len(detector.detections)))
+print("Detected a total of {} Micro QR Codes".format(len(detector.detections)))
 
 for qr in detector.detections:
     print("Message: " + qr.message)
