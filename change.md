@@ -1,3 +1,8 @@
+### Version 0.40.0
+
+- Updated to BoofCV 0.40
+- Added Micro QR Code detector and generator
+
 ### Version 0.39.1r1
 
 - Support for more than one instance of PyBoof has been added

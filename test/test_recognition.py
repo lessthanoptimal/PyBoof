@@ -92,6 +92,10 @@ class ChecksFactoryFiducial(unittest.TestCase):
         config_detector = pb.ConfigQrCode()
         pb.FactoryFiducial(np.uint8).qrcode(config_detector)
 
+    def test_microqrcode(self):
+        config_detector = pb.ConfigMicroQrCode()
+        pb.FactoryFiducial(np.uint8).microqr(config_detector)
+
     def test_random_dots(self):
         config_detector = pb.ConfigUchiyaMarker()
         config_detector.markerWidth = 5.0

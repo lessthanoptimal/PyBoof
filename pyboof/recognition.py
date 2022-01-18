@@ -99,6 +99,11 @@ class ConfigQrCode(JavaConfig):
         JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigQrCode")
 
 
+class ConfigMicroQrCode(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigMicroQrCode")
+
+
 class ConfigUchiyaMarker(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigUchiyaMarker")
@@ -310,6 +315,58 @@ class QrCodeDetector(JavaWrapper):
         self.java_obj.process(image)
         self.detections = [QrCode(x) for x in self.java_obj.getDetections()]
         self.failures = [QrCode(x) for x in self.java_obj.getFailures()]
+
+    def get_image_type(self):
+        return ImageType(self.java_obj.getImageType())
+
+
+class MicroQrCode:
+    """Description of a detected Micro QR Code inside an image.
+
+    """
+
+    def __init__(self, java_object=None):
+        if java_object is None:
+            self.verson = -1
+            self.message = ""
+            self.error_level = ""
+            self.mask_pattern = ""
+            self.mode = ""
+            self.failure_cause = ""
+            self.bounds = Polygon2D(4)
+            self.pp = Polygon2D(4)
+        else:
+            jobj = JavaWrapper(java_object)
+            self.verson = jobj.version
+            self.message = jobj.message
+            self.error_level = jobj.error.toString()
+            self.mask_pattern = jobj.mask.toString()
+            self.mode = jobj.mode.toString()
+            self.failure_cause = ""
+            self.bounds = Polygon2D(jobj.bounds)
+            self.pp = Polygon2D(jobj.pp)
+
+            if jobj.failureCause is not None:
+                self.failure_cause = jobj.failureCause.toString()
+
+
+class MicroQrDetector(JavaWrapper):
+    """Detects Micro QR Codes inside of images
+
+    Attributes:
+        detections: List of detected MicroQrCode
+        failures: List of objects that are highly likely to be a QR Code but were rejected.
+    """
+
+    def __init__(self, java_detector):
+        JavaWrapper.__init__(self, java_detector)
+        self.detections = []
+        self.failures = []
+
+    def detect(self, image):
+        self.java_obj.process(image)
+        self.detections = [MicroQrCode(x) for x in self.java_obj.getDetections()]
+        self.failures = [MicroQrCode(x) for x in self.java_obj.getFailures()]
 
     def get_image_type(self):
         return ImageType(self.java_obj.getImageType())
@@ -550,6 +607,22 @@ class FactoryFiducial:
             qrcode(jconf, self.boof_image_type)
         return QrCodeDetector(java_detector)
 
+    def microqr(self, config: ConfigMicroQrCode = None) -> MicroQrDetector:
+        """ Creates a detector for Micro QR Codes
+
+        :param config: ConfigMicroQrCode or None
+        :return: MicroQrDetector
+        """
+        if config is None:
+            jconf = None
+        else:
+            jconf = config.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            microqr(jconf, self.boof_image_type)
+        return MicroQrDetector(java_detector)
+
+
     def random_dots(self, config: ConfigUchiyaMarker) -> UchiyaRandomDotDetector:
         """ Creates a detector random dot / Uchiya markers
 
@@ -595,6 +668,30 @@ def int_to_qrcode_mask(mask):
         return None
 
 
+def string_to_microqr_error(error):
+    if error == "L":
+        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.L
+    elif error == "M":
+        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.M
+    elif error == "Q":
+        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.Q
+    else:
+        return None
+
+
+def int_to_microqr_mask(mask):
+    if mask == 0b00:
+        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M000
+    elif mask == 0b01:
+        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M001
+    elif mask == 0b10:
+        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M010
+    elif mask == 0b11:
+        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M011
+    else:
+        return None
+
+
 class QrCodeGenerator:
     """Converts a message into a QR Code that meets your specification
 
@@ -630,6 +727,50 @@ class QrCodeGenerator:
 
     def generate(self):
         qr = self.java_encoder.fixate()
+        self.java_generator.render(qr)
+        return self.java_generator.getGray()
+
+
+class MicroQrCodeGenerator:
+    """Converts a message into a Micro QR Code that meets your specification
+    """
+
+    def __init__(self, pixels_per_module=4):
+        self.pixels_per_module = pixels_per_module
+        self.java_encoder = gateway.jvm.boofcv.alg.fiducial.microqr.QrCodeEncoder()
+        self.java_generator = gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeGenerator()
+        self.java_engine = gateway.jvm.boofcv.alg.drawing.FiducialImageEngine()
+        self.java_generator.setRender(self.java_engine)
+
+    def reset(self):
+        self.java_encoder.reset()
+
+    def set_version(self, version):
+        self.java_encoder.setVersion(version)
+
+    def set_error(self, level):
+        """Specifies error level for encoded Micro QR Code
+
+        :param level: String that can be "L","M","Q"
+        """
+        self.java_encoder.setError(string_to_microqr_error(level))
+
+    def set_mask(self, mask):
+        """Specifies the type of mask to use. If not specified then it's automatically selected.
+        Probably shouldn't mess with this unless you have a very good reason.
+
+        :param mask: 0b00, 0b01, 0b11, 0b10
+        """
+        self.java_encoder.setMask(string_to_microqr_error(mask))
+
+    def set_message(self, message):
+        self.java_encoder.addAutomatic(str(message))
+
+    def generate(self):
+        qr = self.java_encoder.fixate()
+        pixel_width = qr.getNumberOfModules() * self.pixels_per_module
+        self.java_engine.configure(0, pixel_width)
+        self.java_generator.setMarkerWidth(pixel_width)
         self.java_generator.render(qr)
         return self.java_generator.getGray()
 
