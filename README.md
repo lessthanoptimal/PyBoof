@@ -7,7 +7,7 @@ pip3 install pyboof
 
 # Examples
 Examples are included with the source code. You can obtain them by either checkout the source code, as described above, or browsing 
-[github here](https://github.com/lessthanoptimal/PyBoof/tree/master/examples). If you don't check out the source code you won't have example data and not
+[github here](https://github.com/lessthanoptimal/PyBoof/tree/SNAPSHOT/examples). If you don't check out the source code you won't have example data and not
 all of the examples will work.
 
 To run any of the examples simply invoke python on the script
