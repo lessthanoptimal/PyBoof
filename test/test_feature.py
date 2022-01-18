@@ -6,8 +6,6 @@ from pyboof import gateway
 import pyboof as pb
 import numpy as np
 
-pb.init_memmap()
-
 
 class TestMemMapFunctions(unittest.TestCase):
     def test_convert_list_tuple64(self):

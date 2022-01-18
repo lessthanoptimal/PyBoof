@@ -6,9 +6,6 @@ from pyboof import gateway
 import pyboof as pb
 import numpy as np
 
-pb.init_memmap()
-
-
 class JavaData(unittest.TestCase):
     def test_is_java_class(self):
         array_class = gateway.jvm.java.util.ArrayList().getClass()

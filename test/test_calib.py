@@ -7,9 +7,6 @@ import pyboof as pb
 import numpy as np
 import os
 
-pb.init_memmap()
-
-
 class ChecksCameraBrown(unittest.TestCase):
     def test_setters(self):
         calib = pb.CameraBrown()

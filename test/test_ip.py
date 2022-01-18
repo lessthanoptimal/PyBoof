@@ -7,8 +7,6 @@ import pyboof as pb
 import numpy as np
 import os
 
-pb.init_memmap()
-
 
 class ChecksIP(unittest.TestCase):
 
