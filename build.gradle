@@ -1,7 +1,4 @@
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'maven'
+apply plugin: 'java-library'
 
 group = 'org.pyboof'
 version = '0.40'
@@ -14,17 +11,23 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.boofcv', name: 'boofcv-core', version: project.version
-    compile group: 'org.boofcv', name: 'boofcv-swing', version: project.version
-    compile 'net.sf.py4j:py4j:0.10.9.2'
+    api group: 'org.boofcv', name: 'boofcv-core', version: project.version
+    api group: 'org.boofcv', name: 'boofcv-swing', version: project.version
+    api 'net.sf.py4j:py4j:0.10.9.2'
 
     // needed to use Java 11+ syntax with Java 11 byte code
-    annotationProcessor('com.github.bsideup.jabel:jabel-javac-plugin:0.3.0')
+    annotationProcessor('com.github.bsideup.jabel:jabel-javac-plugin:0.4.2')
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
-tasks.withType(JavaCompile).all { options.compilerArgs = ["--release", "11"] }
+java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    sourceCompatibility = 17
+    options.release = 11
+}
 
 // Create a jar which contains all the application and all dependencies
 task allJar(type: Jar) {
@@ -33,6 +36,7 @@ task allJar(type: Jar) {
                     'Implementation-Version': version,
                     'Main-Class': 'pyboof.PyBoofEntryPoint'
     }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveName = 'PyBoof-all.jar'
     destinationDir = file("${projectDir}/pyboof")
 
@@ -64,5 +68,5 @@ sourceSets {
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = '6.8.3'
+    gradleVersion = '7.3.3'
 }
