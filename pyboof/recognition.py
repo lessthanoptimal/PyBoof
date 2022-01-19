@@ -1,6 +1,7 @@
 from pyboof.geo import *
 from pyboof.calib import *
 from pyboof import gateway
+from pyboof import MmapType
 from py4j.java_collections import ListConverter
 import tempfile
 
@@ -272,6 +273,9 @@ class QrCode:
         if java_object is None:
             self.verson = -1
             self.message = ""
+            self.corrected = bytes([]) # raw data after error correction
+            self.totalBitErrors = -1 # Number of errors detected in error correction
+            self.bitsTransposed = False # true if the QR code is transposed
             self.error_level = ""
             self.mask_pattern = ""
             self.mode = ""
@@ -284,6 +288,9 @@ class QrCode:
             jobj = JavaWrapper(java_object)
             self.verson = jobj.version
             self.message = jobj.message
+            self.corrected = mmap_array_java_to_python(jobj.corrected, MmapType.ARRAY_U8)
+            self.totalBitErrors = jobj.totalBitErrors
+            self.bitsTransposed = jobj.bitsTransposed
             self.error_level = jobj.error.toString()
             self.mask_pattern = jobj.mask.toString()
             self.mode = jobj.mode.toString()
@@ -328,6 +335,9 @@ class MicroQrCode:
         if java_object is None:
             self.verson = -1
             self.message = ""
+            self.corrected = bytes([]) # raw data after error correction
+            self.totalBitErrors = -1 # Number of errors detected in error correction
+            self.bitsTransposed = False # true if the QR code is transposed
             self.error_level = ""
             self.mask_pattern = ""
             self.mode = ""
@@ -338,6 +348,9 @@ class MicroQrCode:
             jobj = JavaWrapper(java_object)
             self.verson = jobj.version
             self.message = jobj.message
+            self.corrected = mmap_array_java_to_python(jobj.corrected, MmapType.ARRAY_U8)
+            self.totalBitErrors = jobj.totalBitErrors
+            self.bitsTransposed = jobj.bitsTransposed
             self.error_level = jobj.error.toString()
             self.mask_pattern = jobj.mask.toString()
             self.mode = jobj.mode.toString()
