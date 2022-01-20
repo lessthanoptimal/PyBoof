@@ -5,6 +5,18 @@ from pyboof import MmapType
 from py4j.java_collections import ListConverter
 import tempfile
 
+
+def string_to_bytearray(message: str):
+    """
+    Converts a string into a bytearray. This effectively does a 'static_cast' of the String into byte[]. Useful when
+    a marker encodes a binary format such as a zip file
+    """
+    raw_data = bytearray(len(message))
+    for i in range(len(raw_data)):
+        raw_data[i] = ord(message[i])
+    return raw_data
+
+
 class ConfigPolygonDetector(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self, "boofcv.struct.Configuration.ConfigPolygonDetector")
@@ -273,9 +285,9 @@ class QrCode:
         if java_object is None:
             self.verson = -1
             self.message = ""
-            self.corrected = bytes([]) # raw data after error correction
-            self.totalBitErrors = -1 # Number of errors detected in error correction
-            self.bitsTransposed = False # true if the QR code is transposed
+            self.corrected = bytes([])  # raw data after error correction
+            self.totalBitErrors = -1  # Number of errors detected in error correction
+            self.bitsTransposed = False  # true if the QR code is transposed
             self.error_level = ""
             self.mask_pattern = ""
             self.mode = ""
@@ -335,9 +347,9 @@ class MicroQrCode:
         if java_object is None:
             self.verson = -1
             self.message = ""
-            self.corrected = bytes([]) # raw data after error correction
-            self.totalBitErrors = -1 # Number of errors detected in error correction
-            self.bitsTransposed = False # true if the QR code is transposed
+            self.corrected = bytes([])  # raw data after error correction
+            self.totalBitErrors = -1  # Number of errors detected in error correction
+            self.bitsTransposed = False  # true if the QR code is transposed
             self.error_level = ""
             self.mask_pattern = ""
             self.mode = ""
@@ -633,7 +645,6 @@ class FactoryFiducial:
         java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             microqr(jconf, self.boof_image_type)
         return MicroQrDetector(java_detector)
-
 
     def random_dots(self, config: ConfigUchiyaMarker) -> UchiyaRandomDotDetector:
         """ Creates a detector random dot / Uchiya markers
