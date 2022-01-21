@@ -164,6 +164,9 @@ def mmap_array_java_to_python(java_array, mmap_type: pyboof.MmapType):
     """
     Converts a java primitive array into a python primitive list
     """
+    if java_array is None:
+        return None
+
     num_elements = len(java_array)
     mm = pyboof.mmap_file
 
