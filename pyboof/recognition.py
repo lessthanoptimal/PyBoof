@@ -13,7 +13,8 @@ def string_to_bytearray(message: str):
     """
     raw_data = bytearray(len(message))
     for i in range(len(raw_data)):
-        raw_data[i] = ord(message[i])
+        raw_data[i] = ord(message[i]) % 256
+        # If the unicode value is outside the 8-bit range the data is likely to be corrupted... but wont crash@
     return raw_data
 
 

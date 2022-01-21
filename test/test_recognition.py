@@ -2,16 +2,24 @@
 
 import unittest
 
-from pyboof import gateway
 import pyboof as pb
 import numpy as np
+
+
+class ChecksRecognitionFunctions(unittest.TestCase):
+    def test_string_to_bytearray(self):
+        integers = [0, 1, 2, 3, 4, 100, 120, 180, 200, 201, 225, 255]
+        str = bytearray(integers).decode('latin-1')
+        found = pb.string_to_bytearray(str)
+        for i in range(len(found)):
+            self.assertEqual(integers[i], found[i])
 
 
 class ChecksFactoryFiducialCalibration(unittest.TestCase):
     """
     Test factory function calls to see if they crash.
     """
-    
+
     def test_chessboardX(self):
         config_detector = pb.ConfigChessboardX()
         config_target = pb.ConfigGridDimen(5, 6, 0.30)
@@ -109,6 +117,7 @@ class ChecksFactorySceneRecognition(unittest.TestCase):
     def test_scene_recognition(self):
         config = pb.ConfigFeatureToSceneRecognition()
         pb.FactorySceneRecognition(np.uint8).scene_recognition(config)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -604,7 +604,7 @@ def mmap_boof_to_numpy_U8(boof_image):
 
     if data_type is not pyboof.MmapType.IMAGE_U8:
         raise RuntimeError("Expected IMAGE_U8 in mmap file")
-    if num_bands is not 1:
+    if num_bands != 1:
         raise RuntimeError("Expected single band image. Found {}".format(num_bands))
 
     data = mm.read(width*height)
@@ -622,7 +622,7 @@ def mmap_boof_to_numpy_F32(boof_image):
 
     if data_type is not pyboof.MmapType.IMAGE_F32:
         raise RuntimeError("Expected IMAGE_F32 in mmap file")
-    if num_bands is not 1:
+    if num_bands != 1:
         raise RuntimeError("Expected single band image. Found {}".format(num_bands))
 
     raw_data = mm.read(width * height * 4)
