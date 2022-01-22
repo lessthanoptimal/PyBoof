@@ -286,7 +286,8 @@ class QrCode:
         if java_object is None:
             self.verson = -1
             self.message = ""
-            self.corrected = bytes([])  # raw data after error correction
+            self.corrected = None  # raw byte data after error correction
+            self.byteEncoding = ""  # Encoding used when in BYTE mode
             self.totalBitErrors = -1  # Number of errors detected in error correction
             self.bitsTransposed = False  # true if the QR code is transposed
             self.error_level = ""
@@ -302,6 +303,7 @@ class QrCode:
             self.verson = jobj.version
             self.message = jobj.message
             self.corrected = mmap_array_java_to_python(jobj.corrected, MmapType.ARRAY_U8)
+            self.byteEncoding = jobj.byteEncoding
             self.totalBitErrors = jobj.totalBitErrors
             self.bitsTransposed = jobj.bitsTransposed
             self.error_level = jobj.error.toString()
@@ -348,7 +350,8 @@ class MicroQrCode:
         if java_object is None:
             self.verson = -1
             self.message = ""
-            self.corrected = bytes([])  # raw data after error correction
+            self.corrected = None  # raw byte data after error correction
+            self.byteEncoding = ""  # Encoding used when in BYTE mode
             self.totalBitErrors = -1  # Number of errors detected in error correction
             self.bitsTransposed = False  # true if the QR code is transposed
             self.error_level = ""
@@ -362,6 +365,7 @@ class MicroQrCode:
             self.verson = jobj.version
             self.message = jobj.message
             self.corrected = mmap_array_java_to_python(jobj.corrected, MmapType.ARRAY_U8)
+            self.byteEncoding = jobj.byteEncoding
             self.totalBitErrors = jobj.totalBitErrors
             self.bitsTransposed = jobj.bitsTransposed
             self.error_level = jobj.error.toString()
