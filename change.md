@@ -1,5 +1,6 @@
-### Version 0.40.0r1
+### Version 0.40.1
 
+- Updated to BoofCV 0.40.1
 - QR Code and Micro QR Code
   - Access to raw message bytes
 

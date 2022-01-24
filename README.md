@@ -70,6 +70,7 @@ PyBoof depends on the following python packages. They should be automatically in
 * py4j
 * numpy
 * transforms3d
+* opencv (optional and for IO only)
 
 Optional
 * opencv_python (for IO only)
