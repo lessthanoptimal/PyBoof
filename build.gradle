@@ -13,7 +13,7 @@ repositories {
 dependencies {
     api group: 'org.boofcv', name: 'boofcv-core', version: project.version
     api group: 'org.boofcv', name: 'boofcv-swing', version: project.version
-    api 'net.sf.py4j:py4j:0.10.9.2'
+    api 'net.sf.py4j:py4j:0.10.9.5'
 
     // needed to use Java 11+ syntax with Java 11 byte code
     annotationProcessor('com.github.bsideup.jabel:jabel-javac-plugin:0.4.2')
