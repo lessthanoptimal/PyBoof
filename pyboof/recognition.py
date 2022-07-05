@@ -284,7 +284,7 @@ class QrCode:
 
     def __init__(self, java_object=None):
         if java_object is None:
-            self.verson = -1
+            self.version = -1
             self.message = ""
             self.corrected = None  # raw byte data after error correction
             self.byteEncoding = ""  # Encoding used when in BYTE mode
@@ -300,7 +300,7 @@ class QrCode:
             self.pp_down = Polygon2D(4)
         else:
             jobj = JavaWrapper(java_object)
-            self.verson = jobj.version
+            self.version = jobj.version
             self.message = jobj.message
             self.corrected = mmap_array_java_to_python(jobj.corrected, MmapType.ARRAY_U8)
             self.byteEncoding = jobj.byteEncoding
@@ -348,7 +348,7 @@ class MicroQrCode:
 
     def __init__(self, java_object=None):
         if java_object is None:
-            self.verson = -1
+            self.version = -1
             self.message = ""
             self.corrected = None  # raw byte data after error correction
             self.byteEncoding = ""  # Encoding used when in BYTE mode
@@ -362,7 +362,7 @@ class MicroQrCode:
             self.pp = Polygon2D(4)
         else:
             jobj = JavaWrapper(java_object)
-            self.verson = jobj.version
+            self.version = jobj.version
             self.message = jobj.message
             self.corrected = mmap_array_java_to_python(jobj.corrected, MmapType.ARRAY_U8)
             self.byteEncoding = jobj.byteEncoding

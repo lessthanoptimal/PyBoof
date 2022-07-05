@@ -1,3 +1,7 @@
+### Version TBD
+- QR Code
+  - Fixed type-o in version
+
 ### Version 0.40.1
 
 - Updated to BoofCV 0.40.1
