@@ -1,6 +1,8 @@
-### Version TBD
+### Version 0.41
+- Updated to BoofCV 0.41
 - QR Code
   - Fixed type-o in version
+- Added Aztec Code support
 
 ### Version 0.40.1
 

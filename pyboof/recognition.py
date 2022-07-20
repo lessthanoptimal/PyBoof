@@ -117,6 +117,11 @@ class ConfigMicroQrCode(JavaConfig):
         JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigMicroQrCode")
 
 
+class ConfigAztecCode(JavaConfig):
+    def __init__(self):
+        JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigAztecCode")
+
+
 class ConfigUchiyaMarker(JavaConfig):
     def __init__(self):
         JavaConfig.__init__(self, "boofcv.factory.fiducial.ConfigUchiyaMarker")
@@ -384,7 +389,7 @@ class MicroQrDetector(JavaWrapper):
 
     Attributes:
         detections: List of detected MicroQrCode
-        failures: List of objects that are highly likely to be a QR Code but were rejected.
+        failures: List of objects that are highly likely to be a Micro QR Codes but were rejected.
     """
 
     def __init__(self, java_detector):
@@ -396,6 +401,61 @@ class MicroQrDetector(JavaWrapper):
         self.java_obj.process(image)
         self.detections = [MicroQrCode(x) for x in self.java_obj.getDetections()]
         self.failures = [MicroQrCode(x) for x in self.java_obj.getFailures()]
+
+    def get_image_type(self):
+        return ImageType(self.java_obj.getImageType())
+
+
+class AztecCode:
+    """Description of a detected Aztec Code inside an image.
+
+    """
+
+    def __init__(self, java_object=None):
+        if java_object is None:
+            self.dataLayers = 0
+            self.messageWordCount = 0
+            self.rawbits = None  # raw byte data
+            self.corrected = None  # raw byte data after error correction
+            self.message = ""
+            self.structure = ""
+            self.failure = ""
+            self.transposed = False   # true if the marker is transposed
+            self.totalBitErrors = -1  # Number of errors detected in error correction
+            self.bounds = Polygon2D(4)
+        else:
+            jobj = JavaWrapper(java_object)
+            self.dataLayers = jobj.dataLayers
+            self.messageWordCount = jobj.messageWordCount
+            self.rawbits = mmap_array_java_to_python(jobj.rawbits, MmapType.ARRAY_U8)
+            self.corrected = mmap_array_java_to_python(jobj.corrected, MmapType.ARRAY_U8)
+            self.message = jobj.message
+            self.structure = jobj.structure.toString()
+            self.transposed = jobj.transposed
+            self.totalBitErrors = jobj.totalBitErrors
+            self.bounds = Polygon2D(jobj.bounds)
+
+            if jobj.failure is not None:
+                self.failure_cause = jobj.failure.toString()
+
+
+class AztecCodeDetector(JavaWrapper):
+    """Detects Aztec Codes inside of images
+
+    Attributes:
+        detections: List of detected AztecCode
+        failures: List of objects that are highly likely to be Aztec Codes but were rejected.
+    """
+
+    def __init__(self, java_detector):
+        JavaWrapper.__init__(self, java_detector)
+        self.detections = []
+        self.failures = []
+
+    def detect(self, image):
+        self.java_obj.process(image)
+        self.detections = [AztecCode(x) for x in self.java_obj.getDetections()]
+        self.failures = [AztecCode(x) for x in self.java_obj.getFailures()]
 
     def get_image_type(self):
         return ImageType(self.java_obj.getImageType())
@@ -650,6 +710,21 @@ class FactoryFiducial:
         java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             microqr(jconf, self.boof_image_type)
         return MicroQrDetector(java_detector)
+
+    def aztec(self, config: ConfigAztecCode = None) -> AztecCodeDetector:
+        """ Creates a detector for QR Codes
+
+        :param config: ConfigQrCode or None
+        :return: QrCodeDetector
+        """
+        if config is None:
+            jconf = None
+        else:
+            jconf = config.java_obj
+
+        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+            aztec(jconf, self.boof_image_type)
+        return AztecCodeDetector(java_detector)
 
     def random_dots(self, config: ConfigUchiyaMarker) -> UchiyaRandomDotDetector:
         """ Creates a detector random dot / Uchiya markers
