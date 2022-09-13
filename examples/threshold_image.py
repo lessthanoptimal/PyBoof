@@ -30,6 +30,9 @@ algorithms.append(("globalFixed"  ,factory.globalFixed(threshold=100)))
 
 image_list = [(original, "Original")]
 
+# WARNING: There's a bug in Py4J and it's calling the wrong function when we visualize results.
+#          This causes the example to crash.
+
 for a in algorithms:
     a[1].process(original, binary)
     buffered_binary = pb.swing.render_binary(binary)

@@ -90,6 +90,8 @@ def colorize_gradient(deriv_x, deriv_y):
 
 
 def render_binary(binary, invert=False):
+    # BUG in Py4J here. It's calling a private function instead of a public function
+    #     BoofCV SNAPSHOT works around this issue
     return gateway.jvm.boofcv.gui.binary.VisualizeBinaryData.renderBinary(binary, invert, None)
 
 

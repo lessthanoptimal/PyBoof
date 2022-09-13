@@ -190,7 +190,7 @@ class Transform2to2(JavaWrapper):
         JavaWrapper.__init__(self, java_object)
         if is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform2_F32):
             self.is32 = True
-            self.point_out = create_java_point_2D_f32()
+            self.point_out = pyboof.geo.create_java_point_2D_f32()
         elif is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform2_F64):
             self.is32 = False
             self.point_out = create_java_point_2D_f64()

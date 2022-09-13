@@ -16,24 +16,26 @@ def convert_from_boof_calibration_observations(jobservations):
 
 
 def convert_into_boof_calibration_observations(observations):
-    width = int(observations["width"])
-    height = int(observations["height"])
     pixels = observations["pixels"]
-    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation(width, height)
+    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation()
     for o in pixels:
-        p = gateway.jvm.georegression.struct.point.Point2D_F64(float(o[1]), float(o[2]))
-        jobs.add(p, int(o[0]))
+        jobs.add(int(o[0]), float(o[1]), float(o[2]))
         # TODO use this other accessor after 0.30
         # jobs.add(float(o[1]),float(o[2]),int(o[0]))
+
+    if "target" in observations:
+        jobs.target = observations["target"]
 
     return jobs
 
 
-def calibrate_brown(observations: List, detector, num_radial=2, tangential=True, zero_skew=True):
+def calibrate_brown(width:int, height:int, observations: List, detector, num_radial=2, tangential=True, zero_skew=True):
     """
     Calibrates a Brown camera
 
-    :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
+    :param width: Image width in pixels
+    :param height: Image height in pixels
+    :param observations: List of {"points":(boofcv detections)}
     :param detector:
     :param num_radial:
     :param tangential:
@@ -41,7 +43,8 @@ def calibrate_brown(observations: List, detector, num_radial=2, tangential=True,
     :return:
     """
     jlayout = detector.java_obj.getLayout()
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(jlayout)
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
+    jcalib_planar.initialize(width, height, jlayout)
     jcalib_planar.configurePinhole(zero_skew, int(num_radial), tangential)
     for o in observations:
         jcalib_planar.addImage(convert_into_boof_calibration_observations(o))
@@ -57,12 +60,14 @@ def calibrate_brown(observations: List, detector, num_radial=2, tangential=True,
     return (intrinsic, errors)
 
 
-def calibrate_universal(observations: List, detector, num_radial=2, tangential=True, zero_skew=True,
+def calibrate_universal(width:int, height:int, observations: List, detector, num_radial=2, tangential=True, zero_skew=True,
                         mirror_offset=None):
     """
     Calibrate a fisheye camera using Universal Omni model.
 
-    :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
+    :param width: Image width in pixels
+    :param height: Image height in pixels
+    :param observations: List of {"points":(boofcv detections)}
     :param detector:
     :param num_radial:
     :param tangential:
@@ -71,7 +76,8 @@ def calibrate_universal(observations: List, detector, num_radial=2, tangential=T
     :return: (intrinsic, errors)
     """
     jlayout = detector.java_obj.getLayout()
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(jlayout)
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
+    jcalib_planar.initialize(width, height, jlayout)
     if mirror_offset is None:
         jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential)
     else:
@@ -90,12 +96,14 @@ def calibrate_universal(observations: List, detector, num_radial=2, tangential=T
     return (intrinsic, errors)
 
 
-def calibrate_kannala_brandt(observations: List, detector: FiducialCalibrationDetector, num_symmetric: int = 5,
+def calibrate_kannala_brandt(width:int, height:int, observations: List, detector: FiducialCalibrationDetector, num_symmetric: int = 5,
                              num_asymmetric: int = 0, zero_skew: bool = True):
     """
     Calibrate a fisheye camera using Kannala-Brandt model.
 
-    :param observations: List of {"points":(boofcv detections),"width":(image width),"height":(image height)}
+    :param width: Image width in pixels
+    :param height: Image height in pixels
+    :param observations: List of {"points":(boofcv detections)}
     :param detector:
     :param num_symmetric:
     :param num_asymmetric:
@@ -104,7 +112,8 @@ def calibrate_kannala_brandt(observations: List, detector: FiducialCalibrationDe
     :return: (intrinsic, errors)
     """
     jlayout = detector.java_obj.getLayout()
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar(jlayout)
+    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
+    jcalib_planar.initialize(width, height, jlayout)
     jcalib_planar.configureKannalaBrandt(zero_skew, num_symmetric, num_asymmetric)
 
     for o in observations:
@@ -121,7 +130,8 @@ def calibrate_kannala_brandt(observations: List, detector: FiducialCalibrationDe
     return (intrinsic, errors)
 
 
-def calibrate_stereo(observations_left: List, observations_right: List, detector: FiducialCalibrationDetector,
+def calibrate_stereo(shape_left, shape_right,
+                     observations_left: List, observations_right: List, detector: FiducialCalibrationDetector,
                      num_radial: int = 4, tangential: bool = False, zero_skew: bool = True) -> (StereoParameters, List):
     """
     Calibrates a stereo camera using a Brown camera model
@@ -136,6 +146,8 @@ def calibrate_stereo(observations_left: List, observations_right: List, detector
     jlayout = detector.java_obj.getLayout(0) # Hard coded for a single target
     jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateStereoPlanar(jlayout)
     jcalib_planar.configure(zero_skew, int(num_radial), tangential)
+    jcalib_planar.initialize(gateway.jvm.boofcv.struct.image.ImageDimension(shape_left[0], shape_left[1]),
+                             gateway.jvm.boofcv.struct.image.ImageDimension(shape_right[0], shape_right[1]))
 
     for idx in range(len(observations_left)):
         jobs_left = convert_into_boof_calibration_observations(observations_left[idx])

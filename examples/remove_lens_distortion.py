@@ -7,7 +7,7 @@ import pyboof as pb
 data_path = "../data/example/calibration/stereo/Bumblebee2_Chess/"
 
 # Load the camera parameters
-intrinsic = pb.CameraPinhole()
+intrinsic = pb.CameraBrown()
 intrinsic.load(os.path.join(data_path, "intrinsicLeft.yaml"))
 
 # Load original image and the undistorted image

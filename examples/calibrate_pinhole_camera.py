@@ -28,7 +28,10 @@ for file in glob.glob(os.path.join(data_path, "left*.jpg")):
 
 print("Solving for intrinsic parameters")
 
-intrinsic, errors = pb.calibrate_brown(observations, detector,
+width = image.getWidth()
+height = image.getHeight()
+
+intrinsic, errors = pb.calibrate_brown(width, height, observations, detector,
                                        num_radial=2, tangential=True)
 
 print()

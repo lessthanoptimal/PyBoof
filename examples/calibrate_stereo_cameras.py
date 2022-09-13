@@ -18,12 +18,15 @@ files_right = sorted(glob.glob(os.path.join(data_path, "right*.jpg")))
 
 observations_left = []
 observations_right = []
+shape_left = [2]
+shape_right = [2]
+
 for file_left, file_right in zip(files_left, files_right):
     # left image
     image = pb.load_single_band(file_left, np.float32)
     detector.detect(image)
-    o = {"width": image.getWidth(),
-         "height": image.getHeight()}
+    shape_left = [image.getWidth(), image.getHeight()]
+    o = {}
     if detector.detected_markers:
         print("success " + file_left)
         o["pixels"] = detector.detected_markers[0]["landmarks"]
@@ -34,8 +37,8 @@ for file_left, file_right in zip(files_left, files_right):
     # right image
     image = pb.load_single_band(file_right, np.float32)
     detector.detect(image)
-    o = {"width": image.getWidth(),
-         "height": image.getHeight()}
+    shape_right = [image.getWidth(), image.getHeight()]
+    o = {}
     if detector.detected_markers:
         print("success " + file_right)
         o["pixels"] = detector.detected_markers[0]["landmarks"]
@@ -45,7 +48,7 @@ for file_left, file_right in zip(files_left, files_right):
 
 print("Solving for stereo parameters")
 
-stereo_parameters, errors = pb.calibrate_stereo(
+stereo_parameters, errors = pb.calibrate_stereo(shape_left, shape_right,
     observations_left, observations_right, detector, num_radial=4, tangential=False)
 
 print()
