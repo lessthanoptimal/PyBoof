@@ -5,7 +5,7 @@ from pyboof import JavaConfig
 from pyboof import JavaWrapper
 from pyboof import dtype_to_Class_SingleBand
 from pyboof import dtype_to_ImageType
-from pyboof import gateway
+from pyboof import pbg
 from pyboof.common import JavaList
 from pyboof.common import JavaList_to_fastarray
 from pyboof.common import is_java_class
@@ -20,9 +20,9 @@ def p2b_list_descF64(pylist):
     :type pylist: list[list[float]]
     :return: List of descriptors in BoofCV format
     """
-    java_list = gateway.jvm.java.util.ArrayList()
+    java_list = pbg.gateway.jvm.java.util.ArrayList()
 
-    if pyboof.mmap_file:
+    if pbg.mmap_file:
         mmap_list_python_to_TupleF64(pylist, java_list)
     else:
         exception_use_mmap()
@@ -38,7 +38,7 @@ def b2p_list_descF64(boof_list):
     """
     pylist = []
 
-    if pyboof.mmap_file:
+    if pbg.mmap_file:
         mmap_list_TupleF64_to_python(boof_list, pylist)
     else:
         exception_use_mmap()
@@ -166,7 +166,7 @@ class AssociateDescription(JavaWrapper):
         else:
             raise Exception("unexpected list type " + feature_list.__class__.__name__)
 
-        java_type = gateway.jvm.boofcv.struct.feature.TupleDesc_F64(0).getClass()
+        java_type = pbg.gateway.jvm.boofcv.struct.feature.TupleDesc_F64(0).getClass()
 
         fast_array = JavaList_to_fastarray(feature_list, java_type)
         self.java_obj.setSource(fast_array)
@@ -185,7 +185,7 @@ class AssociateDescription(JavaWrapper):
         else:
             raise Exception("unexpected list type " + feature_list.__class__.__name__)
 
-        java_type = gateway.jvm.boofcv.struct.feature.TupleDesc_F64(0).getClass()
+        java_type = pbg.gateway.jvm.boofcv.struct.feature.TupleDesc_F64(0).getClass()
 
         fast_queue = JavaList_to_fastarray(feature_list, java_type)
         self.java_obj.setDestination(fast_queue)
@@ -290,8 +290,8 @@ class DetectDescribePointFeatures(JavaWrapper):
 
         # extract a list of locations and descriptions.  Don't copy since it will immediately be convert
         # into a python format
-        java_locations = gateway.jvm.pyboof.PyBoofEntryPoint.extractPoints(self.java_obj, False)
-        java_descriptions = gateway.jvm.pyboof.PyBoofEntryPoint.extractFeatures(self.java_obj, False)
+        java_locations = pbg.gateway.jvm.pyboof.PyBoofEntryPoint.extractPoints(self.java_obj, False)
+        java_descriptions = pbg.gateway.jvm.pyboof.PyBoofEntryPoint.extractFeatures(self.java_obj, False)
 
         # Convert into a Python format and return the two lists
         locations = pyboof.b2p_list_point2D(java_locations, np.double)
@@ -457,10 +457,10 @@ class FactoryDetectDescribe:
             java_config_ori = config_ori.java_obj
 
         if config_desc.__class__.__name__ == "ConfigSurfFast":
-            java_object = gateway.jvm.boofcv.factory.feature.detdesc.FactoryDetectDescribe.surfFast(
+            java_object = pbg.gateway.jvm.boofcv.factory.feature.detdesc.FactoryDetectDescribe.surfFast(
                 java_config_detect, java_config_desc, java_config_ori, self.boof_image_class)
         elif config_desc.__class__.__name__ == "ConfigSurfStability":
-            java_object = gateway.jvm.boofcv.factory.feature.detdesc.FactoryDetectDescribe.surfStable(
+            java_object = pbg.gateway.jvm.boofcv.factory.feature.detdesc.FactoryDetectDescribe.surfStable(
                 java_config_detect, java_config_desc, java_config_ori, self.boof_image_class)
         else:
             raise RuntimeError("Unknown description type")
@@ -493,10 +493,10 @@ class FactoryDenseDescribe:
         java_config_desc = config_desc.java_obj
 
         if config_desc.__class__.__name__ == "ConfigDenseSurfFast":
-            java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.surfFast(
+            java_object = pbg.gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.surfFast(
                 java_config_desc, self.boof_image_class)
         elif config_desc.__class__.__name__ == "ConfigDenseSurfStable":
-            java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.surfStable(
+            java_object = pbg.gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.surfStable(
                 java_config_desc, self.boof_image_class)
         else:
             raise RuntimeError("Unknown description type")
@@ -509,7 +509,7 @@ class FactoryDenseDescribe:
 
         java_config_desc = config.java_obj
 
-        java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.sift(
+        java_object = pbg.gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.sift(
             java_config_desc, self.boof_image_class)
         return DenseDescribePointFeatures(java_object)
 
@@ -521,7 +521,7 @@ class FactoryDenseDescribe:
 
         # HoG supports color images also. For now we will just support gray
 
-        java_object = gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.hog(
+        java_object = pbg.gateway.jvm.boofcv.factory.feature.dense.FactoryDescribeImageDense.hog(
             java_config_desc, self.py_image_type.java_obj)
         return DenseDescribePointFeatures(java_object)
 
@@ -532,33 +532,33 @@ class FactoryAssociate:
 
     def set_score(self, score_type, descriptor_type):
         if score_type == AssocScoreType.DEFAULT:
-            self.score = gateway.jvm.boofcv.factory.feature.associate. \
+            self.score = pbg.gateway.jvm.boofcv.factory.feature.associate. \
                 FactoryAssociation.defaultScore(descriptor_type)
         elif score_type == AssocScoreType.EUCLIDEAN:
-            self.score = gateway.jvm.boofcv.factory.feature.associate. \
+            self.score = pbg.gateway.jvm.boofcv.factory.feature.associate. \
                 FactoryAssociation.scoreEuclidean(descriptor_type, False)
         elif score_type == AssocScoreType.EUCLIDEAN_SQ:
-            self.score = gateway.jvm.boofcv.factory.feature.associate. \
+            self.score = pbg.gateway.jvm.boofcv.factory.feature.associate. \
                 FactoryAssociation.scoreEuclidean(descriptor_type, True)
         elif score_type == AssocScoreType.NCC:
-            self.score = gateway.jvm.boofcv.factory.feature.associate. \
+            self.score = pbg.gateway.jvm.boofcv.factory.feature.associate. \
                 FactoryAssociation.scoreNcc()
         elif score_type == AssocScoreType.SAD:
-            self.score = gateway.jvm.boofcv.factory.feature.associate. \
+            self.score = pbg.gateway.jvm.boofcv.factory.feature.associate. \
                 FactoryAssociation.scoreSad(descriptor_type)
 
     def generic(self, config: ConfigAssociate, info):
-        java_obj = gateway.jvm.boofcv.factory.feature.associate. \
+        java_obj = pbg.gateway.jvm.boofcv.factory.feature.associate. \
             FactoryAssociation.generic(config.java_obj, info)
         return AssociateDescription(java_obj)
 
     def greedy(self, config: ConfigAssociateGreedy):
-        java_obj = gateway.jvm.boofcv.factory.feature.associate. \
+        java_obj = pbg.gateway.jvm.boofcv.factory.feature.associate. \
             FactoryAssociation.greedy(config.java_obj, self.score)
         return AssociateDescription(java_obj)
 
     # def nearest_neighbor(self, config: ConfigAssociateNearestNeighbor):
-    #     java_obj = gateway.jvm.boofcv.factory.feature.associate.\
+    #     java_obj = pbg.gateway.jvm.boofcv.factory.feature.associate.\
     #             FactoryAssociation.associateNearestNeighbor(config.java_obj, self.score)
     #     return AssociateDescription(java_obj)
 
@@ -570,14 +570,14 @@ class FactoryDetectLine:
     def houghLinePolar(self, config_hough, config_polar=None):
         if not config_polar:
             config_polar = ConfigParamPolar()
-        java_object = gateway.jvm.boofcv.factory.feature.detect.line. \
+        java_object = pbg.gateway.jvm.boofcv.factory.feature.detect.line. \
             FactoryDetectLine.houghLinePolar(config_hough.java_obj, config_polar.java_obj, self.boof_image_class)
         return DetectLine(java_object)
 
     def houghLineFoot(self, config_hough, config_foot=None):
         if not config_foot:
             config_foot = ConfigParamFoot()
-        java_object = gateway.jvm.boofcv.factory.feature.detect.line. \
+        java_object = pbg.gateway.jvm.boofcv.factory.feature.detect.line. \
             FactoryDetectLine.houghLineFoot(config_hough.java_obj, config_foot.java_obj, self.boof_image_class)
         return DetectLine(java_object)
 
@@ -588,7 +588,7 @@ class FactoryPointTracker:
         self.boof_image_type = dtype_to_ImageType(dtype) # TODO remove after getImageType() is added to PointTracker
 
     def generic(self, config_tracker:ConfigPointTracker):
-        java_object = gateway.jvm.boofcv.factory.tracker. \
+        java_object = pbg.gateway.jvm.boofcv.factory.tracker. \
             FactoryPointTracker.tracker(config_tracker.java_obj, self.boof_image_class, None)
         return PointTracker(java_object, self.boof_image_type)
 
@@ -605,10 +605,10 @@ def mmap_list_python_to_TupleF64(pylist, java_list):
         dof = 0
     else:
         dof = len(pylist[0])
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     # max number of list elements it can write at once
-    max_elements = (pyboof.mmap_size - 100) / (dof * 8)
+    max_elements = (pbg.mmap_size - 100) / (dof * 8)
 
     curr = 0
     while curr < num_elements:
@@ -620,7 +620,7 @@ def mmap_list_python_to_TupleF64(pylist, java_list):
             mm.write(struct.pack('>%sd' % dof, *pylist[i]))
 
         # Now tell the java end to read what it just wrote
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_TupleF64(java_list)
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_TupleF64(java_list)
 
         # move on to the next block
         curr = curr + num_write
@@ -634,11 +634,11 @@ def mmap_list_TupleF64_to_python(java_list, pylist):
     :type pylist: list[list[float]]
     """
     num_elements = java_list.size()
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     num_read = 0
     while num_read < num_elements:
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_TupleF64(java_list, num_read)
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_TupleF64(java_list, num_read)
         mm.seek(0)
         data_type, num_found, dof = struct.unpack(">HII", mm.read(2 + 4 + 4))
         if data_type != pyboof.MmapType.LIST_TUPLE_F64:

@@ -1,5 +1,5 @@
 from py4j import java_gateway
-from pyboof import gateway
+from pyboof import pbg
 from six import string_types
 import pyboof
 import struct
@@ -12,21 +12,21 @@ def exception_use_mmap():
 
 def is_java_class(java_class, string_path):
     """True if the passed in object is the Class specified by the path"""
-    return gateway.jvm.pyboof.PyBoofEntryPoint.isClass(java_class, string_path)
+    return pbg.gateway.jvm.pyboof.PyBoofEntryPoint.isClass(java_class, string_path)
 
 
 def ejml_matrix_d_to_f(D):
-    F = gateway.jvm.org.ejml.data.FMatrixRMaj(D.getNumRows(), D.getNumCols())
-    gateway.jvm.org.ejml.ops.ConvertMatrixData.convert(D, F)
+    F = pbg.gateway.jvm.org.ejml.data.FMatrixRMaj(D.getNumRows(), D.getNumCols())
+    pbg.gateway.jvm.org.ejml.ops.ConvertMatrixData.convert(D, F)
     return F
 
 
 def boof_fixed_length(length):
-    return gateway.jvm.boofcv.struct.ConfigLength(float(length), float(-1))
+    return pbg.gateway.jvm.boofcv.struct.ConfigLength(float(length), float(-1))
 
 
 def python_to_java_double_array(array):
-    jarray = gateway.new_array(gateway.jvm.double, len(array))
+    jarray = pbg.gateway.new_array(pbg.gateway.jvm.double, len(array))
     for i in range(len(array)):
         jarray[i] = array[i]
     return jarray
@@ -35,7 +35,7 @@ def python_to_java_double_array(array):
 class JavaWrapper:
     def __init__(self, java_object=None):
         self.java_obj = java_object
-        self.java_fields = [x for x in gateway.jvm.pyboof.PyBoofEntryPoint.getPublicFields(self.java_obj.getClass())]
+        self.java_fields = [x for x in pbg.gateway.jvm.pyboof.PyBoofEntryPoint.getPublicFields(self.java_obj.getClass())]
 
     def __getattr__(self, item):
         if "java_fields" in self.__dict__ and item in self.__dict__["java_fields"]:
@@ -75,7 +75,7 @@ class JavaConfig(JavaWrapper):
 
             words = java_class_path.replace('$', ".").split(".")
 
-            a = gateway.jvm.__getattr__(words[0])
+            a = pbg.gateway.jvm.__getattr__(words[0])
             for i in range(1, len(words)):
                 a = a.__getattr__(words[i])
 
@@ -87,7 +87,7 @@ class JavaConfig(JavaWrapper):
     def __getattr__(self, item):
         if "java_fields" in self.__dict__ and item in self.__dict__["java_fields"]:
             a = java_gateway.get_field(self.java_obj, item)
-            if gateway.jvm.pyboof.PyBoofEntryPoint.isConfigClass(a):
+            if pbg.gateway.jvm.pyboof.PyBoofEntryPoint.isConfigClass(a):
                 return JavaConfig(a)
             else:
                 return a
@@ -113,20 +113,20 @@ class JavaList(JavaWrapper):
         return self.java_obj.size()
 
     def save_to_disk(self, file_name):
-        gateway.jvm.pyboof.FileIO.saveList(self.java_obj, self.java_type, file_name)
+        pbg.gateway.jvm.pyboof.FileIO.saveList(self.java_obj, self.java_type, file_name)
 
 
 def JavaList_to_fastarray(java_list, java_class_type):
-    return gateway.jvm.pyboof.PyBoofEntryPoint.listToFastArray(java_list, java_class_type)
+    return pbg.gateway.jvm.pyboof.PyBoofEntryPoint.listToFastArray(java_list, java_class_type)
 
 
 def create_java_file_writer(path: str):
-    java_file = gateway.jvm.java.io.File(path)
-    return gateway.jvm.java.io.FileWriter(java_file)
+    java_file = pbg.gateway.jvm.java.io.File(path)
+    return pbg.gateway.jvm.java.io.FileWriter(java_file)
 
 
 def create_java_file(path: str):
-    return gateway.jvm.java.io.File(path)
+    return pbg.gateway.jvm.java.io.File(path)
 
 
 def mmap_array_python_to_java(pylist, mmap_type: pyboof.MmapType):
@@ -138,13 +138,13 @@ def mmap_array_python_to_java(pylist, mmap_type: pyboof.MmapType):
     pylist = pyboof.mmap_force_array_type(pylist, mmap_type)
 
     num_elements = len(pylist)
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     num_element_bytes = pyboof.mmap_primitive_len(mmap_type)
     format = pyboof.mmap_primitive_format(mmap_type)
 
     # max number of list elements it can write at once
-    max_elements = (pyboof.mmap_size - 100) / num_element_bytes
+    max_elements = (pbg.mmap_size - 100) / num_element_bytes
 
     # See if it can be writen in a single chunk
     if max_elements < num_elements:
@@ -157,7 +157,7 @@ def mmap_array_python_to_java(pylist, mmap_type: pyboof.MmapType):
         mm.write(struct.pack(format, pylist[i]))
 
     # Now tell the java end to read what it just wrote
-    return gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_primitive_array(mmap_type)
+    return pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_primitive_array(mmap_type)
 
 
 def mmap_array_java_to_python(java_array, mmap_type: pyboof.MmapType):
@@ -168,14 +168,14 @@ def mmap_array_java_to_python(java_array, mmap_type: pyboof.MmapType):
         return None
 
     num_elements = len(java_array)
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     num_element_bytes = pyboof.mmap_primitive_len(mmap_type)
     format = pyboof.mmap_primitive_format(mmap_type)
 
     python_list = []
 
-    gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_primitive_array(java_array, mmap_type, 0)
+    pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_primitive_array(java_array, mmap_type, 0)
     mm.seek(0)
     data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
     if data_type != mmap_type:

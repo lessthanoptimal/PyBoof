@@ -77,7 +77,7 @@ class StitchingFromMotion2D(JavaWrapper):
     def configure(self, mosaic_width:int, mosaic_height:int, scale:float = 1.0 ):
 
         # Hard code it to scale the iamge down and start in the center
-        homography = JavaWrapper(gateway.jvm.georegression.struct.homography.Homography2D_F64())
+        homography = JavaWrapper(pbg.gateway.jvm.georegression.struct.homography.Homography2D_F64())
         homography.a11 = scale
         homography.a22 = scale
         homography.a13 = mosaic_width/2 - (scale*mosaic_width/2)
@@ -117,7 +117,7 @@ class FactoryMultiViewRobust:
         :return:
         :rtype: ModelMatcherMultiview
         """
-        mm = gateway.jvm.boofcv.factory.geo.FactoryMultiViewRobust. \
+        mm = pbg.gateway.jvm.boofcv.factory.geo.FactoryMultiViewRobust. \
             baselineRansac(config_essential.java_obj, config_ransac.java_obj)
         return ModelMatcherMultiview(mm)
 
@@ -129,6 +129,6 @@ class FactoryVideoMosaic:
         self.image_type = create_ImageType(Family.PLANAR, dtype, 3)
 
     def mosaic(self, config_tracker:pyboof.ConfigPointTracker):
-        java_object = gateway.jvm.pyboof.FactoryPyBoofTemp. \
+        java_object = pbg.gateway.jvm.pyboof.FactoryPyBoofTemp. \
             basicVideoMosaic(config_tracker.java_obj, self.boof_image_class)
         return StitchingFromMotion2D(java_object, self.image_type)

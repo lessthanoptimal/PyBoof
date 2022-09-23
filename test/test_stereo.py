@@ -2,7 +2,7 @@
 
 import unittest
 
-from pyboof import gateway
+from pyboof import pbg
 import pyboof as pb
 import numpy as np
 
@@ -30,8 +30,8 @@ class FactoryStereoDisparity(unittest.TestCase):
 
 
     def test_sgm(self):
-        error_hmi = pb.gateway.jvm.boofcv.factory.disparity.DisparitySgmError.MUTUAL_INFORMATION
-        error_types = gateway.jvm.boofcv.factory.disparity.DisparitySgmError.values()
+        error_hmi = pb.pbg.gateway.jvm.boofcv.factory.disparity.DisparitySgmError.MUTUAL_INFORMATION
+        error_types = pbg.gateway.jvm.boofcv.factory.disparity.DisparitySgmError.values()
         # SGM only supports U8 images
         for input_type in [np.uint8]:
             factory = pb.FactoryStereoDisparity(input_type)

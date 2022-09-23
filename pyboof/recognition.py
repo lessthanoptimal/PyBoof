@@ -1,6 +1,6 @@
 from pyboof.geo import *
 from pyboof.calib import *
-from pyboof import gateway
+from pyboof import pbg
 from pyboof import MmapType
 from py4j.java_collections import ListConverter
 import tempfile
@@ -54,25 +54,25 @@ class HammingDictionary:
     """
     List of prebuilt hamming dictionaries
     """
-    CUSTOM = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.CUSTOM
-    ARUCO_ORIGINAL = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_ORIGINAL
-    ARUCO_MIP_16h3 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_16h3
-    ARUCO_MIP_25h7 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_25h7
-    ARUCO_MIP_36h12 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_36h12
-    ARUCO_OCV_4x4_1000 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_4x4_1000
-    ARUCO_OCV_5x5_1000 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_5x5_1000
-    ARUCO_OCV_6x6_1000 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_6x6_1000
-    ARUCO_OCV_7x7_1000 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_7x7_1000
-    APRILTAG_16h5 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_16h5
-    APRILTAG_25h7 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h7
-    APRILTAG_25h9 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h9
-    APRILTAG_36h10 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h10
-    APRILTAG_36h11 = gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h11
+    CUSTOM = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.CUSTOM
+    ARUCO_ORIGINAL = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_ORIGINAL
+    ARUCO_MIP_16h3 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_16h3
+    ARUCO_MIP_25h7 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_25h7
+    ARUCO_MIP_36h12 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_MIP_36h12
+    ARUCO_OCV_4x4_1000 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_4x4_1000
+    ARUCO_OCV_5x5_1000 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_5x5_1000
+    ARUCO_OCV_6x6_1000 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_6x6_1000
+    ARUCO_OCV_7x7_1000 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.ARUCO_OCV_7x7_1000
+    APRILTAG_16h5 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_16h5
+    APRILTAG_25h7 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h7
+    APRILTAG_25h9 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_25h9
+    APRILTAG_36h10 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h10
+    APRILTAG_36h11 = pbg.gateway.jvm.boofcv.factory.fiducial.HammingDictionary.APRILTAG_36h11
 
 
 class ConfigGridDimen(JavaConfig):
     def __init__(self, num_rows, num_cols, square_width):
-        java_obj = gateway.jvm.boofcv.abst.fiducial.calib.ConfigGridDimen(
+        java_obj = pbg.gateway.jvm.boofcv.abst.fiducial.calib.ConfigGridDimen(
             int(num_rows), int(num_cols), float(square_width))
         JavaConfig.__init__(self, java_obj)
 
@@ -149,7 +149,7 @@ def ecocheck_parse(description: str, square_size: float) -> ConfigECoCheckMarker
     :param description: String summary of ECoCheck configuration
     :param square_size: How big a square in the chessboard pattern is
     """
-    return ConfigECoCheckMarkers(gateway.jvm.boofcv.abst.fiducial.calib.ConfigECoCheckMarkers.
+    return ConfigECoCheckMarkers(pbg.gateway.jvm.boofcv.abst.fiducial.calib.ConfigECoCheckMarkers.
                                  parse(description, square_size))
 
 
@@ -166,7 +166,7 @@ def load_hamming_marker(dictionary):
         raise RuntimeError("Custom dictionary")
 
     return ConfigFiducialHammingDetector(
-        gateway.jvm.boofcv.factory.fiducial.ConfigHammingMarker.loadDictionary(dictionary))
+        pbg.gateway.jvm.boofcv.factory.fiducial.ConfigHammingMarker.loadDictionary(dictionary))
 
 
 class FiducialCalibrationDetector(JavaWrapper):
@@ -263,7 +263,7 @@ class FiducialDetector(JavaWrapper):
         return Polygon2D(self.java_obj.getBounds(which, None))
 
     def get_center(self, which):
-        location = gateway.jvm.georegression.struct.point.Point2D_F64()
+        location = pbg.gateway.jvm.georegression.struct.point.Point2D_F64()
         self.java_obj.getCenter(which, location)
         return location.getX(), location.getY()
 
@@ -492,7 +492,7 @@ class FactoryFiducialCalibration:
         if config_detector:
             cdj = config_detector.java_obj
 
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
             chessboardX(cdj, config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
@@ -510,7 +510,7 @@ class FactoryFiducialCalibration:
         if config_detector:
             cdj = config_detector.java_obj
 
-        java_detector = gateway.jvm.boofcv.factory.fiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial. \
             FactoryFiducialCalibration.chessboardB(cdj, config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
@@ -528,7 +528,7 @@ class FactoryFiducialCalibration:
         if config_detector:
             jdetector = config_detector.java_obj
 
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
             ecocheck(jdetector, config_marker.java_obj)
         return FiducialCalibrationDetectorMulti(java_detector)
 
@@ -545,7 +545,7 @@ class FactoryFiducialCalibration:
         cdj = None
         if config_detector:
             cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.squareGrid(cdj,
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration.squareGrid(cdj,
                                                                                                   config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
@@ -562,7 +562,7 @@ class FactoryFiducialCalibration:
         cdj = None
         if config_detector:
             cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
             circleHexagonalGrid(cdj, config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
@@ -579,7 +579,7 @@ class FactoryFiducialCalibration:
         cdj = None
         if config_detector:
             cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducialCalibration. \
             circleRegularGrid(cdj, config_grid.java_obj)
         return FiducialCalibrationDetector(java_detector)
 
@@ -601,7 +601,7 @@ class FactoryFiducial:
         :param config_threshold: Configuration for image thresholding step
         :return: The detector
         """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             squareImage(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
         return FiducialImageDetector(java_detector)
 
@@ -613,7 +613,7 @@ class FactoryFiducial:
         :param config_threshold: Configuration for image thresholding step
         :return: The detector
         """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             squareBinary(config_fiducial.java_obj, config_threshold.java_obj, self.boof_image_type)
         return FiducialDetector(java_detector)
 
@@ -629,7 +629,7 @@ class FactoryFiducial:
         jconfig_detector = None
         if config_detector:
             jconfig_detector = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             squareHamming(config_fiducial.java_obj, jconfig_detector, self.boof_image_type)
         return FiducialDetector(java_detector)
 
@@ -646,7 +646,7 @@ class FactoryFiducial:
         cdj = None
         if config_detector:
             cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             calibChessboardB(cdj, config_grid.java_obj, self.boof_image_type)
         return FiducialDetector(java_detector)
 
@@ -661,7 +661,7 @@ class FactoryFiducial:
         cdj = None
         if config_detector:
             cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             calibChessboardX(cdj, config_grid.java_obj, self.boof_image_type)
         return FiducialDetector(java_detector)
 
@@ -677,7 +677,7 @@ class FactoryFiducial:
         cdj = None
         if config_detector:
             cdj = config_detector.java_obj
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             calibSquareGrid(cdj, config_grid.java_obj, self.boof_image_type)
         return FiducialDetector(java_detector)
 
@@ -692,7 +692,7 @@ class FactoryFiducial:
         else:
             jconf = config.java_obj
 
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             qrcode(jconf, self.boof_image_type)
         return QrCodeDetector(java_detector)
 
@@ -707,7 +707,7 @@ class FactoryFiducial:
         else:
             jconf = config.java_obj
 
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             microqr(jconf, self.boof_image_type)
         return MicroQrDetector(java_detector)
 
@@ -722,7 +722,7 @@ class FactoryFiducial:
         else:
             jconf = config.java_obj
 
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             aztec(jconf, self.boof_image_type)
         return AztecCodeDetector(java_detector)
 
@@ -732,65 +732,65 @@ class FactoryFiducial:
         :param config: ConfigUchiyaMarker or None
         :return: ConfigUchiyaMarker
         """
-        java_detector = gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
+        java_detector = pbg.gateway.jvm.boofcv.factory.fiducial.FactoryFiducial. \
             randomDots(config.java_obj, self.boof_image_type)
         return UchiyaRandomDotDetector(java_detector)
 
 
 def string_to_qrcode_error(error):
     if error == "L":
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.L
     elif error == "M":
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.M
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.M
     elif error == "Q":
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.Q
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.Q
     elif error == "H":
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.H
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCode.ErrorLevel.H
     else:
         return None
 
 
 def int_to_qrcode_mask(mask):
     if mask == 0b000:
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M000
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M000
     elif mask == 0b001:
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M001
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M001
     elif mask == 0b010:
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M010
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M010
     elif mask == 0b011:
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M011
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M011
     elif mask == 0b100:
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M100
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M100
     elif mask == 0b101:
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M101
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M101
     elif mask == 0b110:
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M110
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M110
     elif mask == 0b111:
-        return gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M111
+        return pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeMaskPattern.M111
     else:
         return None
 
 
 def string_to_microqr_error(error):
     if error == "L":
-        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.L
+        return pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.L
     elif error == "M":
-        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.M
+        return pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.M
     elif error == "Q":
-        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.Q
+        return pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCode.ErrorLevel.Q
     else:
         return None
 
 
 def int_to_microqr_mask(mask):
     if mask == 0b00:
-        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M000
+        return pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M000
     elif mask == 0b01:
-        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M001
+        return pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M001
     elif mask == 0b10:
-        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M010
+        return pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M010
     elif mask == 0b11:
-        return gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M011
+        return pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeMaskPattern.M011
     else:
         return None
 
@@ -801,8 +801,8 @@ class QrCodeGenerator:
     """
 
     def __init__(self, pixels_per_module=4):
-        self.java_encoder = gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeEncoder()
-        self.java_generator = gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeGeneratorImage(pixels_per_module)
+        self.java_encoder = pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeEncoder()
+        self.java_generator = pbg.gateway.jvm.boofcv.alg.fiducial.qrcode.QrCodeGeneratorImage(pixels_per_module)
 
     def reset(self):
         self.java_encoder.reset()
@@ -840,9 +840,9 @@ class MicroQrCodeGenerator:
 
     def __init__(self, pixels_per_module=4):
         self.pixels_per_module = int(pixels_per_module)
-        self.java_encoder = gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeEncoder()
-        self.java_generator = gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeGenerator()
-        self.java_engine = gateway.jvm.boofcv.alg.drawing.FiducialImageEngine()
+        self.java_encoder = pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeEncoder()
+        self.java_generator = pbg.gateway.jvm.boofcv.alg.fiducial.microqr.MicroQrCodeGenerator()
+        self.java_engine = pbg.gateway.jvm.boofcv.alg.drawing.FiducialImageEngine()
         self.java_generator.setRender(self.java_engine)
 
     def reset(self):
@@ -894,8 +894,8 @@ class SquareHammingGenerator:
         """
         self.border_pixels = 0
         self.pixels_per_square = pixels_per_square
-        self.java_generator = gateway.jvm.boofcv.alg.fiducial.square.FiducialSquareHammingGenerator(config.java_obj)
-        self.java_engine = gateway.jvm.boofcv.alg.drawing.FiducialImageEngine()
+        self.java_generator = pbg.gateway.jvm.boofcv.alg.fiducial.square.FiducialSquareHammingGenerator(config.java_obj)
+        self.java_engine = pbg.gateway.jvm.boofcv.alg.drawing.FiducialImageEngine()
         self.java_generator.setRenderer(self.java_engine)
 
     def generate(self, marker_idx):
@@ -926,9 +926,9 @@ class ConfigTrackerTld(JavaConfig):
             ConfigTld for user specified configuration
         """
         if obj is None:
-            config = gateway.jvm.boofcv.abst.tracker.ConfigTrackerTld()
+            config = pbg.gateway.jvm.boofcv.abst.tracker.ConfigTrackerTld()
         elif type(obj) is bool:
-            config = gateway.jvm.boofcv.abst.tracker.ConfigTrackerTld(obj)
+            config = pbg.gateway.jvm.boofcv.abst.tracker.ConfigTrackerTld(obj)
         else:
             config = obj
         JavaConfig.__init__(self, config)
@@ -960,7 +960,7 @@ class FactoryTrackerObjectQuad:
         :rtype: TrackerObjectQuad
         """
         boof_image_class = self.image_type.java_obj.getImageClass()
-        java_tracker = gateway.jvm.boofcv.factory.tracker. \
+        java_tracker = pbg.gateway.jvm.boofcv.factory.tracker. \
             FactoryTrackerObjectQuad.circulant(config, boof_image_class)
         return TrackerObjectQuad(java_tracker)
 
@@ -977,7 +977,7 @@ class FactoryTrackerObjectQuad:
             java_conf = None
         else:
             java_conf = config.java_obj
-        java_tracker = gateway.jvm.boofcv.factory.tracker. \
+        java_tracker = pbg.gateway.jvm.boofcv.factory.tracker. \
             FactoryTrackerObjectQuad.tld(java_conf, boof_image_class)
         return TrackerObjectQuad(java_tracker)
 
@@ -993,7 +993,7 @@ class FactoryTrackerObjectQuad:
             java_conf = None
         else:
             java_conf = config.java_obj
-        java_tracker = gateway.jvm.boofcv.factory.tracker.FactoryTrackerObjectQuad. \
+        java_tracker = pbg.gateway.jvm.boofcv.factory.tracker.FactoryTrackerObjectQuad. \
             meanShiftComaniciu2003(java_conf, self.image_type.java_obj)
         return TrackerObjectQuad(java_tracker)
 
@@ -1050,12 +1050,12 @@ class RandomDotDefinition(JavaWrapper):
 
 def save_random_dot_yaml(definition: RandomDotDefinition, path: str):
     java_writer = create_java_file_writer(path)
-    gateway.jvm.boofcv.io.fiducial.FiducialIO.saveRandomDotYaml(definition, java_writer)
+    pbg.gateway.jvm.boofcv.io.fiducial.FiducialIO.saveRandomDotYaml(definition, java_writer)
 
 
 def load_random_dot_yaml(path: str):
-    java_file = gateway.jvm.java.io.File(path)
-    java_obj = gateway.jvm.boofcv.io.fiducial.FiducialIO.loadRandomDotYaml(java_file)
+    java_file = pbg.gateway.jvm.java.io.File(path)
+    java_obj = pbg.gateway.jvm.boofcv.io.fiducial.FiducialIO.loadRandomDotYaml(java_file)
     return RandomDotDefinition(java_obj)
 
 
@@ -1069,11 +1069,11 @@ class SceneRecognition(JavaWrapper):
         in some applications that's a good idea.
         """
         # Convert the python list of strings into a java list of strings
-        java_list = ListConverter().convert(image_files, gateway._gateway_client)
+        java_list = ListConverter().convert(image_files, pbg.gateway._gateway_client)
 
         # Create a Java iterator that will load the images from disk
         java_imageType = self.java_obj.getImageType()
-        java_iterator = gateway.jvm.boofcv.io.image.ImageFileListIterator(java_list, java_imageType)
+        java_iterator = pbg.gateway.jvm.boofcv.io.image.ImageFileListIterator(java_list, java_imageType)
 
         # Learn the model from the images
         self.java_obj.learnModel(java_iterator)
@@ -1091,8 +1091,8 @@ class SceneRecognition(JavaWrapper):
         """
         Looks up the images which are the best match for the query image
         """
-        java_class = gateway.jvm.boofcv.abst.scene.SceneRecognition.Match().getClass()
-        java_matches = gateway.jvm.pyboof.PyBoofEntryPoint.createDogArray(java_class)
+        java_class = pbg.gateway.jvm.boofcv.abst.scene.SceneRecognition.Match().getClass()
+        java_matches = pbg.gateway.jvm.pyboof.PyBoofEntryPoint.createDogArray(java_class)
         self.java_obj.query(query_image, None, limit, java_matches)
 
         # Convert the java results into a python list of dict
@@ -1139,7 +1139,7 @@ class FactorySceneRecognition:
         if config:
             cdj = config.java_obj
 
-        java_obj = gateway.jvm.boofcv.factory.scene.FactorySceneRecognition. \
+        java_obj = pbg.gateway.jvm.boofcv.factory.scene.FactorySceneRecognition. \
             createFeatureToScene(cdj, self.image_type.java_obj)
         return SceneRecognition(java_obj)
 
@@ -1161,6 +1161,6 @@ def download_default_scene_recognition(image_type, path=None) -> SceneRecognitio
     path = os.path.abspath(path)
 
     java_file = pyboof.create_java_file(path)
-    java_recognizer = gateway.jvm.boofcv.io.recognition.RecognitionIO. \
+    java_recognizer = pbg.gateway.jvm.boofcv.io.recognition.RecognitionIO. \
         downloadDefaultSceneRecognition(java_file, image_type.java_obj)
     return SceneRecognition(java_recognizer)

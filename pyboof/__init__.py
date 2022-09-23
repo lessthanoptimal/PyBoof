@@ -24,13 +24,16 @@ if build_date is None:
     print("Can't find build_data.txt at " + os.path.dirname(os.path.realpath(__file__)))
     exit(1)
 
-gateway = None
 
-mmap_size = 0
-mmap_file = None
+# Class which stores all global variables. This is done because if you import a global the reference is copied.
+# As a result if it ever gets modified you're referencing the old object
+class PBGlobal:
+    gateway = None
+    mmap_size = 0
+    mmap_file = None
+    java_pid = None
 
-java_pid = None
-
+pbg = PBGlobal()
 
 def init_pyboof(java_port: int = 25333, python_port: int = 25334, size_mb: int = 20):
     """
@@ -40,17 +43,18 @@ def init_pyboof(java_port: int = 25333, python_port: int = 25334, size_mb: int =
     If you wish to run multiple independent processes, then you launch each process with a unique port.
     :param size_mb: Size of the memory mapped file in megabytes. If <= 0 then memory mapped files will not be used
     """
-    global gateway, java_pid
+    global pbg
 
     # The user is re-initializing for some reason. Let's close the gateway if already open
-    if gateway != None:
+    if pbg.gateway is not None:
         print("Closing previously open gateway")
         shutdown_jvm()
 
-    gateway = JavaGateway(gateway_parameters=GatewayParameters(port=java_port, auto_field=True),
-                          callback_server_parameters=CallbackServerParameters(port=python_port,
-                                                                              daemonize=True))
+    pbg.gateway = JavaGateway(gateway_parameters=GatewayParameters(port=java_port, auto_field=True),
+                              callback_server_parameters=CallbackServerParameters(port=python_port,
+                                                                                  daemonize=True))
 
+    print("gateway={}".format(id(pbg.gateway)))
     signal.signal(signal.SIGINT, signal_handler)
 
     # kill java on a regular exit too
@@ -61,7 +65,7 @@ def init_pyboof(java_port: int = 25333, python_port: int = 25334, size_mb: int =
         jar_path = os.path.realpath(__file__)
         jar_path = os.path.join(os.path.dirname(jar_path), "PyBoof-all.jar")
         proc = subprocess.Popen(["java", "-jar", jar_path, str(java_port)])
-        java_pid = proc.pid
+        pbg.java_pid = proc.pid
         time.sleep(0.1)
         # closed loop initialization.  If it fails for 5 seconds give up
         start_time = time.time()
@@ -81,21 +85,21 @@ def init_pyboof(java_port: int = 25333, python_port: int = 25334, size_mb: int =
 
 # Used to change the number of threads the Java code can run inside of
 def set_max_threads(max_threads):
-    gateway.jvm.pyboof.PyBoofEntryPoint.setMaxThreads(max_threads)
+    pbg.gateway.jvm.pyboof.PyBoofEntryPoint.setMaxThreads(max_threads)
 
 
 def check_jvm(set_date):
-    global gateway
+    global pbg
     try:
-        gateway.jvm.pyboof.PyBoofEntryPoint.nothing()
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.nothing()
         if set_date:
-            gateway.jvm.pyboof.PyBoofEntryPoint.setBuildDate(build_date)
+            pbg.gateway.jvm.pyboof.PyBoofEntryPoint.setBuildDate(build_date)
         else:
-            java_build_date = gateway.jvm.pyboof.PyBoofEntryPoint.getBuildDate()
+            java_build_date = pbg.gateway.jvm.pyboof.PyBoofEntryPoint.getBuildDate()
             if build_date != java_build_date:
                 print("Python and Java build dates do not match.  Killing Java process.")
                 print("  build dates = {:s} {:s}".format(build_date, java_build_date))
-                gateway.close()
+                pbg.gateway.close()
                 time.sleep(1)
                 return False
 
@@ -110,17 +114,17 @@ def check_jvm(set_date):
 
 
 def shutdown_jvm():
-    global java_pid, gateway
-    if java_pid is None:
+    global pbg
+    if pbg.java_pid is None:
         pass
-    elif gateway is None:
+    elif pbg.gateway is None:
         pass
     else:
         # shutdown the gateway so that it doesn't spew out a billion error messages when it can't connect
         # to the JVM
-        gateway.shutdown()
+        pbg.gateway.shutdown()
         gateway = None
-        os.kill(java_pid, signal.SIGTERM)
+        os.kill(pbg.java_pid, signal.SIGTERM)
         java_pid = None
 
 
@@ -143,18 +147,18 @@ def __init_memmap(size_mb=20):
     :param size_mb: Size of the memory mapped file in megabytes
     :type size_mb: int
     """
-    global mmap_size, mmap_file, java_pid
+    global pbg
     import tempfile
-    mmap_path = os.path.join(tempfile.gettempdir(), "pyboof_mmap_{}".format(java_pid))
+    mmap_path = os.path.join(tempfile.gettempdir(), "pyboof_mmap_{}".format(pbg.java_pid))
     # print("mmap_path=", mmap_path)
-    mmap_size = size_mb * 1024 * 1024
-    gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_path, size_mb)
+    pbg.mmap_size = size_mb * 1024 * 1024
+    pbg.gateway.jvm.pyboof.PyBoofEntryPoint.initializeMmap(mmap_path, size_mb)
     # Open file in read,write,binary mode
-    mmap_fid = open(mmap_path, "r+b")
+    pbg.mmap_fid = open(mmap_path, "r+b")
     if os.name == 'nt':
-        mmap_file = mmap.mmap(mmap_fid.fileno(), length=0)
+        mmap_file = mmap.mmap(pbg.mmap_fid.fileno(), length=0)
     else:
-        mmap_file = mmap.mmap(mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
+        pbg.mmap_file = mmap.mmap(pbg.mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
                               prot=mmap.PROT_READ | mmap.PROT_WRITE)
 
 

@@ -2,7 +2,7 @@
 
 import unittest
 
-from pyboof import gateway
+from pyboof import pbg
 import pyboof as pb
 import numpy as np
 
@@ -12,7 +12,7 @@ class TestMemMapFunctions(unittest.TestCase):
         original = [[1, 2.34, 6.7], [-23.4, 934.123, 56.1]]
 
         # python to java
-        java_list = gateway.jvm.java.util.ArrayList()
+        java_list = pbg.gateway.jvm.java.util.ArrayList()
         pb.mmap_list_python_to_TupleF64(original, java_list)
 
         # java to python

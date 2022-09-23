@@ -17,7 +17,7 @@ def convert_from_boof_calibration_observations(jobservations):
 
 def convert_into_boof_calibration_observations(observations):
     pixels = observations["pixels"]
-    jobs = gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation()
+    jobs = pbg.gateway.jvm.boofcv.alg.geo.calibration.CalibrationObservation()
     for o in pixels:
         jobs.add(int(o[0]), float(o[1]), float(o[2]))
         # TODO use this other accessor after 0.30
@@ -43,7 +43,7 @@ def calibrate_brown(width:int, height:int, observations: List, detector, num_rad
     :return:
     """
     jlayout = detector.java_obj.getLayout()
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
+    jcalib_planar = pbg.gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
     jcalib_planar.initialize(width, height, jlayout)
     jcalib_planar.configurePinhole(zero_skew, int(num_radial), tangential)
     for o in observations:
@@ -76,7 +76,7 @@ def calibrate_universal(width:int, height:int, observations: List, detector, num
     :return: (intrinsic, errors)
     """
     jlayout = detector.java_obj.getLayout()
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
+    jcalib_planar = pbg.gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
     jcalib_planar.initialize(width, height, jlayout)
     if mirror_offset is None:
         jcalib_planar.configureUniversalOmni(zero_skew, int(num_radial), tangential)
@@ -112,7 +112,7 @@ def calibrate_kannala_brandt(width:int, height:int, observations: List, detector
     :return: (intrinsic, errors)
     """
     jlayout = detector.java_obj.getLayout()
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
+    jcalib_planar = pbg.gateway.jvm.boofcv.abst.geo.calibration.CalibrateMonoPlanar()
     jcalib_planar.initialize(width, height, jlayout)
     jcalib_planar.configureKannalaBrandt(zero_skew, num_symmetric, num_asymmetric)
 
@@ -144,10 +144,10 @@ def calibrate_stereo(shape_left, shape_right,
     :return:
     """
     jlayout = detector.java_obj.getLayout(0) # Hard coded for a single target
-    jcalib_planar = gateway.jvm.boofcv.abst.geo.calibration.CalibrateStereoPlanar(jlayout)
+    jcalib_planar = pbg.gateway.jvm.boofcv.abst.geo.calibration.CalibrateStereoPlanar(jlayout)
     jcalib_planar.configure(zero_skew, int(num_radial), tangential)
-    jcalib_planar.initialize(gateway.jvm.boofcv.struct.image.ImageDimension(shape_left[0], shape_left[1]),
-                             gateway.jvm.boofcv.struct.image.ImageDimension(shape_right[0], shape_right[1]))
+    jcalib_planar.initialize(pbg.gateway.jvm.boofcv.struct.image.ImageDimension(shape_left[0], shape_left[1]),
+                             pbg.gateway.jvm.boofcv.struct.image.ImageDimension(shape_right[0], shape_right[1]))
 
     for idx in range(len(observations_left)):
         jobs_left = convert_into_boof_calibration_observations(observations_left[idx])

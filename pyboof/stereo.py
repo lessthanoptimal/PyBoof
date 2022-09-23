@@ -5,7 +5,7 @@ from pyboof import ClassSingleBand_to_dtype
 from pyboof import JavaConfig
 from pyboof import JavaWrapper
 from pyboof import dtype_to_Class_SingleBand
-from pyboof import gateway
+from pyboof import pbg
 import numpy as np
 
 
@@ -24,7 +24,7 @@ class StereoParameters:
 
     def load(self, path_to_file):
         abs_path_to_file = os.path.abspath(path_to_file)
-        boof_stereo = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(abs_path_to_file)
+        boof_stereo = pbg.gateway.jvm.boofcv.io.calibration.CalibrationIO.load(abs_path_to_file)
 
         if boof_stereo is None:
             raise RuntimeError("Can't load stereo parameters")
@@ -37,7 +37,7 @@ class StereoParameters:
         self.right_to_left = pyboof.Se3_F64(boof_stereo_param.getRightToLeft())
 
     def convert_to_boof(self):
-        boof = gateway.jvm.boofcv.struct.calib.StereoParameters()
+        boof = pbg.gateway.jvm.boofcv.struct.calib.StereoParameters()
         boof.getLeft().set(self.left.convert_to_boof())
         boof.getRight().set(self.right.convert_to_boof())
         boof.getRightToLeft().set(self.right_to_left.java_obj)
@@ -62,20 +62,20 @@ class DisparityError:
     """
     Error functions which can be used with block-matching stereo disparity approaches
     """
-    SAD = gateway.jvm.boofcv.factory.disparity.DisparityError.SAD
-    CENSUS = gateway.jvm.boofcv.factory.disparity.DisparityError.CENSUS
-    NCC = gateway.jvm.boofcv.factory.disparity.DisparityError.NCC
-    values = gateway.jvm.boofcv.factory.disparity.DisparityError.values()
+    SAD = pbg.gateway.jvm.boofcv.factory.disparity.DisparityError.SAD
+    CENSUS = pbg.gateway.jvm.boofcv.factory.disparity.DisparityError.CENSUS
+    NCC = pbg.gateway.jvm.boofcv.factory.disparity.DisparityError.NCC
+    values = pbg.gateway.jvm.boofcv.factory.disparity.DisparityError.values()
 
 
 class DisparitySgmError:
     """
     Error functions which can be used with SGM stereo disparity
     """
-    ABSOLUTE_DIFFERENCE = gateway.jvm.boofcv.factory.disparity.DisparitySgmError.ABSOLUTE_DIFFERENCE
-    CENSUS = gateway.jvm.boofcv.factory.disparity.DisparitySgmError.CENSUS
-    MUTUAL_INFORMATION = gateway.jvm.boofcv.factory.disparity.DisparitySgmError.MUTUAL_INFORMATION
-    values = gateway.jvm.boofcv.factory.disparity.DisparitySgmError.values()
+    ABSOLUTE_DIFFERENCE = pbg.gateway.jvm.boofcv.factory.disparity.DisparitySgmError.ABSOLUTE_DIFFERENCE
+    CENSUS = pbg.gateway.jvm.boofcv.factory.disparity.DisparitySgmError.CENSUS
+    MUTUAL_INFORMATION = pbg.gateway.jvm.boofcv.factory.disparity.DisparitySgmError.MUTUAL_INFORMATION
+    values = pbg.gateway.jvm.boofcv.factory.disparity.DisparitySgmError.values()
 
 
 class StereoRectification:
@@ -98,13 +98,13 @@ class StereoRectification:
         boof_left = intrinsic_left.convert_to_boof()
         boof_right = intrinsic_right.convert_to_boof()
 
-        K1 = gateway.jvm.org.ejml.data.DMatrixRMaj(3, 3)
-        K2 = gateway.jvm.org.ejml.data.DMatrixRMaj(3, 3)
-        gateway.jvm.boofcv.alg.geo.PerspectiveOps.pinholeToMatrix(boof_left, K1)
-        gateway.jvm.boofcv.alg.geo.PerspectiveOps.pinholeToMatrix(boof_right, K2)
+        K1 = pbg.gateway.jvm.org.ejml.data.DMatrixRMaj(3, 3)
+        K2 = pbg.gateway.jvm.org.ejml.data.DMatrixRMaj(3, 3)
+        pbg.gateway.jvm.boofcv.alg.geo.PerspectiveOps.pinholeToMatrix(boof_left, K1)
+        pbg.gateway.jvm.boofcv.alg.geo.PerspectiveOps.pinholeToMatrix(boof_right, K2)
         left_to_right = right_to_left.invert()
 
-        rectify_alg = gateway.jvm.boofcv.alg.geo.RectifyImageOps.createCalibrated()
+        rectify_alg = pbg.gateway.jvm.boofcv.alg.geo.RectifyImageOps.createCalibrated()
 
         rectify_alg.process(K1, pyboof.Se3_F64().java_obj, K2, left_to_right.get_java_object())
 
@@ -128,7 +128,7 @@ class StereoRectification:
         self.rectK.set(self.orig_rectK)
 
         boof_left = self.intrinsic_left.convert_to_boof()
-        gateway.jvm.boofcv.alg.geo.RectifyImageOps.allInsideLeft(boof_left, self.rect1, self.rect2, self.rectK, None)
+        pbg.gateway.jvm.boofcv.alg.geo.RectifyImageOps.allInsideLeft(boof_left, self.rect1, self.rect2, self.rectK, None)
 
     def full_view_left(self):
         """
@@ -139,7 +139,7 @@ class StereoRectification:
         self.rectK.set(self.orig_rectK)
 
         boof_left = self.intrinsic_left.convert_to_boof()
-        gateway.jvm.boofcv.alg.geo.RectifyImageOps.fullViewLeft(boof_left, self.rect1, self.rect2, self.rectK, None)
+        pbg.gateway.jvm.boofcv.alg.geo.RectifyImageOps.fullViewLeft(boof_left, self.rect1, self.rect2, self.rectK, None)
 
     def create_distortion(self, image_type, is_left_image):
         """
@@ -156,11 +156,11 @@ class StereoRectification:
         boof_border = pyboof.border_to_java(pyboof.Border.SKIP)
 
         if is_left_image:
-            boof_distorter = gateway.jvm.boofcv.alg.geo.RectifyDistortImageOps. \
+            boof_distorter = pbg.gateway.jvm.boofcv.alg.geo.RectifyDistortImageOps. \
                 rectifyImage(self.intrinsic_left.convert_to_boof(), pyboof.ejml_matrix_d_to_f(self.rect1), boof_border,
                              boof_image_type)
         else:
-            boof_distorter = gateway.jvm.boofcv.alg.geo.RectifyDistortImageOps. \
+            boof_distorter = pbg.gateway.jvm.boofcv.alg.geo.RectifyDistortImageOps. \
                 rectifyImage(self.intrinsic_right.convert_to_boof(), pyboof.ejml_matrix_d_to_f(self.rect2), boof_border,
                              boof_image_type)
         return pyboof.ImageDistort(boof_distorter)
@@ -216,7 +216,7 @@ class FactoryStereoDisparity:
         if config and not config.subpixel:
             disp_type = dtype_to_Class_SingleBand(np.uint8)
 
-        java_obj = gateway.jvm.boofcv.factory.disparity.FactoryStereoDisparity. \
+        java_obj = pbg.gateway.jvm.boofcv.factory.disparity.FactoryStereoDisparity. \
             blockMatch(config.java_obj, self.boof_image_type, disp_type)
         return StereoDisparity(java_obj)
 
@@ -225,7 +225,7 @@ class FactoryStereoDisparity:
         if config and not config.subpixel:
             disp_type = dtype_to_Class_SingleBand(np.uint8)
 
-        java_obj = gateway.jvm.boofcv.factory.disparity.FactoryStereoDisparity. \
+        java_obj = pbg.gateway.jvm.boofcv.factory.disparity.FactoryStereoDisparity. \
             blockMatchBest5(config.java_obj, self.boof_image_type, disp_type)
         return StereoDisparity(java_obj)
 
@@ -234,6 +234,6 @@ class FactoryStereoDisparity:
         if config and not config.subpixel:
             disp_type = dtype_to_Class_SingleBand(np.uint8)
 
-        java_obj = gateway.jvm.boofcv.factory.disparity.FactoryStereoDisparity. \
+        java_obj = pbg.gateway.jvm.boofcv.factory.disparity.FactoryStereoDisparity. \
             sgm(config.java_obj, self.boof_image_type, disp_type)
         return StereoDisparity(java_obj)

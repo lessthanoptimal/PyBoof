@@ -7,8 +7,8 @@ class GradientFlow:
         self.derivY = derivY
 
     def visualize(self):
-        buffered_image = gateway.jvm.boofcv.gui.image.VisualizeImageData.colorizeGradient(self.derivX,self.derivY,-1)
-        gateway.jvm.boofcv.gui.image.ShowImages.showWindow(buffered_image,"Gradient")
+        buffered_image = pbg.gateway.jvm.boofcv.gui.image.VisualizeImageData.colorizeGradient(self.derivX,self.derivY,-1)
+        pbg.gateway.jvm.boofcv.gui.image.ShowImages.showWindow(buffered_image,"Gradient")
 
 
 class BoofFlow:
@@ -28,7 +28,7 @@ class BoofFlow:
         return self.image.getHeight()
 
     def visualize(self, name="image"):
-        gateway.jvm.boofcv.gui.image.ShowImages.showWindow(self.image,name)
+        pbg.gateway.jvm.boofcv.gui.image.ShowImages.showWindow(self.image,name)
 
     def blur_gaussian(self,sigma=-1.0,radius=1):
         blurred = self.image._createNew(self.image.getWidth(),self.image.getHeight())

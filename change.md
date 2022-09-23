@@ -1,3 +1,7 @@
+### Version 0.42
+- Globals are handled in a way they can be updated now
+- Re-initializing works. Thanks gaurav-t-sca for the bug report.
+
 ### Version 0.41
 - Updated to BoofCV 0.41
 - QR Code

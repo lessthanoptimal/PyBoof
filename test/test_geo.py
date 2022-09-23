@@ -2,7 +2,7 @@
 
 import unittest
 
-from pyboof import gateway
+from pyboof import pbg
 import pyboof as pb
 import numpy as np
 import os
@@ -159,7 +159,7 @@ class TestMemMapFunctions(unittest.TestCase):
         original = [((1, 2.34),(4,4.5)), ((-23.4, 934.123),(5.1,3.2))]
 
         # python to java
-        java_list = gateway.jvm.java.util.ArrayList()
+        java_list = pbg.gateway.jvm.java.util.ArrayList()
         pb.mmap_list_python_to_AssociatedPair(original, java_list)
 
         # java to python
@@ -181,7 +181,7 @@ class TestMemMapFunctions(unittest.TestCase):
         original = [(1, 2.34), (-23.4, 934.123)]
 
         # python to java
-        java_list = gateway.jvm.java.util.ArrayList()
+        java_list = pbg.gateway.jvm.java.util.ArrayList()
         pb.mmap_list_python_to_Point2D(original, java_list, np.double)
 
         # java to python
@@ -201,7 +201,7 @@ class TestMemMapFunctions(unittest.TestCase):
         original = [(1, 2.34), (-23.4, 934.123)]
 
         # python to java
-        java_list = gateway.jvm.java.util.ArrayList()
+        java_list = pbg.gateway.jvm.java.util.ArrayList()
         pb.mmap_list_python_to_Point2D(original, java_list, float)
 
         # java to python
@@ -221,7 +221,7 @@ class TestMemMapFunctions(unittest.TestCase):
         original = [(1, 2), (-23, 934)]
 
         # python to java
-        java_list = gateway.jvm.java.util.ArrayList()
+        java_list = pbg.gateway.jvm.java.util.ArrayList()
         pb.mmap_list_python_to_Point2D(original, java_list, np.int32)
 
         # java to python
@@ -241,7 +241,7 @@ class TestMemMapFunctions(unittest.TestCase):
         original = [(1, 2), (-23, 934)]
 
         # python to java
-        java_list = gateway.jvm.java.util.ArrayList()
+        java_list = pbg.gateway.jvm.java.util.ArrayList()
         pb.mmap_list_python_to_Point2D(original, java_list, np.int16)
 
         # java to python
@@ -261,7 +261,7 @@ class TestMemMapFunctions(unittest.TestCase):
         original = [(1, 2.34, 9.1), (-23.4, 934.123, -0.234)]
 
         # python to java
-        java_list = gateway.jvm.java.util.ArrayList()
+        java_list = pbg.gateway.jvm.java.util.ArrayList()
         pb.mmap_list_python_to_Point3D(original, java_list, float)
 
         # java to python
@@ -282,7 +282,7 @@ class TestMemMapFunctions(unittest.TestCase):
         original = [(1, 2.34, 9.1), (-23.4, 934.123, -0.234)]
 
         # python to java
-        java_list = gateway.jvm.java.util.ArrayList()
+        java_list = pbg.gateway.jvm.java.util.ArrayList()
         pb.mmap_list_python_to_Point3D(original, java_list, np.double)
 
         # java to python

@@ -6,7 +6,7 @@ import numpy as np
 import py4j.java_gateway as jg
 from pyboof.common import *
 from pyboof.ip import *
-from pyboof import gateway
+from pyboof import pbg
 from abc import ABCMeta, abstractmethod
 import os
 
@@ -25,7 +25,7 @@ def real_nparray_to_ejml32(array):
     num_rows = array.shape[0]
     num_cols = array.shape[1]
 
-    M = gateway.jvm.org.ejml.data.FMatrixRMaj(num_rows, num_cols)
+    M = pbg.gateway.jvm.org.ejml.data.FMatrixRMaj(num_rows, num_cols)
     for i in range(num_rows):
         for j in range(num_cols):
             M.unsafe_set(i, j, array[i, j])
@@ -36,7 +36,7 @@ def real_nparray_to_ejml64(array):
     num_rows = array.shape[0]
     num_cols = array.shape[1]
 
-    M = gateway.jvm.org.ejml.data.DMatrixRMaj(num_rows, num_cols)
+    M = pbg.gateway.jvm.org.ejml.data.DMatrixRMaj(num_rows, num_cols)
     for i in range(num_rows):
         for j in range(num_cols):
             M.unsafe_set(i, j, array[i, j])
@@ -46,7 +46,7 @@ def real_nparray_to_ejml64(array):
 class Se3_F64(JavaWrapper):
     def __init__(self, java_Se3F64=None):
         if java_Se3F64 is None:
-            JavaWrapper.__init__(self, gateway.jvm.georegression.struct.se.Se3_F64())
+            JavaWrapper.__init__(self, pbg.gateway.jvm.georegression.struct.se.Se3_F64())
         else:
             JavaWrapper.__init__(self, java_Se3F64)
 
@@ -62,19 +62,19 @@ class Se3_F64(JavaWrapper):
 
 
 def create_java_point_2D_f32(x=0., y=0.):
-    return gateway.jvm.georegression.struct.point.Point2D_F32(float(x), float(y))
+    return pbg.gateway.jvm.georegression.struct.point.Point2D_F32(float(x), float(y))
 
 
 def create_java_point_2D_f64(x=0., y=0.):
-    return gateway.jvm.georegression.struct.point.Point2D_F64(float(x), float(y))
+    return pbg.gateway.jvm.georegression.struct.point.Point2D_F64(float(x), float(y))
 
 
 def create_java_point_3D_f32(x=0., y=0., z=0.):
-    return gateway.jvm.georegression.struct.point.Point3D_F32(float(x), float(y), float(z))
+    return pbg.gateway.jvm.georegression.struct.point.Point3D_F32(float(x), float(y), float(z))
 
 
 def create_java_point_3D_f64(x=0., y=0., z=0.):
-    return gateway.jvm.georegression.struct.point.Point3D_F64(float(x), float(y), float(z))
+    return pbg.gateway.jvm.georegression.struct.point.Point3D_F64(float(x), float(y), float(z))
 
 
 def tuple_to_Point2D_F64(ptuple, jpoint=None):
@@ -117,10 +117,10 @@ class Point2D:
         elif type(o) is tuple:
             self.x = o[0]
             self.y = o[1]
-        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.point.Point2D_F64):
+        elif jg.is_instance_of(pbg.gateway, o, pbg.gateway.jvm.georegression.struct.point.Point2D_F64):
             self.x = o.getX()
             self.y = o.getY()
-        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.point.Point2D_F32):
+        elif jg.is_instance_of(pbg.gateway, o, pbg.gateway.jvm.georegression.struct.point.Point2D_F32):
             self.x = o.getX()
             self.y = o.getY()
         else:
@@ -170,7 +170,7 @@ class Polygon2D:
         return [(v.x, v.y) for v in self.vertexes]
 
     def convert_boof(self):
-        jobj = gateway.jvm.georegression.struct.shapes.Polygon2D_F64(len(self.vertexes))
+        jobj = pbg.gateway.jvm.georegression.struct.shapes.Polygon2D_F64(len(self.vertexes))
         for idx, v in enumerate(self.vertexes):
             jobj.set(idx, v.x, v.y)
         return jobj
@@ -180,11 +180,11 @@ class Polygon2D:
             self.vertexes = []
             for v in src.vertexes:
                 self.vertexes.append(v.copy())
-        elif jg.is_instance_of(gateway, src, gateway.jvm.georegression.struct.shapes.Polygon2D_F64):
+        elif jg.is_instance_of(pbg.gateway, src, pbg.gateway.jvm.georegression.struct.shapes.Polygon2D_F64):
             self.vertexes = []
             for i in range(src.size()):
                 self.vertexes.append(Point2D(src.get(i)))
-        elif jg.is_instance_of(gateway, src, gateway.jvm.georegression.struct.shapes.Polygon2D_F32):
+        elif jg.is_instance_of(pbg.gateway, src, pbg.gateway.jvm.georegression.struct.shapes.Polygon2D_F32):
             self.vertexes = []
             for i in range(src.size()):
                 self.vertexes.append(Point2D(src.get(i)))
@@ -233,7 +233,7 @@ class Quadrilateral2D:
         c = self.c.convert_to_boof()
         d = self.d.convert_to_boof()
 
-        return gateway.jvm.georegression.struct.shapes.Quadrilateral_F64(a, b, c, d)
+        return pbg.gateway.jvm.georegression.struct.shapes.Quadrilateral_F64(a, b, c, d)
 
     def set(self, o):
         if type(o) is Quadrilateral2D:
@@ -242,7 +242,7 @@ class Quadrilateral2D:
             self.c.set(o.c)
             self.d.set(o.d)
 
-        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.shapes.Quadrilateral_F64):
+        elif jg.is_instance_of(pbg.gateway, o, pbg.gateway.jvm.georegression.struct.shapes.Quadrilateral_F64):
             self.a.set(o.getA())
             self.b.set(o.getB())
             self.c.set(o.getC())
@@ -285,10 +285,10 @@ class LineParametric2D:
         if type(o) is LineParametric2D:
             self.p.set(o.p)
             self.slope.set(o.slope)
-        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.line.LineParametric2D_F32):
+        elif jg.is_instance_of(pbg.gateway, o, pbg.gateway.jvm.georegression.struct.line.LineParametric2D_F32):
             self.p.set((o.getX(), o.getY()))
             self.slope.set((o.getSlopeX(), o.getSlopeY()))
-        elif jg.is_instance_of(gateway, o, gateway.jvm.georegression.struct.line.LineParametric2D_F64):
+        elif jg.is_instance_of(pbg.gateway, o, pbg.gateway.jvm.georegression.struct.line.LineParametric2D_F64):
             self.p.set((o.getX(), o.getY()))
             self.slope.set((o.getSlopeX(), o.getSlopeY()))
         else:
@@ -301,14 +301,14 @@ class LineParametric2D:
             sx = float(self.slope.x)
             sy = float(self.slope.y)
 
-            return gateway.jvm.georegression.struct.line.LineParametric2D_F32(x, y, sx, sy)
+            return pbg.gateway.jvm.georegression.struct.line.LineParametric2D_F32(x, y, sx, sy)
         elif dtype == np.double:
             x = self.p.x
             y = self.p.y
             sx = self.slope.x
             sy = self.slope.y
 
-            return gateway.jvm.georegression.struct.line.LineParametric2D_F64(x, y, sx, sy)
+            return pbg.gateway.jvm.georegression.struct.line.LineParametric2D_F64(x, y, sx, sy)
         else:
             raise Exception("Unknown dtype")
 
@@ -361,7 +361,7 @@ class CameraPinhole(CameraModel):
         :return: this class
         """
         file_path = os.path.abspath(file_name)
-        boof_intrinsic = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
+        boof_intrinsic = pbg.gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
 
         if boof_intrinsic is None:
             raise RuntimeError("Can't load intrinsic parameters")
@@ -372,7 +372,7 @@ class CameraPinhole(CameraModel):
     def save(self, file_name):
         file_path = os.path.abspath(file_name)
         java_obj = self.convert_to_boof()
-        gateway.jvm.boofcv.io.calibration.CalibrationIO.save(java_obj, file_path)
+        pbg.gateway.jvm.boofcv.io.calibration.CalibrationIO.save(java_obj, file_path)
 
     def set_matrix(self, fx: float, fy: float, skew: float, cx: float, cy: float):
         self.fx = fx
@@ -405,7 +405,7 @@ class CameraPinhole(CameraModel):
 
     def convert_to_boof(self, storage=None):
         if storage is None:
-            boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
+            boof_intrinsic = pbg.gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
         else:
             boof_intrinsic = storage
         boof_intrinsic.setFx(float(self.fx))
@@ -477,13 +477,13 @@ class CameraBrown(CameraPinhole):
 
     def convert_to_boof(self, storage=None):
         if storage is None:
-            boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
+            boof_intrinsic = pbg.gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
         else:
             boof_intrinsic = storage
 
         CameraPinhole.convert_to_boof(self, boof_intrinsic)
         if self.radial is not None:
-            jarray = gateway.new_array(gateway.jvm.double, len(self.radial))
+            jarray = pbg.gateway.new_array(pbg.gateway.jvm.double, len(self.radial))
             for i in range(len(self.radial)):
                 jarray[i] = self.radial[i]
             boof_intrinsic.setRadial(jarray)
@@ -518,7 +518,7 @@ class CameraUniversalOmni(CameraBrown):
 
     def convert_to_boof(self, storage=None):
         if storage is None:
-            boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraUniversalOmni(0)
+            boof_intrinsic = pbg.gateway.jvm.boofcv.struct.calib.CameraUniversalOmni(0)
         else:
             boof_intrinsic = storage
         CameraBrown.convert_to_boof(self, boof_intrinsic)
@@ -563,7 +563,7 @@ class CameraKannalaBrandt(CameraPinhole):
 
     def convert_to_boof(self, storage=None):
         if storage is None:
-            boof_intrinsic = gateway.jvm.boofcv.struct.calib.CameraKannalaBrandt(len(self.symmetric), len(self.radial))
+            boof_intrinsic = pbg.gateway.jvm.boofcv.struct.calib.CameraKannalaBrandt(len(self.symmetric), len(self.radial))
         else:
             boof_intrinsic = storage
         CameraPinhole.convert_to_boof(self, boof_intrinsic)
@@ -597,7 +597,7 @@ class StereoParameters(CameraModel):
 
     def load(self, file_name: str):
         file_path = os.path.abspath(file_name)
-        boof_parameters = gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
+        boof_parameters = pbg.gateway.jvm.boofcv.io.calibration.CalibrationIO.load(file_path)
 
         if boof_parameters is None:
             raise RuntimeError("Can't load stereo parameters")
@@ -606,7 +606,7 @@ class StereoParameters(CameraModel):
     def save(self, file_name: str):
         file_path = os.path.abspath(file_name)
         java_obj = self.convert_to_boof()
-        gateway.jvm.boofcv.io.calibration.CalibrationIO.save(java_obj, file_path)
+        pbg.gateway.jvm.boofcv.io.calibration.CalibrationIO.save(java_obj, file_path)
 
     def set_from_boof(self, boof_parameters):
         self.left = CameraBrown(boof_parameters.left)
@@ -615,7 +615,7 @@ class StereoParameters(CameraModel):
 
     def convert_to_boof(self, storage=None):
         if storage is None:
-            boof_parameters = gateway.jvm.boofcv.struct.calib.StereoParameters()
+            boof_parameters = pbg.gateway.jvm.boofcv.struct.calib.StereoParameters()
             # In BoofCV 0.40 StereoParameters will not be initialized with null and this will not be needed
             boof_parameters.setLeft(CameraBrown().convert_to_boof())
             boof_parameters.setRight(CameraBrown().convert_to_boof())
@@ -708,13 +708,13 @@ def create_narrow_lens_distorter(camera_model):
         raise RuntimeError("CameraUniversalOmni is not a narrow FOV camera model")
     elif isinstance(camera_model, CameraPinhole):
         boof_model = camera_model.convert_to_boof()
-        java_obj = gateway.jvm.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
+        java_obj = pbg.gateway.jvm.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
     elif isinstance(camera_model, CameraBrown):
         boof_model = camera_model.convert_to_boof()
         if camera_model.is_distorted():
-            java_obj = gateway.jvm.boofcv.alg.distort.brown.LensDistortionBrown(boof_model)
+            java_obj = pbg.gateway.jvm.boofcv.alg.distort.brown.LensDistortionBrown(boof_model)
         else:
-            java_obj = gateway.jvm.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
+            java_obj = pbg.gateway.jvm.boofcv.alg.distort.pinhole.LensDistortionPinhole(boof_model)
     else:
         raise RuntimeError("Unknown camera model {}".format(type(camera_model)))
 
@@ -730,10 +730,10 @@ def create_wide_lens_distorter(camera_model):
     """
     if isinstance(camera_model, CameraUniversalOmni):
         boof_model = camera_model.convert_to_boof()
-        java_obj = gateway.jvm.boofcv.alg.distort.universal.LensDistortionUniversalOmni(boof_model)
+        java_obj = pbg.gateway.jvm.boofcv.alg.distort.universal.LensDistortionUniversalOmni(boof_model)
     elif isinstance(camera_model, CameraKannalaBrandt):
         boof_model = camera_model.convert_to_boof()
-        java_obj = gateway.jvm.boofcv.alg.distort.kanbra.LensDistortionKannalaBrandt(boof_model)
+        java_obj = pbg.gateway.jvm.boofcv.alg.distort.kanbra.LensDistortionKannalaBrandt(boof_model)
     else:
         raise RuntimeError("Unknown camera model {}".format(type(camera_model)))
 
@@ -759,7 +759,7 @@ class NarrowToWideFovPtoP(JavaWrapper):
         """
         narrow_distort = create_narrow_lens_distorter(narrow_model)
         wide_distort = create_wide_lens_distorter(wide_model)
-        java_object = gateway.jvm.boofcv.alg.distort.NarrowToWidePtoP_F32(narrow_distort.java_obj,
+        java_object = pbg.gateway.jvm.boofcv.alg.distort.NarrowToWidePtoP_F32(narrow_distort.java_obj,
                                                                           wide_distort.java_obj)
         JavaWrapper.__init__(self, java_object)
 
@@ -786,8 +786,8 @@ class NarrowToWideFovPtoP(JavaWrapper):
         java_image_type = image_type.java_obj
         java_interp = FactoryInterpolation(image_type).bilinear(border_type=border_type)
 
-        java_alg = gateway.jvm.boofcv.factory.distort.FactoryDistort.distort(False, java_interp, java_image_type)
-        java_pixel_transform = gateway.jvm.boofcv.struct.distort.PointToPixelTransform_F32(self.java_obj)
+        java_alg = pbg.gateway.jvm.boofcv.factory.distort.FactoryDistort.distort(False, java_interp, java_image_type)
+        java_pixel_transform = pbg.gateway.jvm.boofcv.struct.distort.PointToPixelTransform_F32(self.java_obj)
         java_alg.setModel(java_pixel_transform)
         return ImageDistort(java_alg)
 
@@ -800,11 +800,11 @@ class AdjustmentType:
 
 def adjustment_to_java(value):
     if value == AdjustmentType.NONE:
-        return gateway.jvm.boofcv.alg.distort.AdjustmentType.valueOf("NONE")
+        return pbg.gateway.jvm.boofcv.alg.distort.AdjustmentType.valueOf("NONE")
     elif value == AdjustmentType.FULL_VIEW:
-        return gateway.jvm.boofcv.alg.distort.AdjustmentType.valueOf("FULL_VIEW")
+        return pbg.gateway.jvm.boofcv.alg.distort.AdjustmentType.valueOf("FULL_VIEW")
     elif value == AdjustmentType.EXPAND:
-        return gateway.jvm.boofcv.alg.distort.AdjustmentType.valueOf("EXPAND")
+        return pbg.gateway.jvm.boofcv.alg.distort.AdjustmentType.valueOf("EXPAND")
     else:
         raise RuntimeError("Unknown type")
 
@@ -864,15 +864,15 @@ def create_change_camera_model(intrinsic_orig, intrinsic_desired, image_type,
     java_border = border_to_java(border)
     java_original = intrinsic_orig.convert_to_boof()
     java_desired = intrinsic_desired.convert_to_boof()
-    java_intrinsic_out = gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
-    id = gateway.jvm.boofcv.alg.distort.LensDistortionOps.changeCameraModel(
+    java_intrinsic_out = pbg.gateway.jvm.boofcv.struct.calib.CameraPinholeBrown()
+    id = pbg.gateway.jvm.boofcv.alg.distort.LensDistortionOps.changeCameraModel(
         java_adjustment, java_border, java_original, java_desired, java_intrinsic_out, java_image_type)
     return (ImageDistort(id), CameraPinhole(java_intrinsic_out))
 
 def p2b_list_AssociatedPair(pylist):
-    java_list = gateway.jvm.java.util.ArrayList()
+    java_list = pbg.gateway.jvm.java.util.ArrayList()
 
-    if pyboof.mmap_file:
+    if pbg.mmap_file:
         mmap_list_python_to_AssociatedPair(pylist, java_list)
     else:
         exception_use_mmap()
@@ -888,7 +888,7 @@ def b2p_list_AssociatedPair(boof_list):
     """
     pylist = []
 
-    if pyboof.mmap_file:
+    if pbg.mmap_file:
         mmap_list_AssociatedPair_to_python(boof_list, pylist)
     else:
         exception_use_mmap()
@@ -902,9 +902,9 @@ def p2b_list_point2D(pylist, dtype):
     :type pylist: list[(float,float)]
     :return: List of 2d points in BoofCV format
     """
-    java_list = gateway.jvm.java.util.ArrayList()
+    java_list = pbg.gateway.jvm.java.util.ArrayList()
 
-    if pyboof.mmap_file:
+    if pbg.mmap_file:
         mmap_list_python_to_Point2D(pylist, java_list, dtype)
     else:
         exception_use_mmap()
@@ -920,7 +920,7 @@ def b2p_list_point2D(boof_list, dtype):
     """
     pylist = []
 
-    if pyboof.mmap_file:
+    if pbg.mmap_file:
         mmap_list_Point2D_to_python(boof_list, pylist, dtype)
     else:
         exception_use_mmap()
@@ -934,7 +934,7 @@ def p2b_list_LineParametric(pylist, dtype):
     :type pylist: list[(float,float)]
     :return: List of 2d points in BoofCV format
     """
-    java_list = gateway.jvm.java.util.ArrayList()
+    java_list = pbg.gateway.jvm.java.util.ArrayList()
 
     for o in pylist:
         java_list.add(o.convert_to_boof(dtype))
@@ -951,10 +951,10 @@ def mmap_list_python_to_AssociatedPair(pylist, java_list):
     :param java_list: (Output) Java list to store AssociatedPair
     """
     num_elements = len(pylist)
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     # max number of list elements it can write at once
-    max_elements = (pyboof.mmap_size - 100) / (4 * 8)
+    max_elements = (pbg.mmap_size - 100) / (4 * 8)
 
     curr = 0
     while curr < num_elements:
@@ -967,7 +967,7 @@ def mmap_list_python_to_AssociatedPair(pylist, java_list):
             mm.write(struct.pack('>4d', float(p[0][0]), float(p[0][1]), float(p[1][0]), float(p[1][1])))
 
         # Now tell the java end to read what it just wrote
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_AssociatedPair_F64(java_list)
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_AssociatedPair_F64(java_list)
 
         # move on to the next block
         curr = curr + num_write
@@ -981,11 +981,11 @@ def mmap_list_AssociatedPair_to_python(java_list, pylist):
     :type pylist: list[((float,float),(float,float))]
     """
     num_elements = java_list.size()
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     num_read = 0
     while num_read < num_elements:
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_AssociatedPair_F64(java_list, num_read)
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_AssociatedPair_F64(java_list, num_read)
         mm.seek(0)
         data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
         if data_type != pyboof.MmapType.LIST_ASSOCIATEDPAIR_F64:
@@ -1050,7 +1050,7 @@ def mmap_list_python_to_Point2D(pylist, java_list, dtype):
     :param java_list: (Output) Java list to store Point2D_64F
     """
     num_elements = len(pylist)
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     num_bytes, char_type = dtype_to_unpack(dtype)
     num_bytes_per_point = num_bytes * 2
@@ -1059,7 +1059,7 @@ def mmap_list_python_to_Point2D(pylist, java_list, dtype):
     mmap_type = dtype_to_mmaplistpoints(dtype)
 
     # max number of list elements it can write at once
-    max_elements = int((pyboof.mmap_size - 100) / num_bytes_per_point)
+    max_elements = int((pbg.mmap_size - 100) / num_bytes_per_point)
 
     curr = 0
     while curr < num_elements:
@@ -1071,7 +1071,7 @@ def mmap_list_python_to_Point2D(pylist, java_list, dtype):
             mm.write(struct.pack(format_string, *pylist[i]))
 
         # Now tell the java end to read what it just wrote
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Point2D(java_list, mmap_type)
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Point2D(java_list, mmap_type)
 
         # move on to the next block
         curr = curr + num_write
@@ -1086,7 +1086,7 @@ def mmap_list_Point2D_to_python(java_list, pylist, dtype):
     :param dtype The numpy dtype
     """
     num_elements = java_list.size()
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     num_bytes, char_type = dtype_to_unpack(dtype)
     num_bytes_per_point = num_bytes * 2
@@ -1096,7 +1096,7 @@ def mmap_list_Point2D_to_python(java_list, pylist, dtype):
 
     num_read = 0
     while num_read < num_elements:
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point2D(java_list, mmap_type, num_read)
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point2D(java_list, mmap_type, num_read)
         mm.seek(0)
         data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
         if data_type != mmap_type:
@@ -1114,7 +1114,7 @@ def mmap_list_python_to_Point3D(pylist, java_list, dtype):
     Converts a python list of 3d float tuples into a list of Point3D_64F in java using memmap file
     """
     num_elements = len(pylist)
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     num_bytes, char_type = dtype_to_unpack(dtype)
     num_bytes_per_point = num_bytes * 3
@@ -1123,7 +1123,7 @@ def mmap_list_python_to_Point3D(pylist, java_list, dtype):
     mmap_type = dtype_to_mmaplistpoints3d(dtype)
 
     # max number of list elements it can write at once
-    max_elements = int((pyboof.mmap_size - 100) / num_bytes_per_point)
+    max_elements = int((pbg.mmap_size - 100) / num_bytes_per_point)
 
     curr = 0
     while curr < num_elements:
@@ -1135,7 +1135,7 @@ def mmap_list_python_to_Point3D(pylist, java_list, dtype):
             mm.write(struct.pack(format_string, *pylist[i]))
 
         # Now tell the java end to read what it just wrote
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Point3D(java_list, mmap_type)
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.read_List_Point3D(java_list, mmap_type)
 
         # move on to the next block
         curr = curr + num_write
@@ -1146,7 +1146,7 @@ def mmap_list_Point3D_to_python(java_list, pylist, dtype):
     Converts a java list of Point3D_* into a python list of float 3D tuples using memmap file
     """
     num_elements = java_list.size()
-    mm = pyboof.mmap_file
+    mm = pbg.mmap_file
 
     num_bytes, char_type = dtype_to_unpack(dtype)
     num_bytes_per_point = num_bytes * 3
@@ -1156,7 +1156,7 @@ def mmap_list_Point3D_to_python(java_list, pylist, dtype):
 
     num_read = 0
     while num_read < num_elements:
-        gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point3D(java_list, mmap_type, num_read)
+        pbg.gateway.jvm.pyboof.PyBoofEntryPoint.mmap.write_List_Point3D(java_list, mmap_type, num_read)
         mm.seek(0)
         data_type, num_found = struct.unpack(">HI", mm.read(2 + 4))
         if data_type != mmap_type:

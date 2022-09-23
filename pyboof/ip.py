@@ -1,4 +1,4 @@
-from pyboof import gateway
+from pyboof import pbg
 
 from pyboof.common import *
 from pyboof.image import dtype_to_Class_SingleBand
@@ -25,21 +25,21 @@ class GradientType:
 
 
 class ThresholdType:
-    FIXED          = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.FIXED
-    GLOBAL_ENTROPY = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_ENTROPY
-    GLOBAL_OTSU    = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_OTSU
-    GLOBAL_LI      = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_LI
-    GLOBAL_HUANG   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_HUANG
-    LOCAL_GAUSSIAN = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_GAUSSIAN
-    LOCAL_MEAN     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_MEAN
-    LOCAL_OTSU     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_OTSU
-    LOCAL_SAVOLA   = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SAVOLA
-    LOCAL_WOLF     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_WOLF
-    LOCAL_NICK     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_NICK
-    LOCAL_NIBLACK  = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_NIBLACK
-    BLOCK_MIN_MAX  = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MIN_MAX
-    BLOCK_MEAN     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MEAN
-    BLOCK_OTSU     = gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_OTSU
+    FIXED          = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.FIXED
+    GLOBAL_ENTROPY = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_ENTROPY
+    GLOBAL_OTSU    = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_OTSU
+    GLOBAL_LI      = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_LI
+    GLOBAL_HUANG   = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.GLOBAL_HUANG
+    LOCAL_GAUSSIAN = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_GAUSSIAN
+    LOCAL_MEAN     = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_MEAN
+    LOCAL_OTSU     = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_OTSU
+    LOCAL_SAVOLA   = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_SAVOLA
+    LOCAL_WOLF     = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_WOLF
+    LOCAL_NICK     = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_NICK
+    LOCAL_NIBLACK  = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.LOCAL_NIBLACK
+    BLOCK_MIN_MAX  = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MIN_MAX
+    BLOCK_MEAN     = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_MEAN
+    BLOCK_OTSU     = pbg.gateway.jvm.boofcv.factory.filter.binary.ThresholdType.BLOCK_OTSU
 
 
 class InterpolationType:
@@ -56,17 +56,17 @@ class ConfigThreshold(JavaConfig):
 
     @staticmethod
     def create_fixed(threshold):
-        java_object = gateway.jvm.boofcv.factory.filter.binary.ConfigThreshold.fixed(float(threshold))
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.ConfigThreshold.fixed(float(threshold))
         return JavaConfig(java_object)
 
     @staticmethod
     def create_global(threshold_type):
-        java_object = gateway.jvm.pyboof.PyBoofEntryPoint.createGlobalThreshold(threshold_type)
+        java_object = pbg.gateway.jvm.pyboof.PyBoofEntryPoint.createGlobalThreshold(threshold_type)
         return JavaConfig(java_object)
 
     @staticmethod
     def create_local(threshold_type, radius):
-        java_object = gateway.jvm.boofcv.factory.filter.binary.ConfigThreshold.local(threshold_type, int(radius))
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.ConfigThreshold.local(threshold_type, int(radius))
         return JavaConfig(java_object)
 
 
@@ -78,13 +78,13 @@ def interpolation_type_to_java(interp_type):
     :return: BoofCV interpolation type
     """
     if interp_type == InterpolationType.NEAREST_NEIGHBOR:
-        return gateway.jvm.boofcv.alg.interpolate.InterpolationType.NEAREST_NEIGHBOR
+        return pbg.gateway.jvm.boofcv.alg.interpolate.InterpolationType.NEAREST_NEIGHBOR
     elif interp_type == InterpolationType.BICUBIC:
-        return gateway.jvm.boofcv.alg.interpolate.InterpolationType.BICUBIC
+        return pbg.gateway.jvm.boofcv.alg.interpolate.InterpolationType.BICUBIC
     elif interp_type == InterpolationType.BILINEAR:
-        return gateway.jvm.boofcv.alg.interpolate.InterpolationType.BILINEAR
+        return pbg.gateway.jvm.boofcv.alg.interpolate.InterpolationType.BILINEAR
     elif interp_type == InterpolationType.POLYNOMIAL4:
-        return gateway.jvm.boofcv.alg.interpolate.InterpolationType.POLYNOMIAL4
+        return pbg.gateway.jvm.boofcv.alg.interpolate.InterpolationType.POLYNOMIAL4
     elif interp_type == InterpolationType.INTEGRAL:
         raise RuntimeError("Integral is a special case and can't be handled the same way")
     else:
@@ -99,29 +99,29 @@ def border_to_java(border):
     :return: java_object
     """
     if border == Border.SKIP:
-        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("SKIP")
+        return pbg.gateway.jvm.boofcv.struct.border.BorderType.valueOf("SKIP")
     elif border == Border.EXTENDED:
-        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("EXTENDED")
+        return pbg.gateway.jvm.boofcv.struct.border.BorderType.valueOf("EXTENDED")
     elif border == Border.NORMALIZED:
-        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("NORMALIZED")
+        return pbg.gateway.jvm.boofcv.struct.border.BorderType.valueOf("NORMALIZED")
     elif border == Border.REFLECT:
-        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("REFLECT")
+        return pbg.gateway.jvm.boofcv.struct.border.BorderType.valueOf("REFLECT")
     elif border == Border.WRAP:
-        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("WRAP")
+        return pbg.gateway.jvm.boofcv.struct.border.BorderType.valueOf("WRAP")
     elif border == Border.ZERO:
-        return gateway.jvm.boofcv.struct.border.BorderType.valueOf("ZERO")
+        return pbg.gateway.jvm.boofcv.struct.border.BorderType.valueOf("ZERO")
 
 
 def blur_gaussian(image, output, sigma=-1.0,radius=1):
-    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.gaussian(image, output, sigma, radius, None)
+    pbg.gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.gaussian(image, output, sigma, radius, None)
 
 
 def blur_mean(image, output, radius=1):
-    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.mean(image, output, radius, None, None)
+    pbg.gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.mean(image, output, radius, None, None)
 
 
 def blur_median(image, output, radius=1):
-    gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.median(image, output, radius, None)
+    pbg.gateway.jvm.boofcv.alg.filter.blur.BlurImageOps.median(image, output, radius, None)
 
 
 def shrink_image(image, output_size, interp_type=InterpolationType.INTEGRAL, output=None):
@@ -152,12 +152,12 @@ def shrink_image(image, output_size, interp_type=InterpolationType.INTEGRAL, out
         output.reshape(output_shape[1], output_shape[0])
 
     if interp_type == InterpolationType.INTEGRAL:
-        gateway.jvm.boofcv.alg.filter.misc.AverageDownSampleOps.down(image, output)
+        pbg.gateway.jvm.boofcv.alg.filter.misc.AverageDownSampleOps.down(image, output)
     else:
         scale_x = output_shape[1] / float(image.getWidth())
         scale_y = output_shape[0] / float(image.getHeight())
 
-        fdist = gateway.jvm.boofcv.abst.distort.FDistort(image, output)
+        fdist = pbg.gateway.jvm.boofcv.abst.distort.FDistort(image, output)
         fdist.interp(interpolation_type_to_java(interp_type))
         fdist.affine(scale_x, 0.0, 0.0, scale_y, 0.0, 0.0)
         fdist.apply()
@@ -167,8 +167,8 @@ def shrink_image(image, output_size, interp_type=InterpolationType.INTEGRAL, out
 
 def gradient(input, derivX, derivY, gradient_type=GradientType.SOBEL, border_type=Border.EXTENDED):
     java_border = border_to_java(border_type)
-    java_DerivativeOps = gateway.jvm.boofcv.alg.filter.derivative.GImageDerivativeOps
-    java_DerivativeType = gateway.jvm.boofcv.alg.filter.derivative.DerivativeType
+    java_DerivativeOps = pbg.gateway.jvm.boofcv.alg.filter.derivative.GImageDerivativeOps
+    java_DerivativeType = pbg.gateway.jvm.boofcv.alg.filter.derivative.DerivativeType
     if gradient_type is GradientType.SOBEL:
         java_DerivativeOps.gradient(java_DerivativeType.SOBEL,input,derivX,derivY,java_border)
     elif gradient_type is GradientType.PREWITT:
@@ -188,10 +188,10 @@ def gradient(input, derivX, derivY, gradient_type=GradientType.SOBEL, border_typ
 class Transform2to2(JavaWrapper):
     def __init__(self, java_object):
         JavaWrapper.__init__(self, java_object)
-        if is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform2_F32):
+        if is_instance_of(pbg.gateway, java_object, pbg.gateway.jvm.boofcv.struct.distort.Point2Transform2_F32):
             self.is32 = True
             self.point_out = pyboof.geo.create_java_point_2D_f32()
-        elif is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform2_F64):
+        elif is_instance_of(pbg.gateway, java_object, pbg.gateway.jvm.boofcv.struct.distort.Point2Transform2_F64):
             self.is32 = False
             self.point_out = create_java_point_2D_f64()
         else:
@@ -205,10 +205,10 @@ class Transform2to2(JavaWrapper):
 class Transform2to3(JavaWrapper):
     def __init__(self, java_object):
         JavaWrapper.__init__(self, java_object)
-        if is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform3_F32):
+        if is_instance_of(pbg.gateway, java_object, pbg.gateway.jvm.boofcv.struct.distort.Point2Transform3_F32):
             self.is32 = True
             self.point_out = create_java_point_3D_f32()
-        elif is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point2Transform3_F64):
+        elif is_instance_of(pbg.gateway, java_object, pbg.gateway.jvm.boofcv.struct.distort.Point2Transform3_F64):
             self.is32 = False
             self.point_out = create_java_point_3D_f64()
         else:
@@ -222,10 +222,10 @@ class Transform2to3(JavaWrapper):
 class Transform3to2(JavaWrapper):
     def __init__(self, java_object):
         JavaWrapper.__init__(self, java_object)
-        if is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point3Transform2_F32):
+        if is_instance_of(pbg.gateway, java_object, pbg.gateway.jvm.boofcv.struct.distort.Point3Transform2_F32):
             self.is32 = True
             self.point_out = create_java_point_2D_f32()
-        elif is_instance_of(gateway, java_object, gateway.jvm.boofcv.struct.distort.Point3Transform2_F64):
+        elif is_instance_of(pbg.gateway, java_object, pbg.gateway.jvm.boofcv.struct.distort.Point3Transform2_F64):
             self.is32 = False
             self.point_out = create_java_point_2D_f64()
         else:
@@ -281,7 +281,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             localGaussian(region_width,float(scale),down,self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -300,7 +300,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             localSauvola(region_width,down,float(k),self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -319,7 +319,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             localWolf(region_width,down,float(k),self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -338,7 +338,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             localNiblack(region_width,down,float(k),self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -357,7 +357,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
             localMean(region_width,float(scale),down,self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -376,7 +376,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
             localNick(region_width,down,float(k),self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -399,7 +399,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
             localOtsu(otsu2,region_width,float(tuning),float(scale),down,self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -423,7 +423,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
             blockMinMax(region_width, float(scale), down, thresholdFromLocalBlocks, float(minimumSpread), self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -444,7 +444,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
             blockMean(region_width,float(scale),down,thresholdFromLocalBlocks,self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -469,7 +469,7 @@ class FactoryThresholdBinary:
         """
         region_width = boof_fixed_length(region_width)
 
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
             blockOtsu(region_width,float(scale),down,thresholdFromLocalBlocks,otsu2,float(tuning),self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -486,7 +486,7 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             globalEntropy(int(min_value), int(max_value), float(scale), down, self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -503,7 +503,7 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
             globalLi(float(min_value), float(max_value), float(scale), down, self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -520,7 +520,7 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary. \
             globalHuang(float(min_value), float(max_value), float(scale), down, self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -537,7 +537,7 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             globalFixed(float(threshold),down,self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -554,7 +554,7 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             globalOtsu(float(min_value), float(max_value), float(scale), down, self.boof_image_type)
         return InputToBinary(java_object)
     
@@ -566,7 +566,7 @@ class FactoryThresholdBinary:
         :return: New instance of InputToBinary
         :rtype: InputToBinary
         """
-        java_object = gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
+        java_object = pbg.gateway.jvm.boofcv.factory.filter.binary.FactoryThresholdBinary.\
             threshold(config.java_obj,self.boof_image_type)
         return InputToBinary(java_object)
 
@@ -593,5 +593,5 @@ class FactoryInterpolation:
         java_border = border_to_java(border_type)
         java_interp = interpolation_type_to_java(InterpolationType.BILINEAR)
 
-        return gateway.jvm.boofcv.factory.interpolate.FactoryInterpolation.\
+        return pbg.gateway.jvm.boofcv.factory.interpolate.FactoryInterpolation.\
             createPixel(float(min_pixel), float(max_pixel), java_interp, java_border, self.image_type.java_obj)

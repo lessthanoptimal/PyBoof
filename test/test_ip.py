@@ -2,7 +2,7 @@
 
 import unittest
 
-from pyboof import gateway
+from pyboof import pbg
 import pyboof as pb
 import numpy as np
 import os
