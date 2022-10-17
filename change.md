@@ -1,6 +1,8 @@
 ### Version 0.42
 - Globals are handled in a way they can be updated now
 - Re-initializing works. Thanks gaurav-t-sca for the bug report.
+- Removed printing to stdout from __init__.py
+- Faults in __init__.py now print to stderr
 
 ### Version 0.41
 - Updated to BoofCV 0.41

@@ -60,7 +60,6 @@ public class PyBoofEntryPoint {
            port = Integer.parseInt(args[0]);
         GatewayServer gatewayServer = new GatewayServer(new PyBoofEntryPoint(), port);
         gatewayServer.start();
-        System.out.println("Gateway Server Started");
     }
 
     public static void setMaxThreads(int maxThreads) {

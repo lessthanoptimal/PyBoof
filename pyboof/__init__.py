@@ -5,6 +5,7 @@ import signal
 import subprocess
 import time
 import numpy as np
+import sys
 
 from py4j.java_gateway import JavaGateway
 from py4j.java_gateway import GatewayParameters
@@ -21,7 +22,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "build_date.
     build_date = f.readline()
 
 if build_date is None:
-    print("Can't find build_data.txt at " + os.path.dirname(os.path.realpath(__file__)))
+    print("Can't find build_data.txt at " + os.path.dirname(os.path.realpath(__file__)), file=sys.stderr)
     exit(1)
 
 
@@ -47,21 +48,21 @@ def init_pyboof(java_port: int = 25333, python_port: int = 25334, size_mb: int =
 
     # The user is re-initializing for some reason. Let's close the gateway if already open
     if pbg.gateway is not None:
-        print("Closing previously open gateway")
+        print("Closing previously open gateway", file=sys.stderr)
         shutdown_jvm()
 
     pbg.gateway = JavaGateway(gateway_parameters=GatewayParameters(port=java_port, auto_field=True),
                               callback_server_parameters=CallbackServerParameters(port=python_port,
                                                                                   daemonize=True))
 
-    print("gateway={}".format(id(pbg.gateway)))
+    # print("gateway={}".format(id(pbg.gateway)))
     signal.signal(signal.SIGINT, signal_handler)
 
     # kill java on a regular exit too
     atexit.register(shutdown_jvm)
 
     if not check_jvm(False):
-        print("Launching Java process: java_port={} python_port={}".format(java_port, python_port))
+        # print("Launching Java process: java_port={} python_port={}".format(java_port, python_port))
         jar_path = os.path.realpath(__file__)
         jar_path = os.path.join(os.path.dirname(jar_path), "PyBoof-all.jar")
         proc = subprocess.Popen(["java", "-jar", jar_path, str(java_port)])
@@ -76,7 +77,7 @@ def init_pyboof(java_port: int = 25333, python_port: int = 25334, size_mb: int =
                 break
 
         if not success:
-            print("Failed to successfully launch the JVM after 5 seconds.  Aborting")
+            print("Failed to successfully launch the JVM after 5 seconds.  Aborting", file=sys.stderr)
             pass
 
     if size_mb > 0:
@@ -97,8 +98,8 @@ def check_jvm(set_date):
         else:
             java_build_date = pbg.gateway.jvm.pyboof.PyBoofEntryPoint.getBuildDate()
             if build_date != java_build_date:
-                print("Python and Java build dates do not match.  Killing Java process.")
-                print("  build dates = {:s} {:s}".format(build_date, java_build_date))
+                print("Python and Java build dates do not match.  Killing Java process.", file=sys.stderr)
+                print("  build dates = {:s} {:s}".format(build_date, java_build_date, file=sys.stderr))
                 pbg.gateway.close()
                 time.sleep(1)
                 return False
@@ -106,9 +107,9 @@ def check_jvm(set_date):
     except Py4JNetworkError:
         return False
     except Py4JError as e:
-        print(e)
+        print(e, file=sys.stderr)
         print("Py4J appears to have attached itself to a process that doesn't have the expected jars. "
-              "Try killing py4j processes")
+              "Try killing py4j processes", file=sys.stderr)
         exit(1)
     return True
 
