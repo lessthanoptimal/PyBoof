@@ -1,4 +1,4 @@
-### Version 0.42
+### Version 0.41.1
 - Globals are handled in a way they can be updated now
 - Re-initializing works. Thanks gaurav-t-sca for the bug report.
 - Removed printing to stdout from __init__.py
