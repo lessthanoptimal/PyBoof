@@ -21,7 +21,8 @@ import time
 original = pb.load_single_band('../data/example/outdoors01.jpg', np.uint8)
 
 # Block for 5 seconds
-time.sleep(20)
+print("Sleeping for 5 seconds")
+time.sleep(5)
 print("Done! port={}".format(os.environ['PYBOOF_PYTHON_PORT']))
 
 # To test the code launch the script, modify the ports, then launch it again from another terminal

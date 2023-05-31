@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from pyboof import gateway
 import cv2
 
 import pyboof as pb

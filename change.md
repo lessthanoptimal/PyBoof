@@ -1,3 +1,6 @@
+### Version 0.43.1
+- Updated to BoofCV 0.43.1
+
 ### Version 0.41.1
 - Globals are handled in a way they can be updated now
 - Re-initializing works. Thanks gaurav-t-sca for the bug report.
