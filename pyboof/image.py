@@ -179,6 +179,8 @@ def load_planar( path , dtype ):
     file_path = os.path.abspath(path)
 
     buffered_image =  pbg.gateway.jvm.boofcv.io.image.UtilImageIO.loadImage(file_path)
+    if not buffered_image:
+        return None
     num_bands = buffered_image.getRaster().getNumBands()
     PLANAR = create_planar(buffered_image.getWidth(), buffered_image.getHeight(),num_bands, dtype)
     pbg.gateway.jvm.boofcv.io.image.ConvertBufferedImage.convertFrom(buffered_image,PLANAR, True)

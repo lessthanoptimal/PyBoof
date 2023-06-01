@@ -3,6 +3,7 @@ from pyboof.calib import *
 from pyboof import pbg
 from pyboof import MmapType
 from py4j.java_collections import ListConverter
+from py4j.protocol import Py4JError
 import tempfile
 
 
@@ -338,7 +339,13 @@ class QrCodeDetector(JavaWrapper):
         self.failures = []
 
     def detect(self, image):
-        self.java_obj.process(image)
+        if image is None:
+            raise TypeError("Input is None")
+        try:
+            self.java_obj.process(image)
+        except Py4JError as exc:
+            raise TypeError("Expected image to be GrayU8 or GrayF32") from exc
+
         self.detections = [QrCode(x) for x in self.java_obj.getDetections()]
         self.failures = [QrCode(x) for x in self.java_obj.getFailures()]
 
@@ -398,7 +405,12 @@ class MicroQrDetector(JavaWrapper):
         self.failures = []
 
     def detect(self, image):
-        self.java_obj.process(image)
+        if image is None:
+            raise TypeError("Input is None")
+        try:
+            self.java_obj.process(image)
+        except Py4JError as exc:
+            raise TypeError("Expected image to be GrayU8 or GrayF32") from exc
         self.detections = [MicroQrCode(x) for x in self.java_obj.getDetections()]
         self.failures = [MicroQrCode(x) for x in self.java_obj.getFailures()]
 
@@ -453,7 +465,12 @@ class AztecCodeDetector(JavaWrapper):
         self.failures = []
 
     def detect(self, image):
-        self.java_obj.process(image)
+        if image is None:
+            raise TypeError("Input is None")
+        try:
+            self.java_obj.process(image)
+        except Py4JError as exc:
+            raise TypeError("Expected image to be GrayU8 or GrayF32") from exc
         self.detections = [AztecCode(x) for x in self.java_obj.getDetections()]
         self.failures = [AztecCode(x) for x in self.java_obj.getFailures()]
 
