@@ -16,7 +16,7 @@ dependencies {
     api 'net.sf.py4j:py4j:0.10.9.7'
 
     // needed to use Java 11+ syntax with Java 11 byte code
-    annotationProcessor('com.github.bsideup.jabel:jabel-javac-plugin:0.4.2')
+    annotationProcessor('com.github.bsideup.jabel:jabel-javac-plugin:1.0.0')
 
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
