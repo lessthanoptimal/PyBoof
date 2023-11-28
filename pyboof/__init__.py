@@ -157,7 +157,7 @@ def __init_memmap(size_mb=20):
     # Open file in read,write,binary mode
     pbg.mmap_fid = open(mmap_path, "r+b")
     if os.name == 'nt':
-        mmap_file = mmap.mmap(pbg.mmap_fid.fileno(), length=0)
+        pbg.mmap_file = mmap.mmap(pbg.mmap_fid.fileno(), length=0)
     else:
         pbg.mmap_file = mmap.mmap(pbg.mmap_fid.fileno(), length=0, flags=mmap.MAP_SHARED,
                               prot=mmap.PROT_READ | mmap.PROT_WRITE)
